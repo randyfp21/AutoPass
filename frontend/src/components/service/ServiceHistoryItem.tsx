@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ChevronDown,
   ChevronUp,
@@ -7,6 +8,7 @@ import {
   Store,
   Wrench,
   CheckCircle,
+  Sparkles,
 } from 'lucide-react';
 import type { ServiceRecord } from '../../types';
 import { formatRupiah, formatMileage, formatDate } from '../../utils/formatters';
@@ -20,6 +22,7 @@ interface ServiceHistoryItemProps {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ServiceHistoryItem({ record }: ServiceHistoryItemProps) {
+  const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
 
   const workshopName = record.is_official_workshop
@@ -200,10 +203,24 @@ export function ServiceHistoryItem({ record }: ServiceHistoryItemProps) {
             </div>
           )}
 
-          {/* Date details */}
-          <div className="mt-3 pt-3 border-t border-slate-200 flex items-center gap-3 text-xs text-slate-400">
-            <Calendar size={12} />
-            <span>Tanggal servis: {formatDate(record.service_date, 'full')}</span>
+          {/* Date details & Story Studio CTA */}
+          <div className="mt-4 pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 text-slate-400">
+              <Calendar size={13} />
+              <span>Tanggal servis: {formatDate(record.service_date, 'full')}</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/services/${record.id}/story`);
+              }}
+              className="py-1.5 px-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-full font-extrabold flex items-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer"
+            >
+              <Sparkles size={13} />
+              <span>✨ Telemetry & Story Studio</span>
+            </button>
           </div>
         </div>
       )}

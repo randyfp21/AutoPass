@@ -17,6 +17,7 @@ import ThreadsBookmarkPage from './pages/ThreadsBookmarkPage';
 import ThreadsActivityPage from './pages/ThreadsActivityPage';
 import UserProfilePage from './pages/UserProfilePage';
 import ThreadDetailPage from './pages/ThreadDetailPage';
+import TelemetryStudioPage from './pages/TelemetryStudioPage';
 import { AddPlannerModal } from './components/planner/AddPlannerModal';
 import { AddServiceModal } from './components/service/AddServiceModal';
 import { ThreadComposerModal } from './components/threads/ThreadComposerModal';
@@ -240,6 +241,14 @@ export function App() {
               >
                 <VehicleDetailPage />
               </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/services/:serviceId/story"
+          element={
+            <ProtectedRoute>
+              <TelemetryStudioPage />
             </ProtectedRoute>
           }
         />
