@@ -167,31 +167,31 @@ function renderTelemetryCanvas(
 
   let topLeftY = options.ratio === '9:16' ? 140 : 70;
 
-  // 1. Line 1: Perjalanan [nickname kendaraan] sudah
+  // 1. Line 1: Wah Perjalanan [nickname kendaraan] sudah
   ctx.font = `500 32px ${fontMain}`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
   ctx.textBaseline = 'top';
   const nicknameText = vehicle.nickname ? vehicle.nickname : vehicle.model;
-  ctx.fillText(`Perjalanan ${nicknameText} sudah`, padLeft, topLeftY);
+  ctx.fillText(`Wah Perjalanan ${nicknameText} sudah`, padLeft, topLeftY);
 
-  // 2. Line 2 (NGE-POP DISPLAY): [VALUE ODOMETER] km
+  // 2. Line 2 (NGE-POP DISPLAY): [VALUE ODOMETER]km
   if (options.showMileage) {
     topLeftY += 45;
     const mileageText = formatMileage(record.mileage_at_service);
-    ctx.font = `bold ${options.ratio === '16:9' ? '76px' : '108px'} 'Rajdhani', sans-serif`;
+    ctx.font = `bold ${options.ratio === '16:9' ? '76px' : '112px'} 'Rajdhani', sans-serif`;
     ctx.fillStyle = '#FFFFFF';
     ctx.fillText(mileageText, padLeft, topLeftY);
 
     const mileageWidth = ctx.measureText(mileageText).width;
-    ctx.font = `bold 44px 'Rajdhani', sans-serif`;
+    ctx.font = `bold 46px 'Rajdhani', sans-serif`;
     ctx.fillStyle = primaryColor;
-    ctx.fillText('km', padLeft + mileageWidth + 16, topLeftY + (options.ratio === '16:9' ? 24 : 45));
+    ctx.fillText('km', padLeft + mileageWidth + 16, topLeftY + (options.ratio === '16:9' ? 24 : 48));
 
-    // 3. Line 3 (Font mengecil): service rutin
-    topLeftY += options.ratio === '16:9' ? 85 : 120;
+    // 3. Line 3 (Font mengecil): waktunya service rutin !
+    topLeftY += options.ratio === '16:9' ? 85 : 124;
     ctx.font = `italic 500 28px ${fontMain}`;
     ctx.fillStyle = primaryColor;
-    ctx.fillText('service rutin', padLeft, topLeftY);
+    ctx.fillText('waktunya service rutin !', padLeft, topLeftY);
   }
   ctx.restore();
 
@@ -234,14 +234,21 @@ function renderTelemetryCanvas(
     });
   }
 
-  // 2. Line 3: [Nickname kendaran] Jajannya segini nih [Biaya Service]
-  botLeftY -= 48;
+  // 2. Line 3 & 4: [Nickname kendaran] Jajannya segini nih & (size heboh) [Biaya Service]
   if (options.showCost) {
-    ctx.font = `bold 32px ${fontMain}`;
+    // Line 4: Biaya Service (Meng-heboh sedikit / bold price tag 56px!)
+    botLeftY -= 48;
+    ctx.font = `bold 58px 'Rajdhani', sans-serif`;
     ctx.fillStyle = primaryColor;
     ctx.textBaseline = 'bottom';
+    ctx.fillText(formatRupiah(record.total_cost), padLeft, botLeftY);
+
+    // Line 3: Nickname Jajannya segini nih
+    botLeftY -= 54;
+    ctx.font = `bold 32px ${fontMain}`;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
     const nickOrModel = vehicle.nickname ? vehicle.nickname : vehicle.model;
-    ctx.fillText(`${nickOrModel} Jajannya segini nih ${formatRupiah(record.total_cost)}`, padLeft, botLeftY);
+    ctx.fillText(`${nickOrModel} Jajannya segini nih`, padLeft, botLeftY);
   }
 
   // 3. Line 2: Nama Bengkel
