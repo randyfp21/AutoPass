@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -9,6 +9,10 @@ import {
   AlertCircle,
   Sparkles,
   Download,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  Maximize2,
 } from 'lucide-react';
 import { threadsService } from '../services/threadsService';
 import type { Thread } from '../types';
@@ -26,6 +30,12 @@ export function ThreadPhotoViewerPage() {
   const [error, setError] = useState('');
   const [isCopied, setIsCopied] = useState(false);
 
+  // ── Zoom & Pan Controls ──
+  const [zoomScale, setZoomScale] = useState(1);
+  const [panPos, setPanPos] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
   useEffect(() => {
     if (!threadId) return;
     const fetch = async () => {
@@ -41,6 +51,12 @@ export function ThreadPhotoViewerPage() {
     };
     fetch();
   }, [threadId]);
+
+  // Reset zoom when photo changes
+  useEffect(() => {
+    setZoomScale(1);
+    setPanPos({ x: 0, y: 0 });
+  }, [activePhotoIndex]);
 
   const currentPhoto = thread?.photo_urls?.[activePhotoIndex] || thread?.photo_urls?.[0];
 
@@ -71,6 +87,60 @@ export function ThreadPhotoViewerPage() {
         // Fail silently
       }
     }
+  };
+
+  // ── Zoom Handlers ──
+  const handleZoomIn = () => {
+    setZoomScale((prev) => Math.min(3.5, Number((prev + 0.3).toFixed(1))));
+  };
+
+  const handleZoomOut = () => {
+    setZoomScale((prev) => {
+      const next = Math.max(1, Number((prev - 0.3).toFixed(1)));
+      if (next === 1) setPanPos({ x: 0, y: 0 });
+      return next;
+    });
+  };
+
+  const handleResetZoom = () => {
+    setZoomScale(1);
+    setPanPos({ x: 0, y: 0 });
+  };
+
+  const handleDoubleClick = () => {
+    if (zoomScale > 1) {
+      handleResetZoom();
+    } else {
+      setZoomScale(2);
+    }
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    if (e.deltaY < 0) {
+      handleZoomIn();
+    } else {
+      handleZoomOut();
+    }
+  };
+
+  // Pan dragging when zoomed in
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoomScale <= 1) return;
+    setIsDragging(true);
+    dragStartRef.current = { x: e.clientX - panPos.x, y: e.clientY - panPos.y };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || zoomScale <= 1) return;
+    setPanPos({
+      x: e.clientX - dragStartRef.current.x,
+      y: e.clientY - dragStartRef.current.y,
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
   };
 
   if (isLoading) {
@@ -147,14 +217,62 @@ export function ThreadPhotoViewerPage() {
         </div>
       </div>
 
-      {/* ── Dark Glass Viewport Box (Consistently Styled like Telemetry Studio) ── */}
+      {/* ── Dark Glass Viewport Box with Zoom & Pan Capabilities ── */}
       <div className="max-w-6xl w-full px-4 sm:px-6 my-auto pt-6 flex-1 flex items-center justify-center">
-        <div className="relative bg-slate-950 rounded-3xl p-4 sm:p-8 border border-slate-800 shadow-2xl flex items-center justify-center w-full h-[76vh] overflow-hidden group">
+        <div
+          className="relative bg-slate-950 rounded-3xl p-4 sm:p-8 border border-slate-800 shadow-2xl flex items-center justify-center w-full h-[76vh] overflow-hidden group cursor-grab active:cursor-grabbing"
+          onWheel={handleWheel}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        >
+          {/* Zoom & Pan Control Floating Toolbar */}
+          <div className="absolute top-4 right-4 z-30 flex items-center gap-2 bg-slate-900/90 backdrop-blur-md p-1.5 rounded-full border border-slate-700/80 shadow-2xl">
+            <button
+              type="button"
+              onClick={handleZoomIn}
+              className="p-2 text-white hover:bg-purple-600 rounded-full transition-colors cursor-pointer"
+              title="Perbesar (Zoom In)"
+            >
+              <ZoomIn size={18} />
+            </button>
+            <span className="text-xs font-mono font-extrabold text-purple-300 px-1">
+              {Math.round(zoomScale * 100)}%
+            </span>
+            <button
+              type="button"
+              onClick={handleZoomOut}
+              disabled={zoomScale <= 1}
+              className="p-2 text-white hover:bg-purple-600 disabled:opacity-40 disabled:hover:bg-transparent rounded-full transition-colors cursor-pointer"
+              title="Perkecil (Zoom Out)"
+            >
+              <ZoomOut size={18} />
+            </button>
+            {zoomScale > 1 && (
+              <button
+                type="button"
+                onClick={handleResetZoom}
+                className="p-2 text-amber-400 hover:bg-amber-500/20 rounded-full transition-colors cursor-pointer"
+                title="Reset Zoom (100%)"
+              >
+                <RotateCcw size={16} />
+              </button>
+            )}
+          </div>
+
+          {/* Interactive Zoomable Image Stage */}
           <img
             key={activePhotoIndex}
             src={currentPhoto}
             alt={`Post photo ${activePhotoIndex + 1}`}
-            className="max-h-[70vh] max-w-[95%] w-auto h-auto object-contain rounded-2xl shadow-2xl border border-slate-800/80 animate-in zoom-in-95 duration-200 block my-auto mx-auto"
+            onDoubleClick={handleDoubleClick}
+            style={{
+              transform: `scale(${zoomScale}) translate(${panPos.x / zoomScale}px, ${panPos.y / zoomScale}px)`,
+              transition: isDragging ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
+            }}
+            className="max-h-[70vh] max-w-[95%] w-auto h-auto object-contain rounded-2xl shadow-2xl border border-slate-800/80 block my-auto mx-auto select-none pointer-events-auto"
+            title="Klik 2x untuk Zoom/Reset"
           />
 
           {/* Left Arrow Navigation */}
