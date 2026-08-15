@@ -15,10 +15,6 @@ import {
   Plus,
   Trash2,
   Layers,
-  Flame,
-  Zap,
-  Shield,
-  Award,
   Info,
 } from 'lucide-react';
 import { maintenanceService } from '../services/maintenanceService';
@@ -32,7 +28,7 @@ type FilterType = 'none' | 'cinematic' | 'cyberpunk' | 'monochrome' | 'vintage' 
 type TypographyPreset = 'athletic' | 'cyberpunk' | 'luxury' | 'motorsport' | 'vintage';
 type AspectRatio = '9:16' | '1:1' | '4:5' | '16:9';
 
-// ─── Canvas Drawing Engine (Vertical Collage & Unique Typography Presets) ─────
+// ─── Canvas Drawing Engine (Custom Unique Typography & IG Story Safe Zone) ─────
 
 function renderTelemetryCanvas(
   canvas: HTMLCanvasElement,
@@ -127,8 +123,8 @@ function renderTelemetryCanvas(
     ctx.fillRect(0, 0, width, height);
   }
 
-  // 3. Ambient Dark Shader Gradient Overlay (Bottom 55%)
-  const gradHeight = height * 0.55;
+  // 3. Ambient Dark Shader Gradient Overlay (Top 25% & Bottom 60%)
+  const gradHeight = height * 0.6;
   const grad = ctx.createLinearGradient(0, height - gradHeight, 0, height);
   grad.addColorStop(0, 'rgba(0,0,0,0)');
   grad.addColorStop(0.35, 'rgba(15,23,42,0.5)');
@@ -136,155 +132,157 @@ function renderTelemetryCanvas(
   ctx.fillStyle = grad;
   ctx.fillRect(0, height - gradHeight, width, gradHeight);
 
-  // Subtle top gradient
-  const topGrad = ctx.createLinearGradient(0, 0, 0, height * 0.2);
-  topGrad.addColorStop(0, 'rgba(2,6,23,0.6)');
+  // Top gradient for IG Story upper safe zone
+  const topGrad = ctx.createLinearGradient(0, 0, 0, height * 0.3);
+  topGrad.addColorStop(0, 'rgba(2,6,23,0.75)');
   topGrad.addColorStop(1, 'rgba(2,6,23,0)');
   ctx.fillStyle = topGrad;
-  ctx.fillRect(0, 0, width, height * 0.2);
+  ctx.fillRect(0, 0, width, height * 0.3);
 
   // 4. Preset Theme Colors & Typography Fonts Config
   let primaryColor = '#FC5200';
-  let fontMain = "'Rajdhani', sans-serif";
-  let fontTitle = "'Rajdhani', sans-serif";
-  let themeTitle = '⚡ ODOMTR ATHLETIC TELEMETRY';
+  let fontMain = "'Inter', sans-serif";
 
   if (options.preset === 'cyberpunk') {
     primaryColor = '#00F0FF';
     fontMain = "'Courier New', monospace";
-    fontTitle = "'Rajdhani', sans-serif";
-    themeTitle = '🌆 CYBERPUNK TELEMETRY DATA';
   } else if (options.preset === 'luxury') {
     primaryColor = '#D4AF37'; // Gold
     fontMain = "'Playfair Display', serif";
-    fontTitle = "'Playfair Display', serif";
-    themeTitle = '🏆 ODOMTR LUXURY PASSPORT';
   } else if (options.preset === 'motorsport') {
     primaryColor = '#FFDD00'; // Speed Yellow
     fontMain = "'Bebas Neue', sans-serif";
-    fontTitle = "'Bebas Neue', sans-serif";
-    themeTitle = '🏁 MOTORSPORT RACING GRID';
   } else if (options.preset === 'vintage') {
     primaryColor = '#F59E0B'; // Sepia Amber
     fontMain = "'Courier New', monospace";
-    fontTitle = "'Courier New', monospace";
-    themeTitle = '📜 RETRO VINTAGE STAMP';
   }
 
-  const pad = 60;
-  let currentY = height - (options.ratio === '16:9' ? 40 : 80);
+  const padLeft = 70;
 
-  // ── Watermark Logo ──
+  // ─── A. POJOK KIRI ATAS (TOP LEFT CORNER - IG STORY SAFE ZONE) ───
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 4;
+
+  let topLeftY = options.ratio === '9:16' ? 140 : 70;
+
+  // 1. Line 1: Perjalanan [nickname kendaraan] sudah
+  ctx.font = `500 32px ${fontMain}`;
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+  ctx.textBaseline = 'top';
+  const nicknameText = vehicle.nickname ? vehicle.nickname : vehicle.model;
+  ctx.fillText(`Perjalanan ${nicknameText} sudah`, padLeft, topLeftY);
+
+  // 2. Line 2 (NGE-POP DISPLAY): [VALUE ODOMETER] km
+  if (options.showMileage) {
+    topLeftY += 45;
+    const mileageText = formatMileage(record.mileage_at_service);
+    ctx.font = `bold ${options.ratio === '16:9' ? '76px' : '108px'} 'Rajdhani', sans-serif`;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(mileageText, padLeft, topLeftY);
+
+    const mileageWidth = ctx.measureText(mileageText).width;
+    ctx.font = `bold 44px 'Rajdhani', sans-serif`;
+    ctx.fillStyle = primaryColor;
+    ctx.fillText('km', padLeft + mileageWidth + 16, topLeftY + (options.ratio === '16:9' ? 24 : 45));
+
+    // 3. Line 3 (Font mengecil): service rutin
+    topLeftY += options.ratio === '16:9' ? 85 : 120;
+    ctx.font = `italic 500 28px ${fontMain}`;
+    ctx.fillStyle = primaryColor;
+    ctx.fillText('service rutin', padLeft, topLeftY);
+  }
+  ctx.restore();
+
+  // ─── B. POJOK KANAN BAWAH (BOTTOM RIGHT WATERMARK) ───
   if (options.showWatermark) {
     ctx.save();
-    ctx.font = `bold 28px ${fontTitle}`;
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+    ctx.shadowBlur = 10;
+    const botRightY = height - (options.ratio === '9:16' ? 140 : 60);
+    ctx.font = `bold 42px 'Rajdhani', sans-serif`;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'bottom';
-    ctx.fillText('Odo Telemetry Studio ⚡', width - pad, currentY);
+    ctx.fillText('Odomtr.', width - padLeft, botRightY);
     ctx.restore();
   }
 
-  // Calculate layout upward
-  let contentY = currentY - (options.ratio === '16:9' ? 140 : 270);
-
-  // ── Top Header Pill Badge ──
+  // ─── C. POJOK KIRI BAWAH (BOTTOM LEFT CORNER) ───
   ctx.save();
-  const headerY = options.ratio === '9:16' ? 100 : 50;
-  const headerW = 440;
-  const headerH = 50;
-  ctx.fillStyle = primaryColor;
-  ctx.beginPath();
-  ctx.roundRect(pad, headerY, headerW, headerH, 12);
-  ctx.fill();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+  ctx.shadowBlur = 12;
 
-  ctx.font = `bold 22px ${fontTitle}`;
-  ctx.fillStyle = options.preset === 'motorsport' ? '#000000' : '#FFFFFF';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(themeTitle, pad + 20, headerY + headerH / 2);
-  ctx.restore();
+  let botLeftY = height - (options.ratio === '9:16' ? 140 : 60);
 
-  // ── License Plate Badge ──
+  // Measure service items height to stack upwards
+  const rawItems = (record.items && record.items.length > 0) ? record.items : (record.details || []);
+  const topItems = options.showItems ? rawItems.slice(0, 3) : [];
+  const itemsHeight = topItems.length * 36;
+
+  // Calculate bottom-left anchor Y position
+  botLeftY -= itemsHeight;
+
+  // 1. List detail service items
+  if (topItems.length > 0) {
+    topItems.forEach((item, i) => {
+      ctx.font = `500 26px ${fontMain}`;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(`✓  ${item.item_name}`, padLeft, botLeftY + i * 36);
+    });
+  }
+
+  // 2. Line 3: [Nickname kendaran] Jajannya segini nih [Biaya Service]
+  botLeftY -= 48;
+  if (options.showCost) {
+    ctx.font = `bold 32px ${fontMain}`;
+    ctx.fillStyle = primaryColor;
+    ctx.textBaseline = 'bottom';
+    const nickOrModel = vehicle.nickname ? vehicle.nickname : vehicle.model;
+    ctx.fillText(`${nickOrModel} Jajannya segini nih ${formatRupiah(record.total_cost)}`, padLeft, botLeftY);
+  }
+
+  // 3. Line 2: Nama Bengkel
+  botLeftY -= 44;
+  const wName = record.workshop_name_manual || (record.is_official_workshop ? 'Bengkel Resmi Partner' : 'DIY Maintenance');
+  ctx.font = `600 30px ${fontMain}`;
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(`📍 ${wName}`, padLeft, botLeftY);
+
+  // 4. Line 1: Merek dan Model motor/mobil
+  botLeftY -= 52;
+  ctx.font = `bold 48px 'Rajdhani', sans-serif`;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(`${vehicle.brand} ${vehicle.model}`, padLeft, botLeftY);
+
+  // Optional: License Plate Badge right above brand & model if showPlate is true
   if (options.showPlate) {
     const plateText = vehicle.license_plate;
-    ctx.save();
-    ctx.font = `bold 64px 'Rajdhani', sans-serif`;
-    const plateW = ctx.measureText(plateText).width + 44;
-    const plateH = 80;
-    const plateX = pad;
-    const plateY = contentY - 90;
+    ctx.font = `bold 44px 'Rajdhani', sans-serif`;
+    const plateW = ctx.measureText(plateText).width + 32;
+    const plateH = 58;
+    const plateX = padLeft;
+    const plateY = botLeftY - plateH - 20;
 
-    // Yellow Indonesian Plate style
     ctx.fillStyle = '#FFDD00';
     ctx.beginPath();
-    ctx.roundRect(plateX, plateY, plateW, plateH, 12);
+    ctx.roundRect(plateX, plateY, plateW, plateH, 8);
     ctx.fill();
 
     ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 3;
     ctx.stroke();
 
     ctx.fillStyle = '#000000';
     ctx.textBaseline = 'middle';
-    ctx.fillText(plateText, plateX + 22, plateY + plateH / 2);
-    ctx.restore();
+    ctx.fillText(plateText, plateX + 16, plateY + plateH / 2);
   }
 
-  // ── Vehicle Brand & Model ──
-  ctx.save();
-  ctx.font = `bold 56px ${fontTitle}`;
-  ctx.fillStyle = '#FFFFFF';
-  ctx.textBaseline = 'top';
-  ctx.fillText(`${vehicle.brand} ${vehicle.model}`, pad, contentY);
   ctx.restore();
-
-  // ── Workshop Tag ──
-  const workshopName = record.is_official_workshop
-    ? (record.workshop_name_manual ?? 'Bengkel Resmi Partner')
-    : `🔧 ${record.workshop_name_manual ?? 'DIY Maintenance'}`;
-
-  ctx.save();
-  ctx.font = `600 34px ${fontMain}`;
-  ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  ctx.textBaseline = 'top';
-  ctx.fillText(workshopName, pad, contentY + 68);
-  ctx.restore();
-
-  // ── Date & Odometer ──
-  ctx.save();
-  ctx.font = `500 30px ${fontMain}`;
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  ctx.textBaseline = 'top';
-  ctx.fillText(`📅 ${formatDate(record.service_date, 'full')}`, pad, contentY + 115);
-  if (options.showMileage) {
-    ctx.fillText(`🛣️ ${formatMileage(record.mileage_at_service)} km`, pad + 380, contentY + 115);
-  }
-  ctx.restore();
-
-  // ── Total Cost Badge ──
-  if (options.showCost) {
-    ctx.save();
-    ctx.font = `bold 32px ${fontTitle}`;
-    ctx.fillStyle = primaryColor;
-    ctx.textBaseline = 'top';
-    ctx.fillText(`💰 Total Biaya: ${formatRupiah(record.total_cost)}`, pad, contentY + 160);
-    ctx.restore();
-  }
-
-  // ── Top Service Items ──
-  if (options.showItems) {
-    const rawItems = (record.items && record.items.length > 0) ? record.items : (record.details || []);
-    const topItems = rawItems.slice(0, 3);
-
-    topItems.forEach((item, i) => {
-      ctx.save();
-      ctx.font = `500 28px ${fontMain}`;
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      ctx.textBaseline = 'top';
-      ctx.fillText(`✓  ${item.item_name}`, pad, contentY + (options.showCost ? 205 : 160) + i * 40);
-      ctx.restore();
-    });
-  }
 }
 
 // ─── Main Studio Page Component ───────────────────────────────────────────────
