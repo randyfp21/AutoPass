@@ -12,34 +12,36 @@ import {
   Maximize2,
   CheckCircle2,
   AlertCircle,
-  Wrench,
-  Gauge,
-  Calendar,
+  Plus,
+  Trash2,
+  Layers,
+  Flame,
+  Zap,
+  Shield,
+  Award,
 } from 'lucide-react';
 import { maintenanceService } from '../services/maintenanceService';
 import { vehicleService } from '../services/vehicleService';
 import type { Vehicle, ServiceRecord } from '../types';
 import { formatRupiah, formatMileage, formatDate } from '../utils/formatters';
 
-// ─── Filter Matrix Styles ──────────────────────────────────────────────────────
+// ─── Preset Types ─────────────────────────────────────────────────────────────
 
 type FilterType = 'none' | 'cinematic' | 'cyberpunk' | 'monochrome' | 'vintage' | 'hdr';
-type FontStyle = 'rajdhani' | 'inter' | 'bebas' | 'serif' | 'mono';
+type TypographyPreset = 'athletic' | 'cyberpunk' | 'luxury' | 'motorsport' | 'vintage';
 type AspectRatio = '9:16' | '1:1' | '4:5' | '16:9';
 
-// ─── Canvas Drawing Engine ───────────────────────────────────────────────────
+// ─── Canvas Drawing Engine (Vertical Collage & Unique Typography Presets) ─────
 
 function renderTelemetryCanvas(
   canvas: HTMLCanvasElement,
-  img: HTMLImageElement | null,
+  images: HTMLImageElement[],
   vehicle: Vehicle,
   record: ServiceRecord,
   options: {
     ratio: AspectRatio;
     filter: FilterType;
-    fontStyle: FontStyle;
-    imageScale: number;
-    imageOffsetY: number;
+    preset: TypographyPreset;
     showPlate: boolean;
     showCost: boolean;
     showMileage: boolean;
@@ -50,7 +52,7 @@ function renderTelemetryCanvas(
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  // Set resolution based on aspect ratio
+  // 1. Set resolution based on aspect ratio
   let width = 1080;
   let height = 1920; // 9:16 default
   if (options.ratio === '1:1') height = 1080;
@@ -60,48 +62,63 @@ function renderTelemetryCanvas(
   canvas.width = width;
   canvas.height = height;
 
-  // 1. Draw Background
-  if (img) {
-    ctx.save();
+  // 2. Draw Multi-Photo Vertical Collage (Stacked Top to Bottom up to 3 photos)
+  if (images.length > 0) {
+    const count = images.length;
+    const frameH = height / count;
 
-    // Apply Filter Matrix via canvas context filter
-    if (options.filter === 'cinematic') {
-      ctx.filter = 'contrast(125%) saturate(140%) hue-rotate(-10deg)';
-    } else if (options.filter === 'cyberpunk') {
-      ctx.filter = 'contrast(135%) saturate(180%) hue-rotate(140deg)';
-    } else if (options.filter === 'monochrome') {
-      ctx.filter = 'grayscale(100%) contrast(150%) brightness(90%)';
-    } else if (options.filter === 'vintage') {
-      ctx.filter = 'sepia(60%) contrast(110%) saturate(120%)';
-    } else if (options.filter === 'hdr') {
-      ctx.filter = 'contrast(140%) saturate(150%) brightness(105%)';
-    } else {
-      ctx.filter = 'none';
-    }
+    images.forEach((img, idx) => {
+      ctx.save();
 
-    // Cover Fit Image with Scale & Offset
-    const imgAspect = img.naturalWidth / img.naturalHeight;
-    const canvasAspect = width / height;
-    let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
+      // Apply Filter Matrix
+      if (options.filter === 'cinematic') {
+        ctx.filter = 'contrast(125%) saturate(140%) hue-rotate(-10deg)';
+      } else if (options.filter === 'cyberpunk') {
+        ctx.filter = 'contrast(135%) saturate(180%) hue-rotate(140deg)';
+      } else if (options.filter === 'monochrome') {
+        ctx.filter = 'grayscale(100%) contrast(150%) brightness(90%)';
+      } else if (options.filter === 'vintage') {
+        ctx.filter = 'sepia(60%) contrast(110%) saturate(120%)';
+      } else if (options.filter === 'hdr') {
+        ctx.filter = 'contrast(140%) saturate(150%) brightness(105%)';
+      } else {
+        ctx.filter = 'none';
+      }
 
-    if (imgAspect > canvasAspect) {
-      sw = img.naturalHeight * canvasAspect;
-      sx = (img.naturalWidth - sw) / 2;
-    } else {
-      sh = img.naturalWidth / canvasAspect;
-      sy = (img.naturalHeight - sh) / 2;
-    }
+      const frameY = idx * frameH;
+      const imgAspect = img.naturalWidth / img.naturalHeight;
+      const frameAspect = width / frameH;
+      let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
 
-    const scale = options.imageScale;
-    const drawW = width * scale;
-    const drawH = height * scale;
-    const drawX = (width - drawW) / 2;
-    const drawY = (height - drawH) / 2 + options.imageOffsetY;
+      if (imgAspect > frameAspect) {
+        sw = img.naturalHeight * frameAspect;
+        sx = (img.naturalWidth - sw) / 2;
+      } else {
+        sh = img.naturalWidth / frameAspect;
+        sy = (img.naturalHeight - sh) / 2;
+      }
 
-    ctx.drawImage(img, sx, sy, sw, sh, drawX, drawY, drawW, drawH);
-    ctx.restore();
+      // Clip region to this vertical frame slice
+      ctx.beginPath();
+      ctx.rect(0, frameY, width, frameH);
+      ctx.clip();
+
+      ctx.drawImage(img, sx, sy, sw, sh, 0, frameY, width, frameH);
+
+      // Sleek dividing border line between collage frames
+      if (idx > 0) {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(0, frameY);
+        ctx.lineTo(width, frameY);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    });
   } else {
-    // Solid dark automotive background if no image
+    // Solid dark gradient background when no photo uploaded
     const bgGrad = ctx.createLinearGradient(0, 0, width, height);
     bgGrad.addColorStop(0, '#0F172A');
     bgGrad.addColorStop(1, '#020617');
@@ -109,12 +126,12 @@ function renderTelemetryCanvas(
     ctx.fillRect(0, 0, width, height);
   }
 
-  // 2. Dark Gradient Shader (Bottom 60%)
-  const gradHeight = height * 0.6;
+  // 3. Ambient Dark Shader Gradient Overlay (Bottom 55%)
+  const gradHeight = height * 0.55;
   const grad = ctx.createLinearGradient(0, height - gradHeight, 0, height);
   grad.addColorStop(0, 'rgba(0,0,0,0)');
   grad.addColorStop(0.35, 'rgba(15,23,42,0.5)');
-  grad.addColorStop(1, 'rgba(2,6,23,0.95)');
+  grad.addColorStop(1, 'rgba(2,6,23,0.96)');
   ctx.fillStyle = grad;
   ctx.fillRect(0, height - gradHeight, width, gradHeight);
 
@@ -125,22 +142,42 @@ function renderTelemetryCanvas(
   ctx.fillStyle = topGrad;
   ctx.fillRect(0, 0, width, height * 0.2);
 
-  // 3. Font Family Map
-  let fontName = "'Rajdhani', sans-serif";
-  if (options.fontStyle === 'inter') fontName = "'Inter', sans-serif";
-  if (options.fontStyle === 'bebas') fontName = "'Bebas Neue', sans-serif";
-  if (options.fontStyle === 'serif') fontName = "'Playfair Display', serif";
-  if (options.fontStyle === 'mono') fontName = "'Courier New', monospace";
+  // 4. Preset Theme Colors & Typography Fonts Config
+  let primaryColor = '#FC5200';
+  let fontMain = "'Rajdhani', sans-serif";
+  let fontTitle = "'Rajdhani', sans-serif";
+  let themeTitle = '⚡ ODOMTR ATHLETIC TELEMETRY';
 
-  // 4. Render Telemetry Overlays
+  if (options.preset === 'cyberpunk') {
+    primaryColor = '#00F0FF';
+    fontMain = "'Courier New', monospace";
+    fontTitle = "'Rajdhani', sans-serif";
+    themeTitle = '🌆 CYBERPUNK TELEMETRY DATA';
+  } else if (options.preset === 'luxury') {
+    primaryColor = '#D4AF37'; // Gold
+    fontMain = "'Playfair Display', serif";
+    fontTitle = "'Playfair Display', serif";
+    themeTitle = '🏆 ODOMTR LUXURY PASSPORT';
+  } else if (options.preset === 'motorsport') {
+    primaryColor = '#FFDD00'; // Speed Yellow
+    fontMain = "'Bebas Neue', sans-serif";
+    fontTitle = "'Bebas Neue', sans-serif";
+    themeTitle = '🏁 MOTORSPORT RACING GRID';
+  } else if (options.preset === 'vintage') {
+    primaryColor = '#F59E0B'; // Sepia Amber
+    fontMain = "'Courier New', monospace";
+    fontTitle = "'Courier New', monospace";
+    themeTitle = '📜 RETRO VINTAGE STAMP';
+  }
+
   const pad = 60;
   let currentY = height - (options.ratio === '16:9' ? 40 : 80);
 
-  // ── Watermark (Bottom Right) ──
+  // ── Watermark Logo ──
   if (options.showWatermark) {
     ctx.save();
-    ctx.font = `bold 28px ${fontName}`;
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = `bold 28px ${fontTitle}`;
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'bottom';
     ctx.fillText('Odo Telemetry Studio ⚡', width - pad, currentY);
@@ -148,7 +185,23 @@ function renderTelemetryCanvas(
   }
 
   // Calculate layout upward
-  let contentY = currentY - (options.ratio === '16:9' ? 140 : 260);
+  let contentY = currentY - (options.ratio === '16:9' ? 140 : 270);
+
+  // ── Top Header Pill Badge ──
+  ctx.save();
+  const headerY = options.ratio === '9:16' ? 100 : 50;
+  const headerW = 440;
+  const headerH = 50;
+  ctx.fillStyle = primaryColor;
+  ctx.beginPath();
+  ctx.roundRect(pad, headerY, headerW, headerH, 12);
+  ctx.fill();
+
+  ctx.font = `bold 22px ${fontTitle}`;
+  ctx.fillStyle = options.preset === 'motorsport' ? '#000000' : '#FFFFFF';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(themeTitle, pad + 20, headerY + headerH / 2);
+  ctx.restore();
 
   // ── License Plate Badge ──
   if (options.showPlate) {
@@ -160,18 +213,16 @@ function renderTelemetryCanvas(
     const plateX = pad;
     const plateY = contentY - 90;
 
-    // Yellow background
+    // Yellow Indonesian Plate style
     ctx.fillStyle = '#FFDD00';
     ctx.beginPath();
     ctx.roundRect(plateX, plateY, plateW, plateH, 12);
     ctx.fill();
 
-    // Black border
     ctx.strokeStyle = '#000000';
     ctx.lineWidth = 4;
     ctx.stroke();
 
-    // Plate text
     ctx.fillStyle = '#000000';
     ctx.textBaseline = 'middle';
     ctx.fillText(plateText, plateX + 22, plateY + plateH / 2);
@@ -180,7 +231,7 @@ function renderTelemetryCanvas(
 
   // ── Vehicle Brand & Model ──
   ctx.save();
-  ctx.font = `bold 56px ${fontName}`;
+  ctx.font = `bold 56px ${fontTitle}`;
   ctx.fillStyle = '#FFFFFF';
   ctx.textBaseline = 'top';
   ctx.fillText(`${vehicle.brand} ${vehicle.model}`, pad, contentY);
@@ -192,7 +243,7 @@ function renderTelemetryCanvas(
     : `🔧 ${record.workshop_name_manual ?? 'DIY Maintenance'}`;
 
   ctx.save();
-  ctx.font = `600 34px ${fontName}`;
+  ctx.font = `600 34px ${fontMain}`;
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
   ctx.textBaseline = 'top';
   ctx.fillText(workshopName, pad, contentY + 68);
@@ -200,7 +251,7 @@ function renderTelemetryCanvas(
 
   // ── Date & Odometer ──
   ctx.save();
-  ctx.font = `500 30px ${fontName}`;
+  ctx.font = `500 30px ${fontMain}`;
   ctx.fillStyle = 'rgba(255,255,255,0.7)';
   ctx.textBaseline = 'top';
   ctx.fillText(`📅 ${formatDate(record.service_date, 'full')}`, pad, contentY + 115);
@@ -212,10 +263,10 @@ function renderTelemetryCanvas(
   // ── Total Cost Badge ──
   if (options.showCost) {
     ctx.save();
-    ctx.font = `bold 32px ${fontName}`;
-    ctx.fillStyle = '#34D399'; // Emerald-400
+    ctx.font = `bold 32px ${fontTitle}`;
+    ctx.fillStyle = primaryColor;
     ctx.textBaseline = 'top';
-    ctx.fillText(`💰 Total: ${formatRupiah(record.total_cost)}`, pad, contentY + 160);
+    ctx.fillText(`💰 Total Biaya: ${formatRupiah(record.total_cost)}`, pad, contentY + 160);
     ctx.restore();
   }
 
@@ -226,7 +277,7 @@ function renderTelemetryCanvas(
 
     topItems.forEach((item, i) => {
       ctx.save();
-      ctx.font = `500 28px ${fontName}`;
+      ctx.font = `500 28px ${fontMain}`;
       ctx.fillStyle = 'rgba(255,255,255,0.9)';
       ctx.textBaseline = 'top';
       ctx.fillText(`✓  ${item.item_name}`, pad, contentY + (options.showCost ? 205 : 160) + i * 40);
@@ -250,13 +301,11 @@ export function TelemetryStudioPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Studio Controls
-  const [loadedImg, setLoadedImg] = useState<HTMLImageElement | null>(null);
+  // Studio Controls: Up to 3 Uploaded Images for Vertical Collage
+  const [loadedImages, setLoadedImages] = useState<HTMLImageElement[]>([]);
   const [ratio, setRatio] = useState<AspectRatio>('9:16');
   const [filter, setFilter] = useState<FilterType>('none');
-  const [fontStyle, setFontStyle] = useState<FontStyle>('rajdhani');
-  const [imageScale, setImageScale] = useState(1.0);
-  const [imageOffsetY, setImageOffsetY] = useState(0);
+  const [preset, setPreset] = useState<TypographyPreset>('athletic');
 
   // Overlays Toggles
   const [showPlate, setShowPlate] = useState(true);
@@ -279,7 +328,7 @@ export function TelemetryStudioPage() {
           if (s.receipt_photo_url) {
             const img = new window.Image();
             img.crossOrigin = 'anonymous';
-            img.onload = () => setLoadedImg(img);
+            img.onload = () => setLoadedImages([img]);
             img.src = s.receipt_photo_url;
           }
         }
@@ -296,40 +345,48 @@ export function TelemetryStudioPage() {
   const renderCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas || !vehicle || !record) return;
-    renderTelemetryCanvas(canvas, loadedImg, vehicle, record, {
+    renderTelemetryCanvas(canvas, loadedImages, vehicle, record, {
       ratio,
       filter,
-      fontStyle,
-      imageScale,
-      imageOffsetY,
+      preset,
       showPlate,
       showCost,
       showMileage,
       showItems,
       showWatermark,
     });
-  }, [canvasRef, loadedImg, vehicle, record, ratio, filter, fontStyle, imageScale, imageOffsetY, showPlate, showCost, showMileage, showItems, showWatermark]);
+  }, [canvasRef, loadedImages, vehicle, record, ratio, filter, preset, showPlate, showCost, showMileage, showItems, showWatermark]);
 
   useEffect(() => {
     renderCanvas();
   }, [renderCanvas]);
 
-  const loadFile = (file: File) => {
+  const handleAddFile = (file: File) => {
     if (!file.type.startsWith('image/')) return;
+    if (loadedImages.length >= 3) {
+      setError('Maksimal 3 foto untuk kolase vertikal');
+      return;
+    }
+    setError('');
+
     const url = URL.createObjectURL(file);
     const img = new window.Image();
     img.onload = () => {
-      setLoadedImg(img);
+      setLoadedImages((prev) => [...prev, img].slice(0, 3));
       URL.revokeObjectURL(url);
     };
     img.src = url;
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setLoadedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleDownload = () => {
     const canvas = canvasRef.current;
     if (!canvas || !vehicle || !record) return;
     const link = document.createElement('a');
-    link.download = `telemetry_${vehicle.license_plate}_${record.service_date}.png`;
+    link.download = `telemetry_collage_${vehicle.license_plate}_${record.service_date}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
   };
@@ -339,7 +396,7 @@ export function TelemetryStudioPage() {
     if (!canvas || !vehicle) return;
     canvas.toBlob(async (blob) => {
       if (!blob) return;
-      const file = new File([blob], `telemetry_${vehicle.license_plate}.png`, { type: 'image/png' });
+      const file = new File([blob], `telemetry_collage_${vehicle.license_plate}.png`, { type: 'image/png' });
       if (navigator.canShare?.({ files: [file] })) {
         try {
           await navigator.share({
@@ -387,10 +444,10 @@ export function TelemetryStudioPage() {
   return (
     <div className="flex-1 bg-slate-50 text-slate-900 min-h-screen flex flex-col pb-24">
       {/* Hidden File Inputs */}
-      <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && loadFile(e.target.files[0])} />
-      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && loadFile(e.target.files[0])} />
+      <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleAddFile(e.target.files[0])} />
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && handleAddFile(e.target.files[0])} />
 
-      {/* ── Studio Top Bar Navigation (Clean Light Theme) ── */}
+      {/* ── Studio Top Bar Navigation ── */}
       <div className="bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-4 sticky top-0 z-30 flex items-center justify-between shadow-2xs">
         <div className="flex items-center gap-3">
           <button
@@ -435,7 +492,7 @@ export function TelemetryStudioPage() {
         <div className="lg:col-span-7 flex flex-col items-center justify-center bg-slate-900 rounded-3xl p-6 border border-slate-800 shadow-xl relative">
           <div className="w-full flex items-center justify-between mb-4">
             <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Maximize2 size={14} className="text-purple-400" /> Preview High-Res Canvas
+              <Maximize2 size={14} className="text-purple-400" /> Live High-Res Canvas ({loadedImages.length} Foto Kolase Vertikal)
             </span>
             <span className="text-[11px] font-mono text-purple-300 bg-purple-950/80 px-2.5 py-1 rounded-full border border-purple-800/60">
               Rasio {ratio}
@@ -450,35 +507,112 @@ export function TelemetryStudioPage() {
           </div>
         </div>
 
-        {/* Right Column: Light Studio Control Panel */}
+        {/* Right Column: Studio Control Panel */}
         <div className="lg:col-span-5 space-y-5">
-          {/* 1. Media Source Bar */}
+          {/* 1. Multi-Photo Collage Media Picker (Max 3 Photos) */}
+          <div className="bg-white border border-slate-200/90 rounded-3xl p-5 space-y-3 shadow-xs">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <Layers size={15} className="text-purple-600" /> Kolase Vertikal ({loadedImages.length}/3 Foto)
+              </h3>
+              <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">
+                Maksimal 3 Foto
+              </span>
+            </div>
+
+            {/* Thumbnail Strip */}
+            {loadedImages.length > 0 && (
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {loadedImages.map((img, idx) => (
+                  <div key={idx} className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-purple-500 shrink-0 group">
+                    <img src={img.src} alt={`Frame ${idx + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(idx)}
+                      className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-red-400 cursor-pointer"
+                      title="Hapus Frame Foto Ini"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                    <span className="absolute bottom-1 left-1 text-[9px] font-black text-white bg-slate-900/80 px-1 rounded">
+                      #{idx + 1}
+                    </span>
+                  </div>
+                ))}
+
+                {loadedImages.length < 3 && (
+                  <button
+                    type="button"
+                    onClick={() => galleryInputRef.current?.click()}
+                    className="w-16 h-16 rounded-xl border-2 border-dashed border-purple-300 hover:border-purple-600 bg-purple-50/50 hover:bg-purple-50 flex flex-col items-center justify-center text-purple-600 transition-colors shrink-0 cursor-pointer"
+                  >
+                    <Plus size={18} />
+                    <span className="text-[9px] font-bold mt-0.5">+ Foto</span>
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Action Buttons for Adding Photos */}
+            {loadedImages.length < 3 && (
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => cameraInputRef.current?.click()}
+                  className="py-3 px-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-md cursor-pointer transition-transform active:scale-95"
+                >
+                  <Camera size={16} />
+                  <span>📷 Kamera Langsung</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => galleryInputRef.current?.click()}
+                  className="py-3 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 cursor-pointer transition-transform active:scale-95"
+                >
+                  <ImageIcon size={16} className="text-purple-600" />
+                  <span>🖼️ Pilih Galeri</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 2. Unique Typography & Overlay Presets */}
           <div className="bg-white border border-slate-200/90 rounded-3xl p-5 space-y-3 shadow-xs">
             <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-              <Camera size={15} className="text-purple-600" /> Photo Media Source
+              <Type size={15} className="text-purple-600" /> Template Tipografi & Overlay Unik
             </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => cameraInputRef.current?.click()}
-                className="py-3 px-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-md cursor-pointer transition-transform active:scale-95"
-              >
-                <Camera size={16} />
-                <span>📷 Kamera</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => galleryInputRef.current?.click()}
-                className="py-3 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 cursor-pointer transition-transform active:scale-95"
-              >
-                <ImageIcon size={16} className="text-purple-600" />
-                <span>🖼️ Galeri</span>
-              </button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {(
+                [
+                  { id: 'athletic' as TypographyPreset, label: '🏎️ Athletic HUD', desc: 'Futuristik Orange & Rajdhani' },
+                  { id: 'cyberpunk' as TypographyPreset, label: '🌆 Cyberpunk Neon', desc: 'Neon Cyan & Code Monospace' },
+                  { id: 'luxury' as TypographyPreset, label: '🏆 Luxury Gold', desc: 'Gold Foil & Playfair Serif' },
+                  { id: 'motorsport' as TypographyPreset, label: '🏁 Motorsport Grid', desc: 'Indonesian Plate & Bebas' },
+                  { id: 'vintage' as TypographyPreset, label: '📜 Retro Vintage', desc: 'Warm Sepia & Stamp Typewriter' },
+                ]
+              ).map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setPreset(p.id)}
+                  className={[
+                    'p-3 rounded-2xl border transition-all cursor-pointer text-left',
+                    preset === p.id
+                      ? 'bg-slate-900 text-white border-slate-900 shadow-md'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100',
+                  ].join(' ')}
+                >
+                  <p className="text-xs font-black flex items-center justify-between">
+                    <span>{p.label}</span>
+                    {preset === p.id && <CheckCircle2 size={14} className="text-amber-400" />}
+                  </p>
+                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">{p.desc}</p>
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* 2. Aspect Ratio Selector */}
+          {/* 3. Aspect Ratio Selector */}
           <div className="bg-white border border-slate-200/90 rounded-3xl p-5 space-y-3 shadow-xs">
             <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
               <Maximize2 size={15} className="text-purple-600" /> Aspek Rasio Kanvas
@@ -498,7 +632,7 @@ export function TelemetryStudioPage() {
                   className={[
                     'py-2.5 px-2 rounded-xl text-xs font-extrabold border transition-all cursor-pointer text-center',
                     ratio === item.id
-                      ? 'bg-slate-900 text-white border-slate-900 shadow-md'
+                      ? 'bg-purple-600 text-white border-purple-600 shadow-md'
                       : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900',
                   ].join(' ')}
                 >
@@ -508,10 +642,10 @@ export function TelemetryStudioPage() {
             </div>
           </div>
 
-          {/* 3. Photo Filter Matrix */}
+          {/* 4. Photo Filter Matrix */}
           <div className="bg-white border border-slate-200/90 rounded-3xl p-5 space-y-3 shadow-xs">
             <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-              <Sliders size={15} className="text-purple-600" /> Filter Warna Telemetri
+              <Sliders size={15} className="text-purple-600" /> Filter Warna Foto
             </h3>
             <div className="grid grid-cols-3 gap-2">
               {(
@@ -519,7 +653,7 @@ export function TelemetryStudioPage() {
                   { id: 'none', label: 'Original' },
                   { id: 'cinematic', label: '🎬 Cinematic' },
                   { id: 'cyberpunk', label: '🌆 Cyberpunk' },
-                  { id: 'monochrome', label: '🖤 B&W Contrast' },
+                  { id: 'monochrome', label: '🖤 B&W' },
                   { id: 'vintage', label: '📜 Vintage' },
                   { id: 'hdr', label: '✨ Vivid HDR' },
                 ] as const
@@ -535,36 +669,6 @@ export function TelemetryStudioPage() {
                   ].join(' ')}
                 >
                   {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 4. Font Typography Style */}
-          <div className="bg-white border border-slate-200/90 rounded-3xl p-5 space-y-3 shadow-xs">
-            <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-              <Type size={15} className="text-purple-600" /> Font Typography
-            </h3>
-            <div className="grid grid-cols-2 gap-2">
-              {(
-                [
-                  { id: 'rajdhani', label: '🏎️ Rajdhani Tech' },
-                  { id: 'inter', label: '📱 Inter Modern' },
-                  { id: 'bebas', label: '🏁 Bebas Bold' },
-                  { id: 'mono', label: '📟 Code Monospace' },
-                ] as const
-              ).map((font) => (
-                <button
-                  key={font.id}
-                  onClick={() => setFontStyle(font.id)}
-                  className={[
-                    'py-2.5 px-3 rounded-xl text-xs font-extrabold border transition-all cursor-pointer text-center',
-                    fontStyle === font.id
-                      ? 'bg-slate-900 text-white border-slate-900 shadow-md'
-                      : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900',
-                  ].join(' ')}
-                >
-                  {font.label}
                 </button>
               ))}
             </div>
