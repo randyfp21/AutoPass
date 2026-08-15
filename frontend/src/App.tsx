@@ -16,6 +16,7 @@ import ThreadsFeedPage from './pages/ThreadsFeedPage';
 import ThreadsBookmarkPage from './pages/ThreadsBookmarkPage';
 import ThreadsActivityPage from './pages/ThreadsActivityPage';
 import UserProfilePage from './pages/UserProfilePage';
+import ThreadDetailPage from './pages/ThreadDetailPage';
 import { AddPlannerModal } from './components/planner/AddPlannerModal';
 import { AddServiceModal } from './components/service/AddServiceModal';
 import { ThreadComposerModal } from './components/threads/ThreadComposerModal';
@@ -29,61 +30,71 @@ import type { Vehicle, CreatePlannerData, CreateServiceRecordData } from './type
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  requiredRole?: 'user' | 'workshop_owner' | 'admin';
 }
 
-function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, user } = useAuth();
-  const location = useLocation();
+function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs font-semibold text-slate-500">Memuat sesi...</p>
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <span className="text-slate-400 font-sans text-sm font-semibold">Memuat Odomtr...</span>
         </div>
       </div>
     );
   }
 
-  if (!isAuthenticated || !user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  if (requiredRole && user?.role !== requiredRole && user?.role !== 'admin') {
-    return <Navigate to="/dashboard" replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;
 }
 
-// ─── Guest Route (redirect if already authed) ─────────────────────────────────
+// ─── Public Only Route (redirects to dashboard if already logged in) ─────────
 
-function GuestRoute({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading, user } = useAuth();
+interface PublicOnlyRouteProps {
+  children: ReactNode;
+}
+
+function PublicOnlyRoute({ children }: PublicOnlyRouteProps) {
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return null;
   }
 
-  if (isAuthenticated && user) {
+  if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;
 }
 
-// ─── App Layout (with Navbar & BottomNav) ─────────────────────────────────────
+// ─── Workshop Only Route ──────────────────────────────────────────────────────
+
+interface WorkshopOnlyRouteProps {
+  children: ReactNode;
+}
+
+function WorkshopOnlyRoute({ children }: WorkshopOnlyRouteProps) {
+  const { user } = useAuth();
+
+  if (user?.role !== 'workshop_owner') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+// ─── App Layout Wrapper (with Navbar + Floating BottomNav) ───────────────────
 
 interface AppLayoutProps {
   children: ReactNode;
-  onOpenAddPlanner: () => void;
-  onOpenNewThreadModal: () => void;
+  onOpenAddPlanner?: () => void;
+  onOpenNewThreadModal?: () => void;
 }
 
 function AppLayout({ children, onOpenAddPlanner, onOpenNewThreadModal }: AppLayoutProps) {
@@ -133,49 +144,35 @@ export function App() {
 
   const handleGlobalCreatePlanner = async (data: CreatePlannerData) => {
     await plannerService.createPlanner(data);
+    setShowAddPlannerModal(false);
     window.location.reload();
   };
 
   const handleGlobalCreateInstantService = async (data: CreateServiceRecordData) => {
     if (!selectedInstantVehicle) return;
     await maintenanceService.createServiceRecord(selectedInstantVehicle.id, data);
-    window.location.reload();
-  };
-
-  const handleGlobalThreadCreated = () => {
+    setShowAddInstantServiceModal(false);
     window.location.reload();
   };
 
   return (
     <>
       <Routes>
-        {/* Root redirect */}
-        <Route
-          path="/"
-          element={
-            isAuthenticated && user ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-
-        {/* Guest routes */}
+        {/* Public routes */}
         <Route
           path="/login"
           element={
-            <GuestRoute>
+            <PublicOnlyRoute>
               <LoginPage />
-            </GuestRoute>
+            </PublicOnlyRoute>
           }
         />
         <Route
           path="/register"
           element={
-            <GuestRoute>
+            <PublicOnlyRoute>
               <RegisterPage />
-            </GuestRoute>
+            </PublicOnlyRoute>
           }
         />
 
@@ -220,19 +217,6 @@ export function App() {
           }
         />
         <Route
-          path="/plan"
-          element={
-            <ProtectedRoute>
-              <AppLayout
-                onOpenAddPlanner={() => setShowOptionSelectorModal(true)}
-                onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
-              >
-                <ActivityPage />
-              </AppLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/vehicles"
           element={
             <ProtectedRoute>
@@ -258,21 +242,25 @@ export function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* Workshop Owner protected route */}
         <Route
           path="/workshop"
           element={
-            <ProtectedRoute requiredRole="workshop_owner">
-              <AppLayout
-                onOpenAddPlanner={() => setShowOptionSelectorModal(true)}
-                onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
-              >
-                <WorkshopDashboardPage />
-              </AppLayout>
+            <ProtectedRoute>
+              <WorkshopOnlyRoute>
+                <AppLayout
+                  onOpenAddPlanner={() => setShowOptionSelectorModal(true)}
+                  onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
+                >
+                  <WorkshopDashboardPage />
+                </AppLayout>
+              </WorkshopOnlyRoute>
             </ProtectedRoute>
           }
         />
 
-        {/* Odo Threads Module Routes */}
+        {/* Odo Threads Social Module Protected routes */}
         <Route
           path="/threads"
           element={
@@ -339,20 +327,26 @@ export function App() {
           }
         />
 
-        {/* Fallback route */}
+        {/* Dedicated Thread Detail & Discussion Page Route */}
         <Route
-          path="*"
+          path="/threads/:id"
           element={
-            isAuthenticated && user ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <Navigate to="/login" replace />
-            )
+            <ProtectedRoute>
+              <AppLayout
+                onOpenAddPlanner={() => {}}
+                onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
+              >
+                <ThreadDetailPage />
+              </AppLayout>
+            </ProtectedRoute>
           }
         />
+
+        {/* Catch-all redirect */}
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
 
-      {/* Service Option Selector Modal */}
+      {/* Global Option Selector Modal (Planner vs Instant Log) */}
       <ServiceOptionSelectorModal
         isOpen={showOptionSelectorModal}
         onClose={() => setShowOptionSelectorModal(false)}
@@ -360,33 +354,39 @@ export function App() {
         onSelectInstantLog={() => setShowAddInstantServiceModal(true)}
       />
 
-      {/* 1. Schedule Plan Modal */}
-      <AddPlannerModal
-        isOpen={showAddPlannerModal}
-        onClose={() => setShowAddPlannerModal(false)}
-        vehicles={vehicles}
-        onSubmit={handleGlobalCreatePlanner}
-      />
+      {/* Global Add Planner Modal */}
+      {showAddPlannerModal && (
+        <AddPlannerModal
+          isOpen={showAddPlannerModal}
+          onClose={() => setShowAddPlannerModal(false)}
+          vehicles={vehicles}
+          onSubmit={handleGlobalCreatePlanner}
+        />
+      )}
 
-      {/* 2. Instant Log Servis Modal */}
-      {selectedInstantVehicle && (
+      {/* Global Add Instant Service Modal */}
+      {showAddInstantServiceModal && (
         <AddServiceModal
           isOpen={showAddInstantServiceModal}
           onClose={() => setShowAddInstantServiceModal(false)}
-          vehicleCategory={selectedInstantVehicle.category}
-          currentMileage={selectedInstantVehicle.current_mileage}
           vehicles={vehicles}
           onSubmit={handleGlobalCreateInstantService}
         />
       )}
 
-      {/* 3. Global Odo Threads Post Composer Modal */}
-      <ThreadComposerModal
-        isOpen={showNewThreadComposerModal}
-        onClose={() => setShowNewThreadComposerModal(false)}
-        vehicles={vehicles}
-        onThreadCreated={handleGlobalThreadCreated}
-      />
+      {/* Global New Thread Composer Modal */}
+      {showNewThreadComposerModal && (
+        <ThreadComposerModal
+          isOpen={showNewThreadComposerModal}
+          onClose={() => setShowNewThreadComposerModal(false)}
+          vehicles={vehicles}
+          onThreadCreated={() => {
+            if (window.location.pathname === '/threads') {
+              window.location.reload();
+            }
+          }}
+        />
+      )}
     </>
   );
 }

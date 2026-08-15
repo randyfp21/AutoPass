@@ -121,6 +121,7 @@ func (u *threadUsecase) CreateComment(ctx context.Context, threadID string, user
 		ID:       uuid.New().String(),
 		ThreadID: threadID,
 		UserID:   userID,
+		ParentID: req.ParentID,
 		Content:  req.Content,
 	}
 

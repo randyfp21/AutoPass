@@ -9,7 +9,7 @@ import { ImageLightboxModal } from '../common/ImageLightboxModal';
 interface ThreadCardProps {
   thread: Thread;
   currentUserId?: string;
-  onCommentClick: (thread: Thread) => void;
+  onCommentClick?: (thread: Thread) => void;
   onThreadDeleted?: (threadId: string) => void;
 }
 
@@ -32,7 +32,21 @@ export function ThreadCard({
   // Single image aspect-ratio detection (landscape, portrait, square)
   const [aspectType, setAspectType] = useState<'landscape' | 'portrait' | 'square'>('landscape');
 
-  const handleLike = async () => {
+  const handleCardClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('button') ||
+      target.closest('a') ||
+      target.closest('img') ||
+      target.closest('.no-card-click')
+    ) {
+      return;
+    }
+    navigate(`/threads/${thread.id}`);
+  };
+
+  const handleLike = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     try {
       const isLiked = await threadsService.toggleLikeThread(thread.id);
       setThread((prev) => ({
@@ -45,7 +59,8 @@ export function ThreadCard({
     }
   };
 
-  const handleBookmark = async () => {
+  const handleBookmark = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     try {
       const isBookmarked = await threadsService.toggleBookmarkThread(thread.id);
       setThread((prev) => ({
@@ -69,7 +84,8 @@ export function ThreadCard({
     }
   };
 
-  const handleShare = async () => {
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     const usernameTag = `@${thread.user_username || 'user'}`;
     const text = `💬 *Odo Threads by ${usernameTag}*\n"${thread.content.slice(0, 100)}..."\n\n_Diskusi Komunitas Otomotif Odomtr_`;
     if (navigator.share) {
@@ -89,12 +105,14 @@ export function ThreadCard({
     }
   };
 
-  const openLightbox = (index: number) => {
+  const openLightbox = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation();
     setLightboxIndex(index);
     setShowLightbox(true);
   };
 
-  const navigateToUserProfile = () => {
+  const navigateToUserProfile = (e: React.MouseEvent) => {
+    e.stopPropagation();
     const target = thread.user_username ? `@${thread.user_username}` : thread.user_id;
     navigate(`/threads/user/${target}`);
   };
@@ -128,7 +146,10 @@ export function ThreadCard({
 
   return (
     <>
-      <div className="bg-white border border-slate-200 hover:border-purple-300 rounded-2xl p-4 sm:p-5 shadow-xs transition-all space-y-3.5">
+      <div
+        onClick={handleCardClick}
+        className="bg-white border border-slate-200 hover:border-purple-400/80 rounded-3xl p-4 sm:p-5 shadow-xs transition-all space-y-3.5 cursor-pointer group/card"
+      >
         {/* Header Row: User Info + Category Badge + Delete */}
         <div className="flex items-start justify-between gap-3">
           <div
@@ -169,7 +190,10 @@ export function ThreadCard({
             {isAuthor && (
               <button
                 type="button"
-                onClick={() => setShowDeleteModal(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDeleteModal(true);
+                }}
                 className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
                 title="Hapus Thread"
               >
@@ -188,7 +212,7 @@ export function ThreadCard({
         )}
 
         {/* Content Text */}
-        <p className="text-xs sm:text-sm text-slate-800 leading-relaxed font-normal whitespace-pre-line">
+        <p className="text-xs sm:text-sm text-slate-800 leading-relaxed font-normal whitespace-pre-line group-hover/card:text-slate-900">
           {thread.content}
         </p>
 
@@ -199,7 +223,7 @@ export function ThreadCard({
             {thread.photo_urls.length === 1 && (
               <div
                 className={`relative w-full ${getSingleImageAspectClass()} group cursor-pointer overflow-hidden flex items-center justify-center`}
-                onClick={() => openLightbox(0)}
+                onClick={(e) => openLightbox(e, 0)}
               >
                 <img
                   src={thread.photo_urls[0]}
@@ -228,7 +252,7 @@ export function ThreadCard({
                   <div
                     key={idx}
                     className="relative w-full h-full group cursor-pointer overflow-hidden"
-                    onClick={() => openLightbox(idx)}
+                    onClick={(e) => openLightbox(e, idx)}
                   >
                     <img
                       src={photoUrl}
@@ -248,7 +272,7 @@ export function ThreadCard({
               <div className="grid grid-cols-3 gap-1 max-h-[320px] aspect-video">
                 <div
                   className="col-span-2 relative h-full group cursor-pointer overflow-hidden"
-                  onClick={() => openLightbox(0)}
+                  onClick={(e) => openLightbox(e, 0)}
                 >
                   <img
                     src={thread.photo_urls[0]}
@@ -265,7 +289,7 @@ export function ThreadCard({
                     <div
                       key={idx + 1}
                       className="relative w-full h-full group cursor-pointer overflow-hidden"
-                      onClick={() => openLightbox(idx + 1)}
+                      onClick={(e) => openLightbox(e, idx + 1)}
                     >
                       <img
                         src={photoUrl}
@@ -285,7 +309,7 @@ export function ThreadCard({
                   <div
                     key={idx}
                     className="relative w-full h-full group cursor-pointer overflow-hidden"
-                    onClick={() => openLightbox(idx)}
+                    onClick={(e) => openLightbox(e, idx)}
                   >
                     <img
                       src={photoUrl}
@@ -307,7 +331,7 @@ export function ThreadCard({
                   <div
                     key={idx}
                     className="col-span-3 relative h-40 group cursor-pointer overflow-hidden"
-                    onClick={() => openLightbox(idx)}
+                    onClick={(e) => openLightbox(e, idx)}
                   >
                     <img
                       src={photoUrl}
@@ -320,7 +344,7 @@ export function ThreadCard({
                   <div
                     key={idx + 2}
                     className="col-span-2 relative h-32 group cursor-pointer overflow-hidden"
-                    onClick={() => openLightbox(idx + 2)}
+                    onClick={(e) => openLightbox(e, idx + 2)}
                   >
                     <img
                       src={photoUrl}
@@ -355,7 +379,14 @@ export function ThreadCard({
             {/* Comment / Reply Button */}
             <button
               type="button"
-              onClick={() => onCommentClick(thread)}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onCommentClick) {
+                  onCommentClick(thread);
+                } else {
+                  navigate(`/threads/${thread.id}`);
+                }
+              }}
               className="flex items-center gap-1.5 py-1 px-2.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900 rounded-xl transition-all cursor-pointer"
             >
               <MessageSquare size={16} />

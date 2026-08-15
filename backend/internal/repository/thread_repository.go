@@ -292,11 +292,11 @@ func (r *threadRepository) GetUserThreads(ctx context.Context, targetUserID stri
 
 func (r *threadRepository) CreateComment(ctx context.Context, c *domain.ThreadComment) error {
 	query := `
-		INSERT INTO thread_comments (id, thread_id, user_id, content)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO thread_comments (id, thread_id, user_id, parent_id, content)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING created_at, updated_at
 	`
-	err := r.db.QueryRow(ctx, query, c.ID, c.ThreadID, c.UserID, c.Content).
+	err := r.db.QueryRow(ctx, query, c.ID, c.ThreadID, c.UserID, c.ParentID, c.Content).
 		Scan(&c.CreatedAt, &c.UpdatedAt)
 	if err != nil {
 		return err
@@ -309,7 +309,7 @@ func (r *threadRepository) GetThreadComments(ctx context.Context, threadID strin
 	query := `
 		SELECT 
 			c.id, c.thread_id, c.user_id, u.full_name, u.username, u.avatar_url, u.role::text,
-			c.content, c.likes_count,
+			c.parent_id::text, c.content, c.likes_count,
 			EXISTS(SELECT 1 FROM thread_likes tl WHERE tl.thread_id = c.id AND tl.user_id = CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END) AS is_liked,
 			c.created_at
 		FROM thread_comments c
@@ -327,8 +327,8 @@ func (r *threadRepository) GetThreadComments(ctx context.Context, threadID strin
 	for rows.Next() {
 		cr := &domain.CommentResponse{}
 		if err := rows.Scan(
-			&cr.ID, &cr.ThreadID, &cr.UserName, &cr.UserUsername, &cr.UserAvatar, &cr.UserRole,
-			&cr.Content, &cr.LikesCount, &cr.IsLiked, &cr.CreatedAt,
+			&cr.ID, &cr.ThreadID, &cr.UserID, &cr.UserName, &cr.UserUsername, &cr.UserAvatar, &cr.UserRole,
+			&cr.ParentID, &cr.Content, &cr.LikesCount, &cr.IsLiked, &cr.CreatedAt,
 		); err != nil {
 			return nil, err
 		}

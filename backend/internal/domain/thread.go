@@ -20,6 +20,7 @@ type ThreadComment struct {
 	ID         string    `json:"id"`
 	ThreadID   string    `json:"thread_id"`
 	UserID     string    `json:"user_id"`
+	ParentID   *string   `json:"parent_id"`
 	Content    string    `json:"content"`
 	LikesCount int       `json:"likes_count"`
 	CreatedAt  time.Time `json:"created_at"`
@@ -45,7 +46,8 @@ type CreateThreadRequest struct {
 }
 
 type CreateCommentRequest struct {
-	Content string `json:"content" binding:"required"`
+	Content  string  `json:"content" binding:"required"`
+	ParentID *string `json:"parent_id"`
 }
 
 type ThreadResponse struct {
@@ -79,6 +81,7 @@ type CommentResponse struct {
 	UserUsername *string   `json:"user_username"`
 	UserAvatar   *string   `json:"user_avatar"`
 	UserRole     string    `json:"user_role"`
+	ParentID     *string   `json:"parent_id"`
 	Content      string    `json:"content"`
 	LikesCount   int       `json:"likes_count"`
 	IsLiked      bool      `json:"is_liked"`

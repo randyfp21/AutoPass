@@ -222,6 +222,7 @@ export interface ThreadComment {
   user_username?: string;
   user_avatar?: string;
   user_role: string;
+  parent_id?: string;
   content: string;
   likes_count: number;
   is_liked: boolean;

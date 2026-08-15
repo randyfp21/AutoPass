@@ -138,6 +138,7 @@ func main() {
 		threads.GET("", threadHandler.GetThreads)
 		threads.POST("", threadHandler.CreateThread)
 		threads.GET("/bookmarks", threadHandler.GetBookmarkedThreads)
+		threads.GET("/:id", threadHandler.GetThreadByID)
 		threads.DELETE("/:id", threadHandler.DeleteThread)
 		threads.POST("/:id/like", threadHandler.ToggleLikeThread)
 		threads.POST("/:id/bookmark", threadHandler.ToggleBookmarkThread)

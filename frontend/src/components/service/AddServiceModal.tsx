@@ -28,8 +28,8 @@ interface AddServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: CreateServiceRecordData) => Promise<void>;
-  vehicleCategory: VehicleCategory;
-  currentMileage: number;
+  vehicleCategory?: VehicleCategory;
+  currentMileage?: number;
   vehicles?: Vehicle[];
   onVehicleChange?: (v: Vehicle) => void;
   initialPlanData?: ServicePlanner | null;

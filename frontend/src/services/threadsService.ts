@@ -1,5 +1,5 @@
 import api from './api';
-import type { Thread, ThreadComment, CreateThreadData, NotificationItem } from '../types';
+import type { Thread, CreateThreadData, ThreadComment, NotificationItem } from '../types';
 
 export const threadsService = {
   getThreads: async (category?: string): Promise<Thread[]> => {
@@ -9,22 +9,27 @@ export const threadsService = {
     return res.data || [];
   },
 
+  getThreadById: async (threadId: string): Promise<Thread> => {
+    const res = await api.get<Thread>(`/threads/${threadId}`);
+    return res.data;
+  },
+
   createThread: async (data: CreateThreadData): Promise<Thread> => {
     const res = await api.post<Thread>('/threads', data);
     return res.data;
   },
 
-  deleteThread: async (id: string): Promise<void> => {
-    await api.delete(`/threads/${id}`);
+  deleteThread: async (threadId: string): Promise<void> => {
+    await api.delete(`/threads/${threadId}`);
   },
 
-  toggleLikeThread: async (id: string): Promise<boolean> => {
-    const res = await api.post<{ is_liked: boolean }>(`/threads/${id}/like`);
+  toggleLikeThread: async (threadId: string): Promise<boolean> => {
+    const res = await api.post<{ is_liked: boolean }>(`/threads/${threadId}/like`);
     return res.data.is_liked;
   },
 
-  toggleBookmarkThread: async (id: string): Promise<boolean> => {
-    const res = await api.post<{ is_bookmarked: boolean }>(`/threads/${id}/bookmark`);
+  toggleBookmarkThread: async (threadId: string): Promise<boolean> => {
+    const res = await api.post<{ is_bookmarked: boolean }>(`/threads/${threadId}/bookmark`);
     return res.data.is_bookmarked;
   },
 
@@ -43,8 +48,8 @@ export const threadsService = {
     return res.data || [];
   },
 
-  createComment: async (threadId: string, content: string): Promise<ThreadComment> => {
-    const res = await api.post<ThreadComment>(`/threads/${threadId}/comments`, { content });
+  createComment: async (threadId: string, content: string, parentId?: string): Promise<ThreadComment> => {
+    const res = await api.post<ThreadComment>(`/threads/${threadId}/comments`, { content, parent_id: parentId });
     return res.data;
   },
 
@@ -58,3 +63,5 @@ export const threadsService = {
     return res.data || [];
   },
 };
+
+export default threadsService;

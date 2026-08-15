@@ -28,6 +28,18 @@ func (h *ThreadHandler) GetThreads(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": threads})
 }
 
+func (h *ThreadHandler) GetThreadByID(c *gin.Context) {
+	userID := c.GetString("userID")
+	threadID := c.Param("id")
+
+	thread, err := h.threadUC.GetThreadByID(c.Request.Context(), threadID, userID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "thread not found"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": thread})
+}
+
 func (h *ThreadHandler) CreateThread(c *gin.Context) {
 	userID := c.GetString("userID")
 	var req domain.CreateThreadRequest
