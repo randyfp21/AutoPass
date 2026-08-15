@@ -97,6 +97,13 @@ export function ThreadDetailPage() {
     inputRef.current?.focus();
   };
 
+  const handleNavigateToUser = (username?: string, userId?: string) => {
+    const target = username ? `@${username}` : userId;
+    if (target) {
+      navigate(`/threads/user/${target}`);
+    }
+  };
+
   // Group comments into root comments and nested replies map
   const rootComments = comments.filter((c) => !c.parent_id);
   const repliesMap: Record<string, ThreadComment[]> = {};
@@ -234,21 +241,30 @@ export function ThreadDetailPage() {
                     <div key={comment.id} className="space-y-3">
                       {/* Parent Root Comment Item */}
                       <div className="flex gap-3 text-xs">
-                        {comment.user_avatar ? (
-                          <img
-                            src={comment.user_avatar}
-                            alt={comment.user_name}
-                            className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5"
-                          />
-                        ) : (
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-xs">
-                            {(comment.user_username || comment.user_name).slice(0, 2).toUpperCase()}
-                          </div>
-                        )}
+                        <div
+                          onClick={() => handleNavigateToUser(comment.user_username, comment.user_id)}
+                          className="cursor-pointer shrink-0 mt-0.5 group"
+                          title={`Lihat profil @${comment.user_username || comment.user_name}`}
+                        >
+                          {comment.user_avatar ? (
+                            <img
+                              src={comment.user_avatar}
+                              alt={comment.user_name}
+                              className="w-9 h-9 rounded-full object-cover group-hover:ring-2 group-hover:ring-purple-500 transition-all"
+                            />
+                          ) : (
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-white font-bold flex items-center justify-center text-xs shadow-xs group-hover:scale-105 transition-transform">
+                              {(comment.user_username || comment.user_name).slice(0, 2).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
 
                         <div className="flex-1 space-y-1.5 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
                           <div className="flex items-center justify-between">
-                            <span className="font-extrabold text-slate-900">
+                            <span
+                              onClick={() => handleNavigateToUser(comment.user_username, comment.user_id)}
+                              className="font-extrabold text-slate-900 hover:text-purple-600 cursor-pointer transition-colors"
+                            >
                               @{comment.user_username || comment.user_name}
                             </span>
                             <span className="text-[10px] text-slate-400">
@@ -290,21 +306,30 @@ export function ThreadDetailPage() {
                         <div className="pl-6 sm:pl-10 border-l-2 border-purple-200/80 space-y-3 ml-4">
                           {repliesMap[comment.id].map((reply) => (
                             <div key={reply.id} className="flex gap-2.5 text-xs">
-                              {reply.user_avatar ? (
-                                <img
-                                  src={reply.user_avatar}
-                                  alt={reply.user_name}
-                                  className="w-7 h-7 rounded-full object-cover shrink-0 mt-0.5"
-                                />
-                              ) : (
-                                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">
-                                  {(reply.user_username || reply.user_name).slice(0, 2).toUpperCase()}
-                                </div>
-                              )}
+                              <div
+                                onClick={() => handleNavigateToUser(reply.user_username, reply.user_id)}
+                                className="cursor-pointer shrink-0 mt-0.5 group"
+                                title={`Lihat profil @${reply.user_username || reply.user_name}`}
+                              >
+                                {reply.user_avatar ? (
+                                  <img
+                                    src={reply.user_avatar}
+                                    alt={reply.user_name}
+                                    className="w-7 h-7 rounded-full object-cover group-hover:ring-2 group-hover:ring-purple-500 transition-all"
+                                  />
+                                ) : (
+                                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-bold flex items-center justify-center text-[10px] group-hover:scale-105 transition-transform">
+                                    {(reply.user_username || reply.user_name).slice(0, 2).toUpperCase()}
+                                  </div>
+                                )}
+                              </div>
 
                               <div className="flex-1 space-y-1 bg-purple-50/50 p-3 rounded-2xl border border-purple-100">
                                 <div className="flex items-center justify-between">
-                                  <span className="font-extrabold text-slate-900">
+                                  <span
+                                    onClick={() => handleNavigateToUser(reply.user_username, reply.user_id)}
+                                    className="font-extrabold text-slate-900 hover:text-purple-600 cursor-pointer transition-colors"
+                                  >
                                     @{reply.user_username || reply.user_name}
                                   </span>
                                   <span className="text-[10px] text-slate-400">
