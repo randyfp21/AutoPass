@@ -51,17 +51,17 @@ export function ImageLightboxModal({
   const currentImage = images[currentIndex] || images[0];
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl animate-in fade-in duration-200 select-none flex items-center justify-center">
+    <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-2xl animate-in fade-in duration-200 select-none flex items-center justify-center">
       {/* Backdrop overlay click to close */}
       <div className="absolute inset-0" onClick={onClose} />
 
       {/* Top Header Navigation Overlay */}
-      <div className="fixed top-0 left-0 right-0 z-50 p-4 sm:p-6 bg-gradient-to-b from-slate-950/90 via-slate-950/50 to-transparent flex items-center justify-between pointer-events-none">
+      <div className="fixed top-0 left-0 right-0 z-50 p-4 sm:p-6 bg-gradient-to-b from-slate-950/80 via-slate-950/40 to-transparent flex items-center justify-between pointer-events-none">
         {/* Button Kembali (Left) */}
         <button
           type="button"
           onClick={onClose}
-          className="pointer-events-auto flex items-center gap-2 bg-slate-900/90 hover:bg-slate-800 text-white font-extrabold text-xs sm:text-sm px-4 py-2.5 rounded-full border border-slate-700/80 shadow-2xl transition-all hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md"
+          className="pointer-events-auto flex items-center gap-2 bg-slate-900/80 hover:bg-slate-800 text-white font-extrabold text-xs sm:text-sm px-4 py-2.5 rounded-full border border-slate-700/80 shadow-2xl transition-all hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md"
           title="Kembali ke post (Esc)"
         >
           <ArrowLeft size={18} className="text-purple-400" />
@@ -69,7 +69,7 @@ export function ImageLightboxModal({
         </button>
 
         {/* Counter Badge (Center) */}
-        <span className="pointer-events-auto text-xs font-mono font-extrabold text-slate-200 bg-slate-900/90 px-4 py-2 rounded-full border border-slate-700/80 shadow-xl backdrop-blur-md">
+        <span className="pointer-events-auto text-xs font-mono font-extrabold text-slate-200 bg-slate-900/80 px-4 py-2 rounded-full border border-slate-700/80 shadow-xl backdrop-blur-md">
           Foto {currentIndex + 1} / {images.length}
         </span>
 
@@ -106,7 +106,7 @@ export function ImageLightboxModal({
               e.stopPropagation();
               handlePrev();
             }}
-            className="fixed left-4 top-1/2 -translate-y-1/2 z-50 p-3.5 text-white bg-slate-900/90 hover:bg-purple-600 rounded-full border border-slate-700/80 shadow-2xl transition-all hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
+            className="fixed left-4 top-1/2 -translate-y-1/2 z-50 p-3.5 text-white bg-slate-900/80 hover:bg-purple-600 rounded-full border border-slate-700/80 shadow-2xl transition-all hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
             title="Foto Sebelumnya (←)"
           >
             <ChevronLeft size={24} />
@@ -118,7 +118,7 @@ export function ImageLightboxModal({
               e.stopPropagation();
               handleNext();
             }}
-            className="fixed right-4 top-1/2 -translate-y-1/2 z-50 p-3.5 text-white bg-slate-900/90 hover:bg-purple-600 rounded-full border border-slate-700/80 shadow-2xl transition-all hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
+            className="fixed right-4 top-1/2 -translate-y-1/2 z-50 p-3.5 text-white bg-slate-900/80 hover:bg-purple-600 rounded-full border border-slate-700/80 shadow-2xl transition-all hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
             title="Foto Selanjutnya (→)"
           >
             <ChevronRight size={24} />
@@ -129,7 +129,7 @@ export function ImageLightboxModal({
       {/* Bottom Thumbnail Strip (if multi-photo) */}
       {images.length > 1 && (
         <div
-          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center gap-2 p-2 bg-slate-900/90 border border-slate-800/90 rounded-2xl shadow-2xl backdrop-blur-md max-w-[90vw] overflow-x-auto"
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center gap-2 p-2 bg-slate-900/80 border border-slate-800/90 rounded-2xl shadow-2xl backdrop-blur-md max-w-[90vw] overflow-x-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {images.map((imgUrl, idx) => (
