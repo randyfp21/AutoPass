@@ -22,12 +22,10 @@ export function Navbar() {
   const location = useLocation();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const langDropdownRef = useRef<HTMLDivElement>(null);
 
   const isThreadsMode = location.pathname.startsWith('/threads');
 
@@ -46,9 +44,6 @@ export function Navbar() {
     const handleClick = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
-      }
-      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target as Node)) {
-        setLangDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClick);
@@ -145,52 +140,8 @@ export function Navbar() {
               </div>
             )}
 
-            {/* ── 3. Right Side: Language Selector, Fullscreen & User Profile Dropdown ── */}
+            {/* ── 3. Right Side: Fullscreen & User Profile Dropdown ── */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Language Selector Dropdown */}
-              <div className="relative" ref={langDropdownRef}>
-                <button
-                  onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors border border-slate-200"
-                  aria-label="Language Selector"
-                >
-                  <Globe size={14} className="text-slate-500" />
-                  <span>{language === 'id' ? 'ID 🇮🇩' : 'EN 🇬🇧'}</span>
-                  <ChevronDown size={12} className="text-slate-400" />
-                </button>
-
-                {langDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-44 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-50 text-xs animate-slide-up">
-                    <button
-                      onClick={() => {
-                        setLanguage('id');
-                        setLangDropdownOpen(false);
-                      }}
-                      className={[
-                        'w-full flex items-center justify-between px-3.5 py-2.5 font-medium transition-colors',
-                        language === 'id' ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50',
-                      ].join(' ')}
-                    >
-                      <span>Indonesia 🇮🇩</span>
-                      {language === 'id' && <span>✓</span>}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setLanguage('en');
-                        setLangDropdownOpen(false);
-                      }}
-                      className={[
-                        'w-full flex items-center justify-between px-3.5 py-2.5 font-medium transition-colors border-t border-slate-100',
-                        language === 'en' ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50',
-                      ].join(' ')}
-                    >
-                      <span>English 🇬🇧</span>
-                      {language === 'en' && <span>✓</span>}
-                    </button>
-                  </div>
-                )}
-              </div>
-
               {/* Fullscreen Button */}
               <button
                 onClick={toggleFullscreen}
@@ -232,7 +183,7 @@ export function Navbar() {
 
                   {/* User Dropdown Panel */}
                   {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-60 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden animate-slide-up z-50">
+                    <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden animate-slide-up z-50">
                       <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
                         <p className="text-sm font-semibold text-slate-900 truncate">
                           {user.full_name}
@@ -240,26 +191,67 @@ export function Navbar() {
                         <p className="text-xs text-slate-500 truncate">{user.email}</p>
                       </div>
 
+                      {/* Option 1: Edit Profile */}
                       <div className="py-1 border-b border-slate-100">
                         <button
                           onClick={() => {
                             setDropdownOpen(false);
                             setShowEditProfileModal(true);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors font-semibold"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors font-semibold cursor-pointer"
                         >
                           <Edit3 size={15} className="text-blue-600" />
-                          Edit Profil & Foto
+                          <span>Edit Profil & Foto</span>
                         </button>
                       </div>
 
+                      {/* Option 2: Auto Translate ID / EN (Fitur Beta) */}
+                      <div className="px-4 py-2.5 border-b border-slate-100 bg-slate-50/70 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
+                            <Globe size={14} className="text-blue-600" />
+                            Auto Translate
+                          </span>
+                          <span className="text-[9px] font-black text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-200 uppercase">
+                            fitur beta
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setLanguage('id')}
+                            className={[
+                              'py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-center flex items-center justify-center gap-1',
+                              language === 'id'
+                                ? 'bg-blue-600 text-white shadow-xs'
+                                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100',
+                            ].join(' ')}
+                          >
+                            <span>ID 🇮🇩</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setLanguage('en')}
+                            className={[
+                              'py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-center flex items-center justify-center gap-1',
+                              language === 'en'
+                                ? 'bg-blue-600 text-white shadow-xs'
+                                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100',
+                            ].join(' ')}
+                          >
+                            <span>EN 🇬🇧</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Option 3: Sign Out */}
                       <div className="py-1">
                         <button
                           onClick={handleSignOut}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-red-600 hover:bg-red-50 transition-colors font-semibold"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-red-600 hover:bg-red-50 transition-colors font-semibold cursor-pointer"
                         >
                           <LogOut size={15} />
-                          {t('nav_logout')}
+                          <span>{t('nav_logout')}</span>
                         </button>
                       </div>
                     </div>
