@@ -16,10 +16,14 @@ import {
   Trash2,
   Layers,
   Info,
+  Send,
+  MessageSquare,
 } from 'lucide-react';
 import { maintenanceService } from '../services/maintenanceService';
 import { vehicleService } from '../services/vehicleService';
-import type { Vehicle, ServiceRecord } from '../types';
+import { threadsService } from '../services/threadsService';
+import { Modal } from '../components/common/Modal';
+import type { Vehicle, ServiceRecord, ThreadCategory } from '../types';
 import { formatRupiah, formatMileage, formatDate } from '../utils/formatters';
 
 // ─── Preset Types ─────────────────────────────────────────────────────────────
@@ -320,6 +324,13 @@ export function TelemetryStudioPage() {
   const [showItems, setShowItems] = useState(true);
   const [showWatermark, setShowWatermark] = useState(true);
 
+  // Post to Threads State & Modal
+  const [showPostModal, setShowPostModal] = useState(false);
+  const [postCaption, setPostCaption] = useState('');
+  const [postCategory, setPostCategory] = useState<ThreadCategory>('pengalaman');
+  const [canvasDataUrl, setCanvasDataUrl] = useState('');
+  const [isPosting, setIsPosting] = useState(false);
+
   // Fetch Service & Vehicle Data
   useEffect(() => {
     if (!serviceId) return;
@@ -419,6 +430,44 @@ export function TelemetryStudioPage() {
     }, 'image/png');
   };
 
+  // Open Direct Post to Odo Threads Modal
+  const handleOpenPostModal = () => {
+    const canvas = canvasRef.current;
+    if (!canvas || !vehicle || !record) return;
+    const url = canvas.toDataURL('image/png');
+    setCanvasDataUrl(url);
+
+    const nicknameText = vehicle.nickname ? vehicle.nickname : vehicle.model;
+    const wName = record.workshop_name_manual || (record.is_official_workshop ? 'Bengkel Resmi Partner' : 'DIY Maintenance');
+    const defaultCaption = `Wah Perjalanan ${nicknameText} sudah ${formatMileage(record.mileage_at_service)} KM!\nWaktunya service rutin ! 🛠️\n\n📍 ${wName}\n💰 ${nicknameText} Jajan ${formatRupiah(record.total_cost)}\n\n#OdoThreads #AutoPass #VehicleTelemetry`;
+
+    setPostCaption(defaultCaption);
+    setShowPostModal(true);
+  };
+
+  // Submit Direct Post to Odo Threads API
+  const handlePostToThreadsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!postCaption.trim() || !canvasDataUrl) return;
+
+    setIsPosting(true);
+    try {
+      const newThread = await threadsService.createThread({
+        vehicle_id: vehicle?.id,
+        content: postCaption,
+        photo_urls: [canvasDataUrl],
+        category: postCategory,
+      });
+
+      setShowPostModal(false);
+      navigate(`/threads/${newThread.id}`);
+    } catch {
+      setError('Gagal memposting ke Odo Threads');
+    } finally {
+      setIsPosting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center p-8 bg-slate-50 text-slate-800">
@@ -476,18 +525,27 @@ export function TelemetryStudioPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={handleDownload}
-            className="py-2 px-3.5 bg-white hover:bg-slate-100 text-slate-800 rounded-full text-xs font-extrabold flex items-center gap-1.5 border border-slate-200 shadow-2xs transition-all cursor-pointer"
+            className="py-2 px-3 bg-white hover:bg-slate-100 text-slate-800 rounded-full text-xs font-extrabold flex items-center gap-1.5 border border-slate-200 shadow-2xs transition-all cursor-pointer"
           >
             <Download size={14} />
-            <span className="hidden sm:inline">Download PNG</span>
+            <span className="hidden sm:inline">PNG</span>
           </button>
 
           <button
             onClick={handleShare}
-            className="py-2 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-full text-xs font-extrabold flex items-center gap-1.5 shadow-md transition-all cursor-pointer"
+            className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-full text-xs font-extrabold flex items-center gap-1.5 border border-slate-200 shadow-2xs transition-all cursor-pointer"
           >
             <Share2 size={14} />
-            <span>Bagikan Story</span>
+            <span className="hidden sm:inline">Bagikan</span>
+          </button>
+
+          {/* 🚀 Direct Post to Odo Threads Logo Button */}
+          <button
+            onClick={handleOpenPostModal}
+            className="py-2 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-full text-xs font-black flex items-center gap-1.5 shadow-md transition-all cursor-pointer"
+          >
+            <Send size={14} />
+            <span>Post ke Threads</span>
           </button>
         </div>
       </div>
@@ -537,10 +595,16 @@ export function TelemetryStudioPage() {
             )}
           </div>
 
-          {/* Bottom Quick Studio Info */}
-          <div className="pt-2 flex items-center justify-between text-xs text-slate-500 font-medium">
-            <span>Resolusi Tinggi HD (1080p Export)</span>
-            <span className="text-purple-600 font-bold">Siap Dicetak & Bagikan</span>
+          {/* Bottom Quick Studio Info & Direct Post Trigger */}
+          <div className="pt-2 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <span className="text-slate-500 font-medium">Resolusi Tinggi HD (1080p Export)</span>
+            <button
+              onClick={handleOpenPostModal}
+              className="py-2 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-full font-extrabold flex items-center gap-1.5 cursor-pointer shadow-xs"
+            >
+              <Send size={13} className="text-blue-400" />
+              <span>Langsung Post ke Odo Threads 🚀</span>
+            </button>
           </div>
         </div>
 
@@ -750,6 +814,89 @@ export function TelemetryStudioPage() {
           </div>
         </div>
       </div>
+
+      {/* 🚀 Direct Post to Odo Threads Modal */}
+      {showPostModal && (
+        <Modal
+          isOpen={showPostModal}
+          onClose={() => setShowPostModal(false)}
+          title="🚀 Posting Langsung ke Odo Threads"
+          size="md"
+        >
+          <form onSubmit={handlePostToThreadsSubmit} className="space-y-4">
+            {/* Story Image Preview */}
+            {canvasDataUrl && (
+              <div className="relative h-56 bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center shadow-md">
+                <img src={canvasDataUrl} alt="Pratinjau Telemetri Story" className="h-full object-contain" />
+                <span className="absolute top-2 right-2 text-[10px] font-black text-white bg-blue-600 px-2.5 py-1 rounded-full shadow">
+                  ✨ Auto Telemetry Story
+                </span>
+              </div>
+            )}
+
+            {/* Category Selector */}
+            <div>
+              <label className="block text-xs font-extrabold text-slate-700 mb-1.5">
+                Pilih Kategori Diskusi Threads
+              </label>
+              <select
+                value={postCategory}
+                onChange={(e) => setPostCategory(e.target.value as ThreadCategory)}
+                className="input-field text-sm"
+              >
+                <option value="pengalaman">💬 Pengalaman Servis</option>
+                <option value="tips">💡 Tips Perawatan</option>
+                <option value="modifikasi">🔧 Modifikasi & Upgrades</option>
+                <option value="general">🌐 Beranda Umum</option>
+                <option value="kendala">⚠️ Kendala & Perbaikan</option>
+              </select>
+            </div>
+
+            {/* Caption Textarea */}
+            <div>
+              <label className="block text-xs font-extrabold text-slate-700 mb-1.5">
+                Caption Thread Anda <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                rows={5}
+                required
+                className="input-field text-sm resize-none"
+                placeholder="Tuliskan pengalaman servis atau cerita kendaraan Anda..."
+                value={postCaption}
+                onChange={(e) => setPostCaption(e.target.value)}
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowPostModal(false)}
+                className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="submit"
+                disabled={isPosting || !postCaption.trim()}
+                className="py-2.5 px-5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {isPosting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Posting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send size={14} />
+                    <span>Posting Sekarang ke Threads 🚀</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 }
