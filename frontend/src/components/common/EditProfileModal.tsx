@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { User, Mail, Camera, Trash2, AlertCircle, Check } from 'lucide-react';
+import { User, Mail, Camera, Trash2, AlertCircle, Check, AtSign } from 'lucide-react';
 import { Modal } from './Modal';
 import { Button } from './Button';
 import type { User as UserType } from '../../types';
@@ -86,6 +86,7 @@ export function EditProfileModal({
   const initialPhone = parsePhone(user.phone_number);
 
   const [fullName, setFullName] = useState(user.full_name || '');
+  const [username, setUsername] = useState((user.username || '').replace(/^@/, ''));
   const [countryCode, setCountryCode] = useState(initialPhone.code);
   const [phoneDigits, setPhoneDigits] = useState(initialPhone.digits);
   const [avatarUrl, setAvatarUrl] = useState<string>(user.avatar_url || '');
@@ -130,10 +131,12 @@ export function EditProfileModal({
     setError('');
 
     const formattedPhone = phoneDigits.trim() ? `${countryCode}${phoneDigits.trim()}` : undefined;
+    const cleanUsername = username.trim().toLowerCase().replace(/^@/, '');
 
     try {
       const updated = await authService.updateProfile({
         full_name: fullName.trim(),
+        username: cleanUsername || undefined,
         phone_number: formattedPhone,
         avatar_url: avatarUrl || undefined,
       });
@@ -187,7 +190,7 @@ export function EditProfileModal({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="absolute bottom-0 right-0 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition-transform hover:scale-105"
+              className="absolute bottom-0 right-0 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition-transform hover:scale-105 cursor-pointer"
               title="Upload / Ubah Foto Profil"
             >
               <Camera size={16} />
@@ -206,7 +209,7 @@ export function EditProfileModal({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="font-semibold text-blue-600 hover:underline"
+              className="font-semibold text-blue-600 hover:underline cursor-pointer"
             >
               📷 Upload Foto
             </button>
@@ -216,13 +219,35 @@ export function EditProfileModal({
                 <button
                   type="button"
                   onClick={handleRemoveAvatar}
-                  className="font-semibold text-red-600 hover:underline flex items-center gap-1"
+                  className="font-semibold text-red-600 hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <Trash2 size={12} /> Hapus
                 </button>
               </>
             )}
           </div>
+        </div>
+
+        {/* Username Input (@handle) */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">
+            Username (@handle)
+          </label>
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-extrabold text-xs select-none">
+              @
+            </div>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g, ''))}
+              className="input-field pl-7 text-xs font-mono font-extrabold text-purple-700"
+              placeholder="dnazrl"
+            />
+          </div>
+          <p className="mt-1 text-[11px] text-slate-400">
+            Username unik untuk profil Anda di Odo Threads (contoh: @dnazrl)
+          </p>
         </div>
 
         {/* Full Name Input */}
@@ -258,7 +283,7 @@ export function EditProfileModal({
           </div>
         </div>
 
-        {/* Phone Number Input with Greyed-out Country Code Badge */}
+        {/* Phone Number Input with Country Code Selector */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
             Nomor Telepon / WhatsApp

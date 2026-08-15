@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { MessageSquare, Mail, ArrowLeft, AtSign, User as UserIcon } from 'lucide-react';
+import { MessageSquare, Mail, ArrowLeft, AtSign, User as UserIcon, Edit3 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { threadsService } from '../services/threadsService';
 import { ThreadCard } from '../components/threads/ThreadCard';
 import { ThreadComposerModal } from '../components/threads/ThreadComposerModal';
 import { CommentSheet } from '../components/threads/CommentSheet';
-import { ThreadsBottomNav } from '../components/threads/ThreadsBottomNav';
+import { EditProfileModal } from '../components/common/EditProfileModal';
 import type { Thread } from '../types';
 
 export function UserProfilePage() {
   const params = useParams<{ id?: string; identifier?: string; '*': string }>();
   const location = useLocation();
   const navigate = useNavigate();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, setUser: setCurrentUser } = useAuth();
 
   const [threads, setThreads] = useState<Thread[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showComposerModal, setShowComposerModal] = useState(false);
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [selectedThreadForComment, setSelectedThreadForComment] = useState<Thread | null>(null);
 
   // Safely extract & decode identifier (e.g., %40dnazrl -> @dnazrl)
@@ -86,14 +87,26 @@ export function UserProfilePage() {
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={() => navigate('/threads')}
-              className="flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors"
+              className="flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
             >
               <ArrowLeft size={16} /> Kembali ke Feed
             </button>
 
-            <span className="bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full border border-purple-200">
-              Profil Komunitas
-            </span>
+            <div className="flex items-center gap-2">
+              {isOwnProfile && currentUser && (
+                <button
+                  type="button"
+                  onClick={() => setShowEditProfileModal(true)}
+                  className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold px-3 py-1.5 rounded-full shadow-xs transition-all cursor-pointer active:scale-95"
+                >
+                  <Edit3 size={13} /> Edit Profil
+                </button>
+              )}
+
+              <span className="bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full border border-purple-200">
+                Profil Komunitas
+              </span>
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
@@ -169,8 +182,6 @@ export function UserProfilePage() {
         )}
       </div>
 
-      <ThreadsBottomNav onOpenNewThreadModal={() => setShowComposerModal(true)} />
-
       <ThreadComposerModal
         isOpen={showComposerModal}
         onClose={() => setShowComposerModal(false)}
@@ -183,6 +194,18 @@ export function UserProfilePage() {
         onClose={() => setSelectedThreadForComment(null)}
         thread={selectedThreadForComment}
       />
+
+      {currentUser && (
+        <EditProfileModal
+          isOpen={showEditProfileModal}
+          onClose={() => setShowEditProfileModal(false)}
+          user={currentUser}
+          onProfileUpdated={(updatedUser) => {
+            setCurrentUser(updatedUser);
+            fetchUserThreads();
+          }}
+        />
+      )}
     </div>
   );
 }

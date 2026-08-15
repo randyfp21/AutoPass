@@ -46,7 +46,12 @@ export async function login(data: LoginData): Promise<AuthResponse> {
   return response.data;
 }
 
-export async function updateProfile(data: { full_name: string; phone_number?: string; avatar_url?: string }): Promise<User> {
+export async function updateProfile(data: {
+  full_name: string;
+  username?: string;
+  phone_number?: string;
+  avatar_url?: string;
+}): Promise<User> {
   const response = await api.put<User>('/auth/profile', data);
   const updatedUser = response.data;
   localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
