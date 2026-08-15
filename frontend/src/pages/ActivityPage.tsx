@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Sparkles, Calendar, Wrench, CheckCircle, Plus, Eye, Receipt, Flame } from 'lucide-react';
 import { vehicleService } from '../services/vehicleService';
 import { maintenanceService } from '../services/maintenanceService';
@@ -13,6 +14,7 @@ import { formatRupiah, formatDate, formatMileage } from '../utils/formatters';
 import { useTranslation } from '../context/LanguageContext';
 
 export function ActivityPage() {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [planners, setPlanners] = useState<ServicePlanner[]>([]);
@@ -276,9 +278,9 @@ export function ActivityPage() {
                     <Button
                       variant="primary"
                       size="sm"
-                      className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold border-none shadow-xs"
+                      className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold border-none shadow-xs"
                       leftIcon={<Flame size={14} />}
-                      onClick={() => setShareModalData({ record, vehicle })}
+                      onClick={() => navigate(`/services/${record.id}/story`)}
                     >
                       ✨ {t('act_button_share_genz')}
                     </Button>
