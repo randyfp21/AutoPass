@@ -84,14 +84,14 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 overflow-y-auto flex min-h-full items-center justify-center p-3 sm:p-6 text-center select-none"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in z-0"
         onClick={closeOnBackdrop ? onClose : undefined}
         aria-hidden="true"
       />
@@ -100,38 +100,38 @@ export function Modal({
       <div
         ref={dialogRef}
         className={[
-          'relative w-full bg-white rounded-2xl shadow-[var(--shadow-modal)]',
-          'flex flex-col max-h-[90vh]',
-          'animate-slide-up',
+          'relative w-full bg-white rounded-3xl shadow-2xl border border-slate-200/90',
+          'flex flex-col my-auto max-h-[84vh] sm:max-h-[88vh]',
+          'animate-slide-up z-10 text-left overflow-hidden select-text',
           sizeClasses[size],
         ].join(' ')}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
+        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100 shrink-0 bg-white">
           <h2
             id="modal-title"
-            className="text-lg font-semibold text-slate-900 font-[family-name:var(--font-family-sans)]"
+            className="text-base sm:text-lg font-bold text-slate-900 font-sans tracking-tight"
           >
             {title}
           </h2>
           <button
             ref={firstFocusableRef}
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
             aria-label="Close modal"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {/* Scrollable Body */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 min-h-0">
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 min-h-0">
           {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 rounded-b-2xl shrink-0">
+          <div className="px-5 sm:px-6 py-4 border-t border-slate-100 bg-slate-50/80 rounded-b-3xl shrink-0">
             {footer}
           </div>
         )}
