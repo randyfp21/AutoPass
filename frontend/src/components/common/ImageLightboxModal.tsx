@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ImageLightboxModalProps {
   isOpen: boolean;
@@ -52,31 +52,45 @@ export function ImageLightboxModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-between p-4 bg-slate-950/92 backdrop-blur-md animate-in fade-in duration-200 select-none"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-between p-3 sm:p-5 bg-slate-950/94 backdrop-blur-md animate-in fade-in duration-200 select-none"
       onClick={onClose}
     >
-      {/* Top Bar: Counter & Close Button */}
+      {/* Top Bar: Button Kembali (Left), Counter (Center), Button Tutup (Right) */}
       <div
-        className="w-full max-w-5xl flex items-center justify-between pt-2 px-2 z-10"
+        className="w-full max-w-5xl flex items-center justify-between pt-1 px-1 z-10"
         onClick={(e) => e.stopPropagation()}
       >
-        <span className="text-xs font-extrabold text-slate-300 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700/60 shadow-xs font-mono">
-          Foto {currentIndex + 1} dari {images.length}
-        </span>
-
+        {/* Tombol Kembali / Back */}
         <button
           type="button"
           onClick={onClose}
-          className="p-2 text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 rounded-full border border-slate-700/60 shadow-lg transition-transform active:scale-95 cursor-pointer"
+          className="flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700 text-white text-xs font-extrabold px-3.5 py-2 rounded-full border border-slate-700/80 shadow-lg cursor-pointer transition-all active:scale-95"
+          title="Kembali (Esc)"
+        >
+          <ArrowLeft size={16} />
+          <span>Kembali</span>
+        </button>
+
+        {/* Counter Chip */}
+        <span className="text-xs font-extrabold text-slate-300 bg-slate-800/80 px-3.5 py-1.5 rounded-full border border-slate-700/60 shadow-xs font-mono">
+          Foto {currentIndex + 1} dari {images.length}
+        </span>
+
+        {/* Tombol Close / Tutup */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex items-center gap-1.5 bg-red-600/90 hover:bg-red-600 text-white text-xs font-extrabold px-3.5 py-2 rounded-full border border-red-500/80 shadow-lg cursor-pointer transition-all active:scale-95"
           title="Tutup (Esc)"
         >
-          <X size={20} />
+          <X size={16} />
+          <span className="hidden sm:inline">Tutup</span>
         </button>
       </div>
 
       {/* Center Image Container */}
       <div
-        className="relative flex-1 w-full max-w-5xl flex items-center justify-center my-4 overflow-hidden"
+        className="relative flex-1 w-full max-w-5xl flex items-center justify-center my-3 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {images.length > 1 && (
