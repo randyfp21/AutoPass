@@ -1,0 +1,317 @@
+import React, { useState, useRef } from 'react';
+import { User, Mail, Camera, Trash2, AlertCircle, Check } from 'lucide-react';
+import { Modal } from './Modal';
+import { Button } from './Button';
+import type { User as UserType } from '../../types';
+import { authService } from '../../services/authService';
+
+interface EditProfileModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  user: UserType;
+  onProfileUpdated: (updatedUser: UserType) => void;
+}
+
+function compressAvatarImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 400;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height = Math.round((height * MAX_SIZE) / width);
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width = Math.round((width * MAX_SIZE) / height);
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(e.target?.result as string);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressed = canvas.toDataURL('image/jpeg', 0.85);
+        resolve(compressed);
+      };
+      img.onerror = reject;
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+const COUNTRY_CODES = [
+  { code: '+62', flag: '🇮🇩', label: 'Indonesia (+62)' },
+  { code: '+60', flag: '🇲🇾', label: 'Malaysia (+60)' },
+  { code: '+65', flag: '🇸🇬', label: 'Singapore (+65)' },
+  { code: '+1', flag: '🇺🇸', label: 'United States (+1)' },
+  { code: '+61', flag: '🇦🇺', label: 'Australia (+61)' },
+  { code: '+81', flag: '🇯🇵', label: 'Japan (+81)' },
+];
+
+export function EditProfileModal({
+  isOpen,
+  onClose,
+  user,
+  onProfileUpdated,
+}: EditProfileModalProps) {
+  // Parse initial phone number into country code & digits
+  const parsePhone = (rawPhone?: string) => {
+    if (!rawPhone) return { code: '+62', digits: '' };
+    for (const c of COUNTRY_CODES) {
+      if (rawPhone.startsWith(c.code)) {
+        return { code: c.code, digits: rawPhone.slice(c.code.length) };
+      }
+    }
+    if (rawPhone.startsWith('0')) {
+      return { code: '+62', digits: rawPhone.slice(1) };
+    }
+    return { code: '+62', digits: rawPhone };
+  };
+
+  const initialPhone = parsePhone(user.phone_number);
+
+  const [fullName, setFullName] = useState(user.full_name || '');
+  const [countryCode, setCountryCode] = useState(initialPhone.code);
+  const [phoneDigits, setPhoneDigits] = useState(initialPhone.digits);
+  const [avatarUrl, setAvatarUrl] = useState<string>(user.avatar_url || '');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError('File harus berupa gambar (JPG/PNG/WebP)');
+      return;
+    }
+
+    try {
+      const compressed = await compressAvatarImage(file);
+      setAvatarUrl(compressed);
+      setError('');
+    } catch (err) {
+      console.error('Failed to compress avatar:', err);
+      setError('Gagal memproses foto. Coba lagi.');
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarUrl('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fullName.trim()) {
+      setError('Nama lengkap wajib diisi');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    const formattedPhone = phoneDigits.trim() ? `${countryCode}${phoneDigits.trim()}` : undefined;
+
+    try {
+      const updated = await authService.updateProfile({
+        full_name: fullName.trim(),
+        phone_number: formattedPhone,
+        avatar_url: avatarUrl || undefined,
+      });
+
+      onProfileUpdated(updated);
+      onClose();
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
+        'Gagal memperbarui profil. Coba lagi.';
+      setError(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="👤 Edit Profil Saya" size="sm">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
+            <AlertCircle size={15} className="shrink-0" />
+            {error}
+          </div>
+        )}
+
+        {/* Avatar Upload Area */}
+        <div className="flex flex-col items-center justify-center pt-2 pb-4 border-b border-slate-100">
+          <div className="relative group">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={fullName}
+                className="w-24 h-24 rounded-full object-cover border-4 border-blue-100 shadow-md"
+              />
+            ) : (
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-extrabold text-2xl flex items-center justify-center border-4 border-blue-100 shadow-md">
+                {getInitials(fullName || 'User')}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute bottom-0 right-0 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition-transform hover:scale-105"
+              title="Upload / Ubah Foto Profil"
+            >
+              <Camera size={16} />
+            </button>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarFileChange}
+            />
+          </div>
+
+          <div className="flex items-center gap-2 mt-3 text-xs">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="font-semibold text-blue-600 hover:underline"
+            >
+              📷 Upload Foto
+            </button>
+            {avatarUrl && (
+              <>
+                <span className="text-slate-300">•</span>
+                <button
+                  type="button"
+                  onClick={handleRemoveAvatar}
+                  className="font-semibold text-red-600 hover:underline flex items-center gap-1"
+                >
+                  <Trash2 size={12} /> Hapus
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Full Name Input */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">
+            Nama Lengkap
+          </label>
+          <div className="relative">
+            <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="input-field pl-10 text-xs font-medium"
+              placeholder="Nama lengkap Anda"
+            />
+          </div>
+        </div>
+
+        {/* Email Input (Read-only) */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">
+            Email (Terverifikasi)
+          </label>
+          <div className="relative">
+            <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="email"
+              value={user.email}
+              disabled
+              className="input-field pl-10 text-xs font-medium bg-slate-100 text-slate-500 cursor-not-allowed"
+            />
+          </div>
+        </div>
+
+        {/* Phone Number Input with Greyed-out Country Code Badge */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">
+            Nomor Telepon / WhatsApp
+          </label>
+          <div className="flex items-center border border-slate-300 rounded-xl overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 bg-white">
+            <div className="bg-slate-100 border-r border-slate-200 text-slate-700 font-extrabold text-xs px-2.5 py-2.5 flex items-center shrink-0">
+              <select
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                className="bg-transparent font-bold text-slate-800 cursor-pointer outline-none text-xs"
+              >
+                {COUNTRY_CODES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.flag} {c.code}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <input
+              type="tel"
+              value={phoneDigits}
+              onChange={(e) => {
+                let val = e.target.value.replace(/[^0-9]/g, '');
+                if (val.startsWith('0')) val = val.slice(1);
+                setPhoneDigits(val);
+              }}
+              className="flex-1 py-2 px-3 text-xs font-medium border-0 focus:outline-none text-slate-900 placeholder:text-slate-400 font-mono"
+              placeholder="85780336399"
+            />
+          </div>
+          <p className="mt-1 text-[11px] text-slate-400">
+            Ketik nomor tanpa angka 0 di depan (contoh: 85780336399)
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <Button type="button" variant="ghost" size="md" onClick={onClose}>
+            Batal
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            size="md"
+            isLoading={isLoading}
+            leftIcon={<Check size={16} />}
+          >
+            Simpan Perubahan
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
+export default EditProfileModal;

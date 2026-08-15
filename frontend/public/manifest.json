@@ -1,0 +1,20 @@
+{
+  "short_name": "Odomtr",
+  "name": "Odomtr - Digital Vehicle Passport",
+  "description": "Passport Digital Kendaraan - Service Tracker & Digital Passport",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%232563EB'/><text x='50%' y='68%' font-size='65' text-anchor='middle' fill='white'>🚗</text></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0F172A",
+  "theme_color": "#2563EB",
+  "prefer_related_applications": false
+}
