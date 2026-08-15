@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   ChevronRight,
   Star,
+  Lock,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -136,6 +137,9 @@ export function LandingPage() {
             <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-xs text-slate-500 font-semibold">
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 size={15} className="text-emerald-500" /> 100% Gratis & Transparan
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Lock size={14} className="text-blue-600" /> End-to-End Encrypted Data & Privasi Terjaga
               </span>
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 size={15} className="text-emerald-500" /> PWA Desktop & Mobile Ready
@@ -382,6 +386,22 @@ export function LandingPage() {
                   Dapat dipasang di HP Android, iOS, maupun laptop PC/Mac secara cepat tanpa perlu mendownload dari App Store.
                 </p>
               </div>
+            </div>
+
+            {/* Feature 7: End-to-End Encrypted Data & Privasi */}
+            <div className="bg-gradient-to-r from-slate-900 to-blue-950 text-white border border-slate-800 rounded-3xl p-6 space-y-3 shadow-lg md:col-span-2 lg:col-span-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/30 shadow-xs">
+                  <Lock size={24} />
+                </div>
+                <div>
+                  <h3 className="font-black text-white text-lg">7. Data Anda, Privasi Anda (End-to-End Encrypted Data)</h3>
+                  <p className="text-xs font-mono font-bold text-blue-400">100% Encrypted Personal & Vehicle Data Protection</p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed font-normal pt-1">
+                Seluruh informasi kendaraan, dokumen struk servis, dan data profil pribadi Anda dilindungi secara maksimal dengan teknologi enkripsi canggih (End-to-End Encrypted). Karakter plat nomor secara default disembunyikan untuk privasi penuh Anda saat berbagi ke media sosial.
+              </p>
             </div>
           </div>
         </div>
