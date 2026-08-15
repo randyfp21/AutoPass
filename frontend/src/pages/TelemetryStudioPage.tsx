@@ -514,19 +514,19 @@ export function TelemetryStudioPage() {
             </span>
           </div>
 
-          {/* Dark Glass Canvas Studio Viewport Box */}
-          <div className="relative bg-slate-950 rounded-2xl p-4 sm:p-6 border border-slate-800 shadow-2xl flex items-center justify-center min-h-[440px] max-h-[600px] w-full overflow-hidden group">
+          {/* Dark Glass Canvas Studio Viewport Box - Expanded Large Display */}
+          <div className="relative bg-slate-950 rounded-2xl p-4 sm:p-8 border border-slate-800 shadow-2xl flex items-center justify-center min-h-[580px] sm:min-h-[700px] lg:min-h-[780px] w-full overflow-hidden group">
             <canvas
               ref={canvasRef}
-              className="rounded-xl shadow-2xl max-h-[520px] max-w-full object-contain transition-transform duration-300 transform-gpu group-hover:scale-[1.01]"
+              className="rounded-2xl shadow-2xl max-h-[720px] sm:max-h-[760px] w-auto max-w-full object-contain transition-transform duration-300 transform-gpu group-hover:scale-[1.01]"
             />
 
             {/* Helper Floating Badge when 0 Photos */}
             {loadedImages.length === 0 && (
-              <div className="absolute bottom-4 inset-x-6 text-center">
-                <div className="inline-flex items-center gap-2 text-[11px] font-bold text-slate-300 bg-slate-900/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-slate-700 shadow-lg">
-                  <Info size={14} className="text-amber-400 shrink-0" />
-                  <span>Tekan "📷 Kamera" atau "🖼️ Galeri" untuk menambah foto kolase</span>
+              <div className="absolute bottom-6 inset-x-6 text-center">
+                <div className="inline-flex items-center gap-2 text-xs font-bold text-slate-200 bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-full border border-slate-700 shadow-xl">
+                  <Info size={16} className="text-amber-400 shrink-0" />
+                  <span>Tekan "📷 Kamera" atau "🖼️ Galeri" untuk menambahkan foto kendaraan</span>
                 </div>
               </div>
             )}
