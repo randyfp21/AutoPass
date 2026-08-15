@@ -4,6 +4,7 @@ import { Button } from '../common/Button';
 import { Image as ImageIcon, Camera, Trash2, Car, Sparkles, AlertCircle, Tag } from 'lucide-react';
 import type { Vehicle, ThreadCategory } from '../../types';
 import { threadsService } from '../../services/threadsService';
+import { compressImage } from '../../utils/imageCompressor';
 
 interface ThreadComposerModalProps {
   isOpen: boolean;
@@ -27,7 +28,7 @@ export function ThreadComposerModal({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -38,16 +39,16 @@ export function ThreadComposerModal({
 
     const fileArray = Array.from(files).slice(0, 5 - photoUrls.length);
 
-    fileArray.forEach((file) => {
-      if (!file.type.startsWith('image/')) return;
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const dataUrl = event.target?.result as string;
-        setPhotoUrls((prev) => [...prev, dataUrl].slice(0, 5));
-      };
-      reader.readAsDataURL(file);
-    });
+    try {
+      const compressedList = await Promise.all(
+        fileArray.map((file) => compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.82 }))
+      );
+      setPhotoUrls((prev) => [...prev, ...compressedList].slice(0, 5));
+      setError('');
+    } catch (err) {
+      console.error('Failed to compress image:', err);
+      setError('Gagal memproses beberapa foto. Coba lagi.');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -124,7 +125,7 @@ export function ThreadComposerModal({
           </select>
         </div>
 
-        {/* Optional Vehicle Tag Selector (Privacy Format: 🏍️ Motor · Yamaha Mio (2021) - 100cc) */}
+        {/* Optional Vehicle Tag Selector */}
         {vehicles.length > 0 && (
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, MessageSquare, Bookmark, Trash2, Car, Share2, Check, AlertTriangle, X } from 'lucide-react';
+import { Heart, MessageSquare, Bookmark, Trash2, Car, Share2, Check, AlertTriangle, Maximize2 } from 'lucide-react';
 import type { Thread } from '../../types';
 import { threadsService } from '../../services/threadsService';
 import { timeAgo } from '../../utils/formatters';
+import { ImageLightboxModal } from '../common/ImageLightboxModal';
 
 interface ThreadCardProps {
   thread: Thread;
@@ -23,6 +24,13 @@ export function ThreadCard({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+
+  // Lightbox Modal state
+  const [showLightbox, setShowLightbox] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  // Single image aspect-ratio detection (landscape, portrait, square)
+  const [aspectType, setAspectType] = useState<'landscape' | 'portrait' | 'square'>('landscape');
 
   const handleLike = async () => {
     try {
@@ -81,6 +89,11 @@ export function ThreadCard({
     }
   };
 
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setShowLightbox(true);
+  };
+
   const navigateToUserProfile = () => {
     const target = thread.user_username ? `@${thread.user_username}` : thread.user_id;
     navigate(`/threads/user/${target}`);
@@ -100,6 +113,13 @@ export function ThreadCard({
 
   const categoryBadge = categoryBadgeMap[thread.category] || categoryBadgeMap.general;
   const usernameDisplay = `@${thread.user_username || 'user'}`;
+
+  // Helper for single image container aspect ratio class
+  const getSingleImageAspectClass = () => {
+    if (aspectType === 'portrait') return 'aspect-[3/4] max-h-[440px]';
+    if (aspectType === 'square') return 'aspect-square max-h-[380px]';
+    return 'aspect-video max-h-[380px]'; // landscape
+  };
 
   return (
     <>
@@ -154,7 +174,7 @@ export function ThreadCard({
           </div>
         </div>
 
-        {/* Privacy Protected Vehicle Tag (Category, Brand, Model, Variant ONLY - NO License Plate) */}
+        {/* Privacy Protected Vehicle Tag */}
         {thread.vehicle_name && (
           <div className="inline-flex items-center gap-2 bg-purple-50/70 border border-purple-200/60 px-3 py-1 rounded-xl text-xs text-purple-900 font-semibold shadow-2xs">
             <Car size={14} className="text-purple-600 shrink-0" />
@@ -167,28 +187,145 @@ export function ThreadCard({
           {thread.content}
         </p>
 
-        {/* Multi-Photo Carousel Grid (Up to 5 photos) */}
+        {/* Adaptive Photo Grid & Aspect Ratio System */}
         {thread.photo_urls && thread.photo_urls.length > 0 && (
-          <div
-            className={[
-              'grid gap-2 rounded-2xl overflow-hidden border border-slate-200',
-              thread.photo_urls.length === 1
-                ? 'grid-cols-1 max-h-80'
-                : thread.photo_urls.length === 2
-                ? 'grid-cols-2 max-h-64'
-                : 'grid-cols-3 max-h-56',
-            ].join(' ')}
-          >
-            {thread.photo_urls.map((photoUrl, idx) => (
-              <div key={idx} className="relative overflow-hidden bg-slate-900 h-full min-h-[140px]">
+          <div className="rounded-2xl overflow-hidden border border-slate-200/90 shadow-2xs bg-slate-950">
+            {/* Case 1: Single Image (Landscape / Portrait / Square adaptive detection) */}
+            {thread.photo_urls.length === 1 && (
+              <div
+                className={`relative w-full ${getSingleImageAspectClass()} group cursor-pointer overflow-hidden flex items-center justify-center`}
+                onClick={() => openLightbox(0)}
+              >
                 <img
-                  src={photoUrl}
-                  alt={`Media ${idx + 1}`}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
-                  onClick={() => window.open(photoUrl, '_blank')}
+                  src={thread.photo_urls[0]}
+                  alt="Post media"
+                  onLoad={(e) => {
+                    const img = e.currentTarget;
+                    const ratio = img.naturalWidth / img.naturalHeight;
+                    if (ratio > 1.15) setAspectType('landscape');
+                    else if (ratio < 0.88) setAspectType('portrait');
+                    else setAspectType('square');
+                  }}
+                  className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300"
                 />
+                <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <span className="bg-slate-900/80 text-white text-xs font-extrabold px-3 py-1.5 rounded-full border border-slate-700/80 flex items-center gap-1.5 shadow-lg">
+                    <Maximize2 size={13} /> Perbesar Foto
+                  </span>
+                </div>
               </div>
-            ))}
+            )}
+
+            {/* Case 2: 2 Images (Side-by-Side 50%-50%) */}
+            {thread.photo_urls.length === 2 && (
+              <div className="grid grid-cols-2 gap-1 aspect-video sm:aspect-[16/9] max-h-[320px]">
+                {thread.photo_urls.map((photoUrl, idx) => (
+                  <div
+                    key={idx}
+                    className="relative w-full h-full group cursor-pointer overflow-hidden"
+                    onClick={() => openLightbox(idx)}
+                  >
+                    <img
+                      src={photoUrl}
+                      alt={`Media ${idx + 1}`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Maximize2 size={18} className="text-white drop-shadow-md" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Case 3: 3 Images (1 Hero Left, 2 Stacked Right) */}
+            {thread.photo_urls.length === 3 && (
+              <div className="grid grid-cols-3 gap-1 max-h-[320px] aspect-video">
+                <div
+                  className="col-span-2 relative h-full group cursor-pointer overflow-hidden"
+                  onClick={() => openLightbox(0)}
+                >
+                  <img
+                    src={thread.photo_urls[0]}
+                    alt="Media 1"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Maximize2 size={18} className="text-white drop-shadow-md" />
+                  </div>
+                </div>
+
+                <div className="col-span-1 grid grid-rows-2 gap-1 h-full">
+                  {thread.photo_urls.slice(1, 3).map((photoUrl, idx) => (
+                    <div
+                      key={idx + 1}
+                      className="relative w-full h-full group cursor-pointer overflow-hidden"
+                      onClick={() => openLightbox(idx + 1)}
+                    >
+                      <img
+                        src={photoUrl}
+                        alt={`Media ${idx + 2}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Case 4: 4 Images (2x2 Quad Grid) */}
+            {thread.photo_urls.length === 4 && (
+              <div className="grid grid-cols-2 gap-1 max-h-[340px] aspect-video">
+                {thread.photo_urls.map((photoUrl, idx) => (
+                  <div
+                    key={idx}
+                    className="relative w-full h-full group cursor-pointer overflow-hidden"
+                    onClick={() => openLightbox(idx)}
+                  >
+                    <img
+                      src={photoUrl}
+                      alt={`Media ${idx + 1}`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Maximize2 size={16} className="text-white drop-shadow-md" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Case 5: 5 Images (Top 2 + Bottom 3) */}
+            {thread.photo_urls.length >= 5 && (
+              <div className="grid grid-cols-6 gap-1 max-h-[360px] aspect-video">
+                {thread.photo_urls.slice(0, 2).map((photoUrl, idx) => (
+                  <div
+                    key={idx}
+                    className="col-span-3 relative h-40 group cursor-pointer overflow-hidden"
+                    onClick={() => openLightbox(idx)}
+                  >
+                    <img
+                      src={photoUrl}
+                      alt={`Media ${idx + 1}`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                ))}
+                {thread.photo_urls.slice(2, 5).map((photoUrl, idx) => (
+                  <div
+                    key={idx + 2}
+                    className="col-span-2 relative h-32 group cursor-pointer overflow-hidden"
+                    onClick={() => openLightbox(idx + 2)}
+                  >
+                    <img
+                      src={photoUrl}
+                      alt={`Media ${idx + 3}`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -292,6 +429,16 @@ export function ThreadCard({
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── Image Lightbox Popup Modal ── */}
+      {thread.photo_urls && (
+        <ImageLightboxModal
+          isOpen={showLightbox}
+          onClose={() => setShowLightbox(false)}
+          images={thread.photo_urls}
+          initialIndex={lightboxIndex}
+        />
       )}
     </>
   );
