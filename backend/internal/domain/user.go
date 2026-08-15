@@ -11,6 +11,7 @@ type User struct {
 	FullName     string    `json:"full_name"`
 	PhoneNumber  *string   `json:"phone_number"`
 	AvatarURL    *string   `json:"avatar_url"`
+	Bio          *string   `json:"bio"`
 	Role         string    `json:"role"`
 	AuthProvider string    `json:"auth_provider"`
 	GoogleID     *string   `json:"-"`
@@ -39,6 +40,7 @@ type UpdateProfileRequest struct {
 	Username    *string `json:"username"`
 	PhoneNumber *string `json:"phone_number"`
 	AvatarURL   *string `json:"avatar_url"`
+	Bio         *string `json:"bio"`
 }
 
 // AuthResponse is returned on successful authentication.
@@ -55,5 +57,6 @@ type UserResponse struct {
 	FullName    string  `json:"full_name"`
 	PhoneNumber *string `json:"phone_number"`
 	AvatarURL   *string `json:"avatar_url"`
+	Bio         *string `json:"bio"`
 	Role        string  `json:"role"`
 }

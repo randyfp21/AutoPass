@@ -104,6 +104,7 @@ func (u *authUsecase) Register(ctx context.Context, req domain.RegisterRequest) 
 			FullName:    user.FullName,
 			PhoneNumber: user.PhoneNumber,
 			AvatarURL:   user.AvatarURL,
+			Bio:         user.Bio,
 			Role:        user.Role,
 		},
 	}, nil
@@ -140,6 +141,7 @@ func (u *authUsecase) Login(ctx context.Context, req domain.LoginRequest) (*doma
 			FullName:    user.FullName,
 			PhoneNumber: user.PhoneNumber,
 			AvatarURL:   user.AvatarURL,
+			Bio:         user.Bio,
 			Role:        user.Role,
 		},
 	}, nil
@@ -208,7 +210,7 @@ func (u *authUsecase) generateJWT(userID, email, role string) (string, error) {
 	return signedToken, nil
 }
 
-// UpdateProfile modifies a user's full name, username, phone number, and avatar URL.
+// UpdateProfile modifies a user's full name, username, phone number, avatar URL, and bio.
 func (u *authUsecase) UpdateProfile(ctx context.Context, userID string, req domain.UpdateProfileRequest) (*domain.UserResponse, error) {
 	user, err := u.userRepo.GetUserByID(ctx, userID)
 	if err != nil {
@@ -221,6 +223,8 @@ func (u *authUsecase) UpdateProfile(ctx context.Context, userID string, req doma
 	user.FullName = req.FullName
 	user.PhoneNumber = req.PhoneNumber
 	user.AvatarURL = req.AvatarURL
+	user.Bio = req.Bio
+
 	if req.Username != nil && *req.Username != "" {
 		clean := strings.TrimPrefix(*req.Username, "@")
 		user.Username = &clean
@@ -237,6 +241,7 @@ func (u *authUsecase) UpdateProfile(ctx context.Context, userID string, req doma
 		FullName:    user.FullName,
 		PhoneNumber: user.PhoneNumber,
 		AvatarURL:   user.AvatarURL,
+		Bio:         user.Bio,
 		Role:        user.Role,
 	}, nil
 }

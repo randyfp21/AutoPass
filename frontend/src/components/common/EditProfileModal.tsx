@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { User, Mail, Camera, Trash2, AlertCircle, Check, AtSign } from 'lucide-react';
+import { User, Mail, Camera, Trash2, AlertCircle, Check, FileText } from 'lucide-react';
 import { Modal } from './Modal';
 import { Button } from './Button';
 import type { User as UserType } from '../../types';
@@ -87,6 +87,7 @@ export function EditProfileModal({
 
   const [fullName, setFullName] = useState(user.full_name || '');
   const [username, setUsername] = useState((user.username || '').replace(/^@/, ''));
+  const [bio, setBio] = useState(user.bio || '');
   const [countryCode, setCountryCode] = useState(initialPhone.code);
   const [phoneDigits, setPhoneDigits] = useState(initialPhone.digits);
   const [avatarUrl, setAvatarUrl] = useState<string>(user.avatar_url || '');
@@ -139,6 +140,7 @@ export function EditProfileModal({
         username: cleanUsername || undefined,
         phone_number: formattedPhone,
         avatar_url: avatarUrl || undefined,
+        bio: bio.trim() || undefined,
       });
 
       onProfileUpdated(updated);
@@ -248,6 +250,27 @@ export function EditProfileModal({
           <p className="mt-1 text-[11px] text-slate-400">
             Username unik untuk profil Anda di Odo Threads (contoh: @dnazrl)
           </p>
+        </div>
+
+        {/* Bio Textarea Input */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-xs font-semibold text-slate-700 flex items-center gap-1">
+              <FileText size={13} className="text-purple-600" />
+              Bio / Deskripsi Profil
+            </label>
+            <span className="text-[10px] text-slate-400 font-medium">
+              {bio.length}/160
+            </span>
+          </div>
+          <textarea
+            rows={2}
+            value={bio}
+            onChange={(e) => setBio(e.target.value.slice(0, 160))}
+            className="w-full p-2.5 text-xs text-slate-800 bg-slate-50 border border-slate-300 focus:border-blue-500 rounded-xl outline-none resize-none placeholder:text-slate-400"
+            placeholder="Tulis deskripsi singkat tentang hobi otomotif, kendaraan impian, atau moto Anda..."
+            maxLength={160}
+          />
         </div>
 
         {/* Full Name Input */}

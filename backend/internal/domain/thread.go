@@ -54,6 +54,7 @@ type ThreadResponse struct {
 	UserName       string             `json:"user_name"`
 	UserUsername   *string            `json:"user_username"`
 	UserAvatar     *string            `json:"user_avatar"`
+	UserBio        *string            `json:"user_bio"`
 	UserRole       string             `json:"user_role"`
 	VehicleID      *string            `json:"vehicle_id"`
 	VehicleName    *string            `json:"vehicle_name"`

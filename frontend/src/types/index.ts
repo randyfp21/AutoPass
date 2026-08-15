@@ -18,6 +18,7 @@ export interface User {
   full_name: string;
   phone_number?: string;
   avatar_url?: string;
+  bio?: string;
   role: UserRole;
   auth_provider: AuthProvider;
   created_at: string;
@@ -220,6 +221,7 @@ export interface Thread {
   user_name: string;
   user_username?: string;
   user_avatar?: string;
+  user_bio?: string;
   user_role: string;
   vehicle_id?: string;
   vehicle_name?: string;

@@ -32,8 +32,8 @@ func NewUserRepository(db *pgxpool.Pool) UserRepository {
 // CreateUser inserts a new user record into the database.
 func (r *userRepository) CreateUser(ctx context.Context, user *domain.User) error {
 	query := `
-		INSERT INTO users (id, email, username, password_hash, full_name, phone_number, avatar_url, role, auth_provider, google_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		INSERT INTO users (id, email, username, password_hash, full_name, phone_number, avatar_url, bio, role, auth_provider, google_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		RETURNING created_at, updated_at
 	`
 	err := r.db.QueryRow(ctx, query,
@@ -44,6 +44,7 @@ func (r *userRepository) CreateUser(ctx context.Context, user *domain.User) erro
 		user.FullName,
 		user.PhoneNumber,
 		user.AvatarURL,
+		user.Bio,
 		user.Role,
 		user.AuthProvider,
 		user.GoogleID,
@@ -57,7 +58,7 @@ func (r *userRepository) CreateUser(ctx context.Context, user *domain.User) erro
 // GetUserByEmail retrieves a user by email address.
 func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {
 	query := `
-		SELECT id, email, username, password_hash, full_name, phone_number, avatar_url, role, auth_provider, google_id, created_at, updated_at
+		SELECT id, email, username, password_hash, full_name, phone_number, avatar_url, bio, role, auth_provider, google_id, created_at, updated_at
 		FROM users
 		WHERE email = $1
 	`
@@ -70,6 +71,7 @@ func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (*dom
 		&user.FullName,
 		&user.PhoneNumber,
 		&user.AvatarURL,
+		&user.Bio,
 		&user.Role,
 		&user.AuthProvider,
 		&user.GoogleID,
@@ -107,7 +109,7 @@ func (r *userRepository) GetUserByPhoneOrEmail(ctx context.Context, identifier s
 	cleanUsername := strings.TrimPrefix(identifier, "@")
 
 	query := `
-		SELECT id, email, username, password_hash, full_name, phone_number, avatar_url, role, auth_provider, google_id, created_at, updated_at
+		SELECT id, email, username, password_hash, full_name, phone_number, avatar_url, bio, role, auth_provider, google_id, created_at, updated_at
 		FROM users
 		WHERE email = $1 OR phone_number = $1 OR phone_number = $2 OR phone_number = $3 OR username = $4
 	`
@@ -120,6 +122,7 @@ func (r *userRepository) GetUserByPhoneOrEmail(ctx context.Context, identifier s
 		&user.FullName,
 		&user.PhoneNumber,
 		&user.AvatarURL,
+		&user.Bio,
 		&user.Role,
 		&user.AuthProvider,
 		&user.GoogleID,
@@ -139,7 +142,7 @@ func (r *userRepository) GetUserByPhoneOrEmail(ctx context.Context, identifier s
 func (r *userRepository) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
 	cleanIdentifier := strings.TrimPrefix(id, "@")
 	query := `
-		SELECT id, email, username, password_hash, full_name, phone_number, avatar_url, role, auth_provider, google_id, created_at, updated_at
+		SELECT id, email, username, password_hash, full_name, phone_number, avatar_url, bio, role, auth_provider, google_id, created_at, updated_at
 		FROM users
 		WHERE id::text = $1 OR username = $2
 	`
@@ -152,6 +155,7 @@ func (r *userRepository) GetUserByID(ctx context.Context, id string) (*domain.Us
 		&user.FullName,
 		&user.PhoneNumber,
 		&user.AvatarURL,
+		&user.Bio,
 		&user.Role,
 		&user.AuthProvider,
 		&user.GoogleID,
@@ -171,8 +175,8 @@ func (r *userRepository) GetUserByID(ctx context.Context, id string) (*domain.Us
 func (r *userRepository) UpdateUser(ctx context.Context, user *domain.User) error {
 	query := `
 		UPDATE users
-		SET full_name = $1, username = $2, phone_number = $3, avatar_url = $4, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $5
+		SET full_name = $1, username = $2, phone_number = $3, avatar_url = $4, bio = $5, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $6
 		RETURNING updated_at
 	`
 	err := r.db.QueryRow(ctx, query,
@@ -180,6 +184,7 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *domain.User) erro
 		user.Username,
 		user.PhoneNumber,
 		user.AvatarURL,
+		user.Bio,
 		user.ID,
 	).Scan(&user.UpdatedAt)
 	if err != nil {

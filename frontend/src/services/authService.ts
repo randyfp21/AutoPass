@@ -51,6 +51,7 @@ export async function updateProfile(data: {
   username?: string;
   phone_number?: string;
   avatar_url?: string;
+  bio?: string;
 }): Promise<User> {
   const response = await api.put<User>('/auth/profile', data);
   const updatedUser = response.data;
