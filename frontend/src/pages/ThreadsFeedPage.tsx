@@ -62,12 +62,17 @@ export function ThreadsFeedPage() {
 
   const topicCategories = [
     { id: 'all', label: '🌟 Semua Topik' },
-    { id: 'diskusi', label: '💬 Diskusi' },
+    { id: 'ban', label: '🛞 Ban & Roda' },
+    { id: 'ev', label: '⚡ Electric Vehicle (EV)' },
+    { id: 'audio', label: '🔊 Audio Mobil' },
+    { id: 'biled', label: '💡 Lampu & Biled' },
+    { id: 'aksesoris', label: '🎀 Aksesoris' },
+    { id: 'modifikasi', label: '🛠️ Modifikasi' },
     { id: 'kendala', label: '🚨 Kendala' },
+    { id: 'diskusi', label: '💬 Diskusi' },
     { id: 'sharing', label: '✨ Sharing' },
     { id: 'trip', label: '🗺️ Trip' },
     { id: 'touring', label: '🏍️ Touring' },
-    { id: 'modifikasi', label: '🛠️ Modifikasi' },
   ];
 
   return (

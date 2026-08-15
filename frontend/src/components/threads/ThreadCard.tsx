@@ -108,6 +108,11 @@ export function ThreadCard({
     trip: { label: '🗺️ Trip / Perjalanan', bg: 'bg-blue-50 text-blue-700 border-blue-200' },
     touring: { label: '🏍️ Touring / Sunmori', bg: 'bg-amber-50 text-amber-800 border-amber-200' },
     modifikasi: { label: '🛠️ Modifikasi', bg: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+    ban: { label: '🛞 Ban & Roda', bg: 'bg-stone-100 text-stone-800 border-stone-300' },
+    ev: { label: '⚡ Electric Vehicle (EV)', bg: 'bg-emerald-50 text-emerald-800 border-emerald-300' },
+    audio: { label: '🔊 Audio Mobil', bg: 'bg-cyan-50 text-cyan-800 border-cyan-300' },
+    biled: { label: '💡 Lampu & Biled', bg: 'bg-amber-50 text-amber-900 border-amber-300' },
+    aksesoris: { label: '🎀 Aksesoris', bg: 'bg-pink-50 text-pink-800 border-pink-300' },
     general: { label: '💬 Diskusi Umum', bg: 'bg-slate-100 text-slate-700 border-slate-200' },
   };
 

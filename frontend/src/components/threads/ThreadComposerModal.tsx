@@ -117,11 +117,16 @@ export function ThreadComposerModal({
           >
             <option value="general">💬 Umum / Diskusi</option>
             <option value="kendala">🚨 Kendala / Trouble</option>
+            <option value="ban">🛞 Ban & Roda</option>
+            <option value="ev">⚡ Electric Vehicle (EV)</option>
+            <option value="audio">🔊 Audio Mobil</option>
+            <option value="biled">💡 Lampu & Biled</option>
+            <option value="aksesoris">🎀 Aksesoris & Detailing</option>
+            <option value="modifikasi">🛠️ Modifikasi</option>
             <option value="pengalaman">✨ Sharing Pengalaman</option>
             <option value="tips">💡 Tips & Perawatan</option>
             <option value="trip">🗺️ Trip / Perjalanan</option>
             <option value="touring">🏍️ Touring / Sunmori</option>
-            <option value="modifikasi">🛠️ Modifikasi & Aksesori</option>
           </select>
         </div>
 

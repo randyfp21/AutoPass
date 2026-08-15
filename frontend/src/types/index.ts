@@ -199,7 +199,20 @@ export interface UpdatePlannerData {
 // ODO THREADS (SOCIAL MEDIA MODULE)
 // ============================================
 
-export type ThreadCategory = 'kendala' | 'pengalaman' | 'tips' | 'general' | 'trip' | 'touring' | 'modifikasi' | 'subscribed';
+export type ThreadCategory =
+  | 'kendala'
+  | 'pengalaman'
+  | 'tips'
+  | 'general'
+  | 'trip'
+  | 'touring'
+  | 'modifikasi'
+  | 'ban'
+  | 'ev'
+  | 'audio'
+  | 'biled'
+  | 'aksesoris'
+  | 'subscribed';
 
 export interface ThreadComment {
   id: string;
