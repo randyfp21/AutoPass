@@ -12,6 +12,7 @@ import VehiclesPage from './pages/VehiclesPage';
 import ActivityPage from './pages/ActivityPage';
 import SpentPage from './pages/SpentPage';
 import WorkshopDashboardPage from './pages/WorkshopDashboardPage';
+import LandingPage from './pages/LandingPage';
 import ThreadsFeedPage from './pages/ThreadsFeedPage';
 import ThreadsBookmarkPage from './pages/ThreadsBookmarkPage';
 import ThreadsActivityPage from './pages/ThreadsActivityPage';
@@ -161,7 +162,10 @@ export function App() {
   return (
     <>
       <Routes>
-        {/* Public routes */}
+        {/* Public Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Public Only routes */}
         <Route
           path="/login"
           element={
