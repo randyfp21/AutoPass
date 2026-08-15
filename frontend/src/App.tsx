@@ -17,6 +17,7 @@ import ThreadsBookmarkPage from './pages/ThreadsBookmarkPage';
 import ThreadsActivityPage from './pages/ThreadsActivityPage';
 import UserProfilePage from './pages/UserProfilePage';
 import ThreadDetailPage from './pages/ThreadDetailPage';
+import ThreadPhotoViewerPage from './pages/ThreadPhotoViewerPage';
 import TelemetryStudioPage from './pages/TelemetryStudioPage';
 import { AddPlannerModal } from './components/planner/AddPlannerModal';
 import { AddServiceModal } from './components/service/AddServiceModal';
@@ -348,6 +349,16 @@ export function App() {
               >
                 <ThreadDetailPage />
               </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Dedicated Thread Photo Theater Mode Page Route */}
+        <Route
+          path="/threads/:threadId/photo"
+          element={
+            <ProtectedRoute>
+              <ThreadPhotoViewerPage />
             </ProtectedRoute>
           }
         />

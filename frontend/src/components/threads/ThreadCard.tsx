@@ -224,7 +224,10 @@ export function ThreadCard({
             <img
               src={thread.photo_urls[activePhotoIndex]}
               alt={`Post media ${activePhotoIndex + 1}`}
-              onClick={(e) => openLightbox(e, activePhotoIndex)}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/threads/${thread.id}/photo?index=${activePhotoIndex}`);
+              }}
               className="w-auto max-w-full max-h-[580px] rounded-xl object-contain shadow-md cursor-pointer transition-all duration-300 group-hover:scale-[1.005]"
             />
 
