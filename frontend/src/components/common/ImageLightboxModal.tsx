@@ -51,82 +51,85 @@ export function ImageLightboxModal({
   const currentImage = images[currentIndex] || images[0];
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-between p-3 sm:p-5 bg-slate-950/94 backdrop-blur-md animate-in fade-in duration-200 select-none"
-      onClick={onClose}
-    >
-      {/* Top Bar: Button Kembali (Left), Counter (Center), Button Tutup (Right) */}
-      <div
-        className="w-full max-w-5xl flex items-center justify-between pt-1 px-1 z-10"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Tombol Kembali / Back */}
+    <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl animate-in fade-in duration-200 select-none flex items-center justify-center">
+      {/* Backdrop overlay click to close */}
+      <div className="absolute inset-0" onClick={onClose} />
+
+      {/* Top Header Navigation Overlay */}
+      <div className="fixed top-0 left-0 right-0 z-50 p-4 sm:p-6 bg-gradient-to-b from-slate-950/90 via-slate-950/50 to-transparent flex items-center justify-between pointer-events-none">
+        {/* Button Kembali (Left) */}
         <button
           type="button"
           onClick={onClose}
-          className="flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700 text-white text-xs font-extrabold px-3.5 py-2 rounded-full border border-slate-700/80 shadow-lg cursor-pointer transition-all active:scale-95"
-          title="Kembali (Esc)"
+          className="pointer-events-auto flex items-center gap-2 bg-slate-900/90 hover:bg-slate-800 text-white font-extrabold text-xs sm:text-sm px-4 py-2.5 rounded-full border border-slate-700/80 shadow-2xl transition-all hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md"
+          title="Kembali ke post (Esc)"
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft size={18} className="text-purple-400" />
           <span>Kembali</span>
         </button>
 
-        {/* Counter Chip */}
-        <span className="text-xs font-extrabold text-slate-300 bg-slate-800/80 px-3.5 py-1.5 rounded-full border border-slate-700/60 shadow-xs font-mono">
-          Foto {currentIndex + 1} dari {images.length}
+        {/* Counter Badge (Center) */}
+        <span className="pointer-events-auto text-xs font-mono font-extrabold text-slate-200 bg-slate-900/90 px-4 py-2 rounded-full border border-slate-700/80 shadow-xl backdrop-blur-md">
+          Foto {currentIndex + 1} / {images.length}
         </span>
 
-        {/* Tombol Close / Tutup */}
+        {/* Button Tutup (Right) */}
         <button
           type="button"
           onClick={onClose}
-          className="flex items-center gap-1.5 bg-red-600/90 hover:bg-red-600 text-white text-xs font-extrabold px-3.5 py-2 rounded-full border border-red-500/80 shadow-lg cursor-pointer transition-all active:scale-95"
-          title="Tutup (Esc)"
+          className="pointer-events-auto flex items-center gap-1.5 bg-red-600/90 hover:bg-red-500 text-white font-extrabold text-xs sm:text-sm px-4 py-2.5 rounded-full border border-red-500/80 shadow-2xl transition-all hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md"
+          title="Tutup foto (Esc)"
         >
-          <X size={16} />
+          <X size={18} />
           <span className="hidden sm:inline">Tutup</span>
         </button>
       </div>
 
-      {/* Center Image Container */}
-      <div
-        className="relative flex-1 w-full max-w-5xl flex items-center justify-center my-3 overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {images.length > 1 && (
+      {/* Perfectly Centered Image Viewport */}
+      <div className="relative w-full max-w-5xl h-full flex items-center justify-center p-4 sm:p-12 z-10 pointer-events-none">
+        <div className="pointer-events-auto relative flex items-center justify-center max-h-[78vh] sm:max-h-[82vh] max-w-full">
+          <img
+            key={currentIndex}
+            src={currentImage}
+            alt={`Lightbox image ${currentIndex + 1}`}
+            className="max-h-[78vh] sm:max-h-[82vh] max-w-full object-contain rounded-2xl shadow-2xl border border-slate-800/90 animate-in zoom-in-95 duration-200"
+          />
+        </div>
+      </div>
+
+      {/* Prev / Next Floating Arrow Buttons */}
+      {images.length > 1 && (
+        <>
           <button
             type="button"
-            onClick={handlePrev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 p-3 text-white bg-slate-900/80 hover:bg-purple-600 rounded-full border border-slate-700/80 shadow-2xl transition-all hover:scale-110 active:scale-95 z-20 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePrev();
+            }}
+            className="fixed left-4 top-1/2 -translate-y-1/2 z-50 p-3.5 text-white bg-slate-900/90 hover:bg-purple-600 rounded-full border border-slate-700/80 shadow-2xl transition-all hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
             title="Foto Sebelumnya (←)"
           >
             <ChevronLeft size={24} />
           </button>
-        )}
 
-        <img
-          key={currentIndex}
-          src={currentImage}
-          alt={`Lightbox image ${currentIndex + 1}`}
-          className="max-h-[80vh] max-w-full object-contain rounded-2xl shadow-2xl border border-slate-800/80 animate-in zoom-in-95 duration-200"
-        />
-
-        {images.length > 1 && (
           <button
             type="button"
-            onClick={handleNext}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-3 text-white bg-slate-900/80 hover:bg-purple-600 rounded-full border border-slate-700/80 shadow-2xl transition-all hover:scale-110 active:scale-95 z-20 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNext();
+            }}
+            className="fixed right-4 top-1/2 -translate-y-1/2 z-50 p-3.5 text-white bg-slate-900/90 hover:bg-purple-600 rounded-full border border-slate-700/80 shadow-2xl transition-all hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
             title="Foto Selanjutnya (→)"
           >
             <ChevronRight size={24} />
           </button>
-        )}
-      </div>
+        </>
+      )}
 
       {/* Bottom Thumbnail Strip (if multi-photo) */}
       {images.length > 1 && (
         <div
-          className="w-full max-w-lg flex items-center justify-center gap-2 pb-2 overflow-x-auto z-10"
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center gap-2 p-2 bg-slate-900/90 border border-slate-800/90 rounded-2xl shadow-2xl backdrop-blur-md max-w-[90vw] overflow-x-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {images.map((imgUrl, idx) => (
@@ -137,7 +140,7 @@ export function ImageLightboxModal({
               className={[
                 'w-12 h-12 rounded-xl overflow-hidden border-2 transition-all cursor-pointer shrink-0',
                 idx === currentIndex
-                  ? 'border-purple-500 ring-2 ring-purple-500/40 scale-110'
+                  ? 'border-purple-500 ring-2 ring-purple-500/50 scale-110'
                   : 'border-slate-800 opacity-60 hover:opacity-100',
               ].join(' ')}
             >
