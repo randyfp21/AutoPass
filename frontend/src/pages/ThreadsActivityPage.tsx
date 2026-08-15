@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, Heart, MessageSquare, AtSign, CheckCircle2 } from 'lucide-react';
 import { threadsService } from '../services/threadsService';
-import { ThreadsBottomNav } from '../components/threads/ThreadsBottomNav';
 import { ThreadComposerModal } from '../components/threads/ThreadComposerModal';
 import type { NotificationItem } from '../types';
 import { timeAgo } from '../utils/formatters';
@@ -94,8 +93,6 @@ export function ThreadsActivityPage() {
           </div>
         )}
       </div>
-
-      <ThreadsBottomNav onOpenNewThreadModal={() => setShowComposerModal(true)} />
 
       <ThreadComposerModal
         isOpen={showComposerModal}

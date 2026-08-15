@@ -7,7 +7,6 @@ import { threadsService } from '../services/threadsService';
 import { ThreadCard } from '../components/threads/ThreadCard';
 import { ThreadComposerModal } from '../components/threads/ThreadComposerModal';
 import { CommentSheet } from '../components/threads/CommentSheet';
-import { ThreadsBottomNav } from '../components/threads/ThreadsBottomNav';
 import type { Thread, Vehicle } from '../types';
 
 export function ThreadsFeedPage() {
@@ -50,80 +49,54 @@ export function ThreadsFeedPage() {
     setThreads((prev) => prev.filter((t) => t.id !== threadId));
   };
 
+  const categories = [
+    { id: 'all', label: '🌟 Semua' },
+    { id: 'diskusi', label: '💬 Diskusi' },
+    { id: 'kendala', label: '🚨 Kendala' },
+    { id: 'sharing', label: '✨ Sharing' },
+    { id: 'trip', label: '🗺️ Trip' },
+    { id: 'touring', label: '🏍️ Touring' },
+    { id: 'modifikasi', label: '🛠️ Modifikasi' },
+  ];
+
   return (
     <div className="flex-1 bg-slate-50 pb-28">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* ── Top Header Banner ── */}
-        <div className="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white rounded-2xl p-5 shadow-lg border border-purple-800/40 relative overflow-hidden">
-          <div className="relative z-10 flex items-center justify-between gap-4">
+        {/* Header & New Post CTA */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-md">
+              <MessageSquare size={22} />
+            </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="w-8 h-8 bg-purple-500/30 rounded-xl flex items-center justify-center backdrop-blur-md">
-                  <Sparkles size={18} className="text-purple-300 animate-pulse" />
-                </span>
-                <h1 className="text-2xl font-extrabold tracking-tight font-[family-name:var(--font-family-tech)]">
-                  Odo Threads
-                </h1>
-              </div>
-              <p className="text-xs text-purple-200 mt-1 max-w-sm">
-                Komunitas Otomotif Terintegrasi: Sharing kendala, keluhan sparepart, trip, touring, & modifikasi
-              </p>
+              <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-1.5">
+                Odo Threads
+              </h1>
+              <p className="text-xs text-slate-500">Komunitas & Diskusi Otomotif Indonesia</p>
             </div>
-
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-xs font-bold transition-all shrink-0 backdrop-blur-md"
-            >
-              🚗 Core Tracker
-            </button>
-          </div>
-        </div>
-
-        {/* ── Quick Create Post Bar ── */}
-        <div
-          onClick={() => setShowComposerModal(true)}
-          className="bg-white border border-purple-200 hover:border-purple-400 p-3.5 rounded-2xl shadow-xs cursor-pointer transition-all flex items-center gap-3 group"
-        >
-          {user?.avatar_url ? (
-            <img src={user.avatar_url} alt={user.full_name} className="w-9 h-9 rounded-full object-cover shrink-0" />
-          ) : (
-            <div className="w-9 h-9 rounded-full bg-purple-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
-              {user?.full_name?.slice(0, 2).toUpperCase() || 'US'}
-            </div>
-          )}
-
-          <div className="flex-1 bg-slate-50 group-hover:bg-purple-50/50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-400 font-medium transition-colors">
-            Ada kendala, cerita trip, touring, atau modifikasi? Ketik di sini...
           </div>
 
           <button
             type="button"
-            className="w-8 h-8 bg-purple-600 group-hover:bg-purple-700 text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs"
+            onClick={() => setShowComposerModal(true)}
+            className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
           >
             <Plus size={16} />
+            Buat Thread
           </button>
         </div>
 
-        {/* ── Category Filters Pills ── */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs">
-          {[
-            { id: 'all', label: '🔥 Semua Feed' },
-            { id: 'kendala', label: '🚨 Kendala' },
-            { id: 'pengalaman', label: '✨ Pengalaman' },
-            { id: 'tips', label: '💡 Tips' },
-            { id: 'trip', label: '🗺️ Trip' },
-            { id: 'touring', label: '🏍️ Touring' },
-            { id: 'modifikasi', label: '🛠️ Modifikasi' },
-            { id: 'general', label: '💬 Diskusi Umum' },
-          ].map((cat) => (
+        {/* Category Pills Filter */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
               className={[
-                'px-3.5 py-1.5 rounded-xl font-bold transition-all border whitespace-nowrap shrink-0',
+                'px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer',
                 activeCategory === cat.id
-                  ? 'bg-purple-600 text-white border-purple-600 shadow-xs'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50',
+                  ? 'bg-purple-600 text-white shadow-xs'
+                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100',
               ].join(' ')}
             >
               {cat.label}
@@ -131,37 +104,34 @@ export function ThreadsFeedPage() {
           ))}
         </div>
 
-        {/* ── Error Banner ── */}
+        {/* Error Alert */}
         {error && (
-          <div className="p-4 bg-red-50 border border-red-200 text-xs text-red-700 rounded-2xl flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <AlertCircle size={16} /> {error}
-            </span>
-            <button onClick={fetchData} className="font-bold underline">
-              Coba Lagi
-            </button>
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-3 text-red-700 text-xs font-medium">
+            <AlertCircle size={18} className="shrink-0" />
+            <span>{error}</span>
           </div>
         )}
 
-        {/* ── Threads Feed List ── */}
+        {/* Feed List */}
         {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="skeleton h-44 rounded-2xl" />
+              <div key={i} className="skeleton h-48 rounded-2xl" />
             ))}
           </div>
         ) : threads.length === 0 ? (
           <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
-            <MessageSquare size={36} className="mx-auto text-slate-300 mb-2" />
-            <h3 className="font-bold text-slate-800 text-sm">Belum ada thread diposting</h3>
-            <p className="text-xs text-slate-400 mt-1 mb-4">
-              Jadilah yang pertama memposting kendala, cerita trip, touring, atau modifikasi kamu!
+            <MessageSquare size={40} className="mx-auto text-slate-300 mb-3" />
+            <h3 className="font-bold text-slate-800 text-base">Belum Ada Thread Diskusi</h3>
+            <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+              Jadilah yang pertama membuat thread mengenai pengamalan atau pertanyaan otomotif Anda!
             </p>
             <button
               onClick={() => setShowComposerModal(true)}
-              className="px-4 py-2 bg-purple-600 text-white text-xs font-bold rounded-xl hover:bg-purple-700 shadow-sm"
+              className="mt-4 inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition-colors"
             >
-              + Posting Thread Baru
+              <Plus size={16} />
+              Tulis Thread Pertama
             </button>
           </div>
         ) : (
@@ -178,9 +148,6 @@ export function ThreadsFeedPage() {
           </div>
         )}
       </div>
-
-      {/* ── Floating Bottom Navigation ── */}
-      <ThreadsBottomNav onOpenNewThreadModal={() => setShowComposerModal(true)} />
 
       {/* ── Modals ── */}
       <ThreadComposerModal

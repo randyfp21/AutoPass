@@ -5,7 +5,6 @@ import { threadsService } from '../services/threadsService';
 import { ThreadCard } from '../components/threads/ThreadCard';
 import { ThreadComposerModal } from '../components/threads/ThreadComposerModal';
 import { CommentSheet } from '../components/threads/CommentSheet';
-import { ThreadsBottomNav } from '../components/threads/ThreadsBottomNav';
 import type { Thread } from '../types';
 
 export function ThreadsBookmarkPage() {
@@ -74,8 +73,6 @@ export function ThreadsBookmarkPage() {
           </div>
         )}
       </div>
-
-      <ThreadsBottomNav onOpenNewThreadModal={() => setShowComposerModal(true)} />
 
       <ThreadComposerModal
         isOpen={showComposerModal}

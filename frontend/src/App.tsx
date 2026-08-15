@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Navbar from './components/common/Navbar';
 import BottomNav from './components/common/BottomNav';
+import ThreadsBottomNav from './components/threads/ThreadsBottomNav';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
@@ -17,6 +18,7 @@ import ThreadsActivityPage from './pages/ThreadsActivityPage';
 import UserProfilePage from './pages/UserProfilePage';
 import { AddPlannerModal } from './components/planner/AddPlannerModal';
 import { AddServiceModal } from './components/service/AddServiceModal';
+import { ThreadComposerModal } from './components/threads/ThreadComposerModal';
 import { ServiceOptionSelectorModal } from './components/common/ServiceOptionSelectorModal';
 import { vehicleService } from './services/vehicleService';
 import { plannerService } from './services/plannerService';
@@ -81,9 +83,10 @@ function GuestRoute({ children }: { children: ReactNode }) {
 interface AppLayoutProps {
   children: ReactNode;
   onOpenAddPlanner: () => void;
+  onOpenNewThreadModal: () => void;
 }
 
-function AppLayout({ children, onOpenAddPlanner }: AppLayoutProps) {
+function AppLayout({ children, onOpenAddPlanner, onOpenNewThreadModal }: AppLayoutProps) {
   const location = useLocation();
   const isThreadsMode = location.pathname.startsWith('/threads');
 
@@ -96,7 +99,11 @@ function AppLayout({ children, onOpenAddPlanner }: AppLayoutProps) {
       >
         {children}
       </main>
-      {!isThreadsMode && <BottomNav onOpenAddPlanner={onOpenAddPlanner} />}
+      {isThreadsMode ? (
+        <ThreadsBottomNav onOpenNewThreadModal={onOpenNewThreadModal} />
+      ) : (
+        <BottomNav onOpenAddPlanner={onOpenAddPlanner} />
+      )}
     </div>
   );
 }
@@ -109,6 +116,7 @@ export function App() {
   const [showOptionSelectorModal, setShowOptionSelectorModal] = useState(false);
   const [showAddPlannerModal, setShowAddPlannerModal] = useState(false);
   const [showAddInstantServiceModal, setShowAddInstantServiceModal] = useState(false);
+  const [showNewThreadComposerModal, setShowNewThreadComposerModal] = useState(false);
   const [selectedInstantVehicle, setSelectedInstantVehicle] = useState<Vehicle | null>(null);
 
   // Pre-fetch vehicles when logged in so FAB modals can populate vehicle options
@@ -125,13 +133,17 @@ export function App() {
 
   const handleGlobalCreatePlanner = async (data: CreatePlannerData) => {
     await plannerService.createPlanner(data);
-    window.location.reload(); // Refresh current page state
+    window.location.reload();
   };
 
   const handleGlobalCreateInstantService = async (data: CreateServiceRecordData) => {
     if (!selectedInstantVehicle) return;
     await maintenanceService.createServiceRecord(selectedInstantVehicle.id, data);
-    window.location.reload(); // Refresh current page state
+    window.location.reload();
+  };
+
+  const handleGlobalThreadCreated = () => {
+    window.location.reload();
   };
 
   return (
@@ -172,7 +184,10 @@ export function App() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <AppLayout onOpenAddPlanner={() => setShowOptionSelectorModal(true)}>
+              <AppLayout
+                onOpenAddPlanner={() => setShowOptionSelectorModal(true)}
+                onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
+              >
                 <DashboardPage />
               </AppLayout>
             </ProtectedRoute>
@@ -182,7 +197,10 @@ export function App() {
           path="/spent"
           element={
             <ProtectedRoute>
-              <AppLayout onOpenAddPlanner={() => setShowOptionSelectorModal(true)}>
+              <AppLayout
+                onOpenAddPlanner={() => setShowOptionSelectorModal(true)}
+                onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
+              >
                 <SpentPage />
               </AppLayout>
             </ProtectedRoute>
@@ -192,7 +210,10 @@ export function App() {
           path="/activity"
           element={
             <ProtectedRoute>
-              <AppLayout onOpenAddPlanner={() => setShowOptionSelectorModal(true)}>
+              <AppLayout
+                onOpenAddPlanner={() => setShowOptionSelectorModal(true)}
+                onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
+              >
                 <ActivityPage />
               </AppLayout>
             </ProtectedRoute>
@@ -202,7 +223,10 @@ export function App() {
           path="/plan"
           element={
             <ProtectedRoute>
-              <AppLayout onOpenAddPlanner={() => setShowOptionSelectorModal(true)}>
+              <AppLayout
+                onOpenAddPlanner={() => setShowOptionSelectorModal(true)}
+                onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
+              >
                 <ActivityPage />
               </AppLayout>
             </ProtectedRoute>
@@ -212,7 +236,10 @@ export function App() {
           path="/vehicles"
           element={
             <ProtectedRoute>
-              <AppLayout onOpenAddPlanner={() => setShowOptionSelectorModal(true)}>
+              <AppLayout
+                onOpenAddPlanner={() => setShowOptionSelectorModal(true)}
+                onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
+              >
                 <VehiclesPage />
               </AppLayout>
             </ProtectedRoute>
@@ -222,7 +249,10 @@ export function App() {
           path="/vehicles/:id"
           element={
             <ProtectedRoute>
-              <AppLayout onOpenAddPlanner={() => setShowOptionSelectorModal(true)}>
+              <AppLayout
+                onOpenAddPlanner={() => setShowOptionSelectorModal(true)}
+                onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
+              >
                 <VehicleDetailPage />
               </AppLayout>
             </ProtectedRoute>
@@ -232,7 +262,10 @@ export function App() {
           path="/workshop"
           element={
             <ProtectedRoute requiredRole="workshop_owner">
-              <AppLayout onOpenAddPlanner={() => setShowOptionSelectorModal(true)}>
+              <AppLayout
+                onOpenAddPlanner={() => setShowOptionSelectorModal(true)}
+                onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
+              >
                 <WorkshopDashboardPage />
               </AppLayout>
             </ProtectedRoute>
@@ -244,7 +277,10 @@ export function App() {
           path="/threads"
           element={
             <ProtectedRoute>
-              <AppLayout onOpenAddPlanner={() => {}}>
+              <AppLayout
+                onOpenAddPlanner={() => {}}
+                onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
+              >
                 <ThreadsFeedPage />
               </AppLayout>
             </ProtectedRoute>
@@ -254,7 +290,10 @@ export function App() {
           path="/threads/bookmarks"
           element={
             <ProtectedRoute>
-              <AppLayout onOpenAddPlanner={() => {}}>
+              <AppLayout
+                onOpenAddPlanner={() => {}}
+                onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
+              >
                 <ThreadsBookmarkPage />
               </AppLayout>
             </ProtectedRoute>
@@ -264,7 +303,10 @@ export function App() {
           path="/threads/activity"
           element={
             <ProtectedRoute>
-              <AppLayout onOpenAddPlanner={() => {}}>
+              <AppLayout
+                onOpenAddPlanner={() => {}}
+                onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
+              >
                 <ThreadsActivityPage />
               </AppLayout>
             </ProtectedRoute>
@@ -274,7 +316,10 @@ export function App() {
           path="/threads/user/:id"
           element={
             <ProtectedRoute>
-              <AppLayout onOpenAddPlanner={() => {}}>
+              <AppLayout
+                onOpenAddPlanner={() => {}}
+                onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
+              >
                 <UserProfilePage />
               </AppLayout>
             </ProtectedRoute>
@@ -284,7 +329,10 @@ export function App() {
           path="/threads/user/*"
           element={
             <ProtectedRoute>
-              <AppLayout onOpenAddPlanner={() => {}}>
+              <AppLayout
+                onOpenAddPlanner={() => {}}
+                onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
+              >
                 <UserProfilePage />
               </AppLayout>
             </ProtectedRoute>
@@ -331,6 +379,14 @@ export function App() {
           onSubmit={handleGlobalCreateInstantService}
         />
       )}
+
+      {/* 3. Global Odo Threads Post Composer Modal */}
+      <ThreadComposerModal
+        isOpen={showNewThreadComposerModal}
+        onClose={() => setShowNewThreadComposerModal(false)}
+        vehicles={vehicles}
+        onThreadCreated={handleGlobalThreadCreated}
+      />
     </>
   );
 }
