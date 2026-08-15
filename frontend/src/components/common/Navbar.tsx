@@ -71,10 +71,10 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 w-full">
       {/* Glass navbar */}
-      <div className="bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+      <div className="bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* ── Logo & Mode Badge ── */}
+          <div className="flex items-center justify-between h-16 relative">
+            {/* ── 1. Left Side: Logo & Mode Badge ── */}
             <div className="flex items-center gap-3">
               <Link
                 to={isAuthenticated ? (isThreadsMode ? '/threads' : '/dashboard') : '/'}
@@ -94,20 +94,19 @@ export function Navbar() {
 
               {/* Mode Toggle Badge */}
               {isThreadsMode ? (
-                <span className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[11px] font-extrabold px-2.5 py-0.5 rounded-full shadow-xs flex items-center gap-1">
+                <span className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[11px] font-extrabold px-2.5 py-0.5 rounded-full shadow-xs items-center gap-1 hidden lg:flex">
                   <Sparkles size={11} /> Odo Threads
                 </span>
               ) : (
-                <span className="bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold px-2 py-0.5 rounded-full hidden sm:inline-block">
+                <span className="bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold px-2 py-0.5 rounded-full hidden lg:inline-block">
                   Vehicle Passport
                 </span>
               )}
             </div>
 
-            {/* ── Right Controls: Language Selector, Segmented ON/OFF Switcher & User Profile Dropdown ── */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              {/* Segmented ON/OFF Mode Switcher Pill with Smooth Animation */}
-              {isAuthenticated && (
+            {/* ── 2. CENTER TOP BAR: Segmented ON/OFF Mode Switcher Pill ── */}
+            {isAuthenticated && (
+              <div className="absolute left-1/2 -translate-x-1/2 z-20">
                 <div className="bg-slate-100/90 p-1 rounded-full border border-slate-200/80 flex items-center shadow-inner relative transition-all duration-300">
                   {/* Segment 1: Core Tracker */}
                   <button
@@ -143,8 +142,11 @@ export function Navbar() {
                     <span>Odo Threads</span>
                   </button>
                 </div>
-              )}
+              </div>
+            )}
 
+            {/* ── 3. Right Side: Language Selector, Fullscreen & User Profile Dropdown ── */}
+            <div className="flex items-center gap-2 sm:gap-3">
               {/* Language Selector Dropdown */}
               <div className="relative" ref={langDropdownRef}>
                 <button
