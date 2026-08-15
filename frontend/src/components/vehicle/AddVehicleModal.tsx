@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Modal } from '../common/Modal';
 import { Button } from '../common/Button';
-import { Car, Bike, AlertCircle, Sparkles, Camera, Upload, Trash2, ShieldAlert } from 'lucide-react';
+import { Car, Bike, AlertCircle, Sparkles, Camera, Upload, Trash2, ShieldAlert, Fuel, Zap } from 'lucide-react';
 import type { CreateVehicleData, VehicleCategory, Vehicle } from '../../types';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -26,8 +26,8 @@ interface FormErrors {
 const currentYear = new Date().getFullYear();
 const YEARS = Array.from({ length: currentYear - 1989 }, (_, i) => currentYear - i);
 
-const POPULAR_BRANDS_MOBIL = ['Toyota', 'Honda', 'Suzuki', 'Mitsubishi', 'Daihatsu', 'Nissan', 'Hyundai', 'BMW', 'Mercedes-Benz', 'Wuling', 'Chery'];
-const POPULAR_BRANDS_MOTOR = ['Honda', 'Yamaha', 'Suzuki', 'Kawasaki', 'TVS', 'Bajaj', 'Royal Enfield', 'Harley-Davidson'];
+const POPULAR_BRANDS_MOBIL = ['Toyota', 'Honda', 'Suzuki', 'Mitsubishi', 'Daihatsu', 'Nissan', 'Hyundai', 'BMW', 'Mercedes-Benz', 'Wuling', 'Chery', 'BYD'];
+const POPULAR_BRANDS_MOTOR = ['Honda', 'Yamaha', 'Suzuki', 'Kawasaki', 'TVS', 'Bajaj', 'Royal Enfield', 'Harley-Davidson', 'Vespa', 'Niu', 'Gesits'];
 
 const GENZ_NICKNAMES_MOBIL = [
   'Black Mamba',
@@ -97,6 +97,7 @@ function compressImage(file: File): Promise<string> {
 export function AddVehicleModal({ isOpen, onClose, onSubmit, initialData }: AddVehicleModalProps) {
   const [nickname, setNickname] = useState('');
   const [category, setCategory] = useState<VehicleCategory>('mobil');
+  const [fuelType, setFuelType] = useState<'bensin' | 'ev'>('bensin');
   const [licensePlate, setLicensePlate] = useState('');
   const [brand, setBrand] = useState('');
   const [model, setModel] = useState('');
@@ -120,6 +121,7 @@ export function AddVehicleModal({ isOpen, onClose, onSubmit, initialData }: AddV
     if (isOpen && initialData) {
       setNickname(initialData.nickname || '');
       setCategory(initialData.category || 'mobil');
+      setFuelType(initialData.fuel_type === 'ev' ? 'ev' : 'bensin');
       setLicensePlate(initialData.license_plate || '');
       setBrand(initialData.brand || '');
       setModel(initialData.model || '');
@@ -134,6 +136,7 @@ export function AddVehicleModal({ isOpen, onClose, onSubmit, initialData }: AddV
     } else if (!isOpen) {
       setNickname('');
       setCategory('mobil');
+      setFuelType('bensin');
       setLicensePlate('');
       setBrand('');
       setModel('');
@@ -202,15 +205,16 @@ export function AddVehicleModal({ isOpen, onClose, onSubmit, initialData }: AddV
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setGlobalError('');
-
     if (!validate()) return;
 
     setIsLoading(true);
+    setGlobalError('');
+
     try {
-      await onSubmit({
+      const data: CreateVehicleData = {
         nickname: nickname.trim() || undefined,
         category,
+        fuel_type: fuelType,
         license_plate: licensePlate.trim().toUpperCase(),
         brand: brand.trim(),
         model: model.trim(),
@@ -220,27 +224,33 @@ export function AddVehicleModal({ isOpen, onClose, onSubmit, initialData }: AddV
         photo_url: photoUrl || undefined,
         stnk_number: stnkNumber.trim() || undefined,
         stnk_expiry_date: stnkExpiryDate || undefined,
-      });
+      };
+      await onSubmit(data);
       onClose();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Gagal menambah kendaraan';
-      setGlobalError(message);
+      const msg = err instanceof Error ? err.message : 'Gagal menyimpan kendaraan';
+      setGlobalError(msg);
     } finally {
       setIsLoading(false);
     }
   };
 
   const popularBrands = category === 'mobil' ? POPULAR_BRANDS_MOBIL : POPULAR_BRANDS_MOTOR;
-  const nicknamePresets = category === 'mobil' ? GENZ_NICKNAMES_MOBIL : GENZ_NICKNAMES_MOTOR;
+
+  const handleGenerateGenZNickname = () => {
+    const list = category === 'mobil' ? GENZ_NICKNAMES_MOBIL : GENZ_NICKNAMES_MOTOR;
+    const random = list[Math.floor(Math.random() * list.length)];
+    setNickname(random);
+  };
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={initialData ? 'Edit Data Kendaraan' : 'Tambah Kendaraan'}
-      size="lg"
+      title={initialData ? 'Edit Data Kendaraan' : 'Tambah Kendaraan Baru'}
+      size="md"
       footer={
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex justify-end gap-3 w-full">
           <Button variant="ghost" onClick={onClose} disabled={isLoading}>
             Batal
           </Button>
@@ -255,18 +265,24 @@ export function AddVehicleModal({ isOpen, onClose, onSubmit, initialData }: AddV
       }
     >
       <form id="add-vehicle-form" onSubmit={handleSubmit} className="space-y-5">
-        {/* ── Photo Upload Zone ── */}
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center justify-between">
-            <span>Foto Kendaraan</span>
-            <span className="text-xs text-slate-400 font-normal">Tersimpan ke Database</span>
-          </label>
+        {/* Global Error Banner */}
+        {globalError && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-center gap-2 text-red-700 text-xs font-medium">
+            <AlertCircle size={16} className="shrink-0" />
+            <span>{globalError}</span>
+          </div>
+        )}
 
+        {/* ── Photo Upload Section ── */}
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            Foto Kendaraan
+          </label>
           <input
-            ref={fileInputRef}
             type="file"
-            accept="image/*"
+            ref={fileInputRef}
             onChange={handleFileChange}
+            accept="image/jpeg,image/png,image/webp"
             className="hidden"
           />
 
@@ -277,14 +293,14 @@ export function AddVehicleModal({ isOpen, onClose, onSubmit, initialData }: AddV
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="bg-white text-slate-800 p-2.5 rounded-full text-xs font-bold shadow hover:bg-slate-100 flex items-center gap-1.5 px-3"
+                  className="bg-white text-slate-800 p-2.5 rounded-full text-xs font-bold shadow hover:bg-slate-100 flex items-center gap-1.5 px-3 cursor-pointer"
                 >
                   <Camera size={15} /> Ubah Foto
                 </button>
                 <button
                   type="button"
                   onClick={() => setPhotoUrl('')}
-                  className="bg-red-600 text-white p-2.5 rounded-full text-xs font-bold shadow hover:bg-red-700 flex items-center gap-1.5 px-3"
+                  className="bg-red-600 text-white p-2.5 rounded-full text-xs font-bold shadow hover:bg-red-700 flex items-center gap-1.5 px-3 cursor-pointer"
                 >
                   <Trash2 size={15} /> Hapus
                 </button>
@@ -334,7 +350,7 @@ export function AddVehicleModal({ isOpen, onClose, onSubmit, initialData }: AddV
                   setBrand('');
                 }}
                 className={[
-                  'flex flex-col items-center justify-center gap-2 py-4 rounded-xl border-2 transition-all font-medium',
+                  'flex flex-col items-center justify-center gap-2 py-4 rounded-xl border-2 transition-all font-medium cursor-pointer',
                   category === opt.value
                     ? 'border-blue-500 bg-blue-50 text-blue-700'
                     : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50',
@@ -351,226 +367,281 @@ export function AddVehicleModal({ isOpen, onClose, onSubmit, initialData }: AddV
           </div>
         </div>
 
-        {/* ── Nickname Ala Gen Z ── */}
-        <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-4 rounded-2xl border border-purple-150 space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-              <Sparkles size={15} className="text-purple-600 animate-pulse" />
-              Nama Panggilan / Nickname (Ala Gen Z ✨)
+        {/* ── Fuel Type Interactive Slider Switch ── */}
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            Tipe Bahan Bakar / Sumber Daya
+          </label>
+          <div className="relative p-1 bg-slate-200/80 rounded-2xl flex items-center shadow-inner cursor-pointer select-none">
+            {/* Animated Slider Highlight background */}
+            <div
+              className={[
+                'absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-xl transition-all duration-300 shadow-md',
+                fuelType === 'ev'
+                  ? 'left-[calc(50%+2px)] bg-gradient-to-r from-emerald-500 to-teal-600'
+                  : 'left-1 bg-gradient-to-r from-amber-500 to-orange-600',
+              ].join(' ')}
+            />
+
+            <button
+              type="button"
+              onClick={() => setFuelType('bensin')}
+              className={[
+                'relative z-10 flex-1 py-3 text-xs font-extrabold flex items-center justify-center gap-2 transition-colors duration-200 cursor-pointer',
+                fuelType === 'bensin' ? 'text-white' : 'text-slate-600 hover:text-slate-900',
+              ].join(' ')}
+            >
+              <Fuel size={16} />
+              <span>⛽ Bensin / BBM</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setFuelType('ev')}
+              className={[
+                'relative z-10 flex-1 py-3 text-xs font-extrabold flex items-center justify-center gap-2 transition-colors duration-200 cursor-pointer',
+                fuelType === 'ev' ? 'text-white' : 'text-slate-600 hover:text-slate-900',
+              ].join(' ')}
+            >
+              <Zap size={16} />
+              <span>⚡ Kendaraan Listrik (EV)</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ── Nickname Field (Optional GenZ Feature) ── */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-sm font-semibold text-slate-700">
+              Nama Panggilan / Nickname (Opsional)
             </label>
-            <span className="text-[10px] text-purple-600 font-semibold bg-purple-100 px-2 py-0.5 rounded-full">
-              Keren & Estetik
-            </span>
+
+            <button
+              type="button"
+              onClick={handleGenerateGenZNickname}
+              className="text-[11px] font-extrabold text-blue-600 hover:text-blue-700 flex items-center gap-1 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200 hover:bg-blue-100 transition-colors cursor-pointer"
+            >
+              <Sparkles size={13} className="text-amber-500" />
+              <span>Acak Gen-Z</span>
+            </button>
           </div>
 
           <input
             type="text"
-            className="input-field text-xs bg-white border-purple-200 focus:border-purple-500 font-semibold"
-            placeholder='Contoh: "Black Mamba", "Mio Smile", "Si Merah", "Zenix Prime"'
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
+            placeholder="Contoh: Si Merah, Zenix Prime, Starboy"
+            className="input-field"
           />
-
-          {/* Preset Suggestions */}
-          <div>
-            <p className="text-[11px] font-semibold text-slate-500 mb-1.5">Inspirasi Panggilan Keren:</p>
-            <div className="flex flex-wrap gap-1.5">
-              {nicknamePresets.map((preset) => (
-                <button
-                  key={preset}
-                  type="button"
-                  onClick={() => setNickname(preset)}
-                  className="text-[11px] bg-white hover:bg-purple-600 hover:text-white text-purple-700 font-bold px-2.5 py-1 rounded-lg border border-purple-200 transition-all shadow-2xs"
-                >
-                  ✨ {preset}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
 
-        {/* ── STNK Information (Nomor STNK & Masa Berlaku / Expired Date) ── */}
-        <div className="bg-amber-50/60 p-4 rounded-2xl border border-amber-200/80 space-y-3">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
-              <ShieldAlert size={16} className="text-amber-600" />
-              Informasi STNK & Pajak Kendaraan
-            </label>
-            <span className="text-[10px] text-amber-700 font-semibold bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200">
-              Pengingat Otomatis 90 Hari
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Nomor STNK / Registrasi (Opsional)
-              </label>
-              <input
-                type="text"
-                className="input-field text-xs uppercase bg-white border-amber-200 focus:border-amber-500 font-mono"
-                placeholder="Contoh: 12345678/SKUM/2025"
-                value={stnkNumber}
-                onChange={(e) => setStnkNumber(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Masa Berlaku STNK / Pajak
-              </label>
-              <input
-                type="date"
-                className="input-field text-xs bg-white border-amber-200 focus:border-amber-500 font-semibold text-slate-800"
-                value={stnkExpiryDate}
-                onChange={(e) => setStnkExpiryDate(e.target.value)}
-              />
-            </div>
-          </div>
-          <p className="text-[11px] text-amber-800/80">
-            💡 Dashboard akan otomatis menampilkan peringatan jika masa berlaku STNK tersisa 3 bulan (90 hari) atau kurang.
-          </p>
-        </div>
-
-        {/* ── License Plate ── */}
+        {/* ── License Plate Field ── */}
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-1.5">
             Plat Nomor <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
-            className={`input-field uppercase tracking-widest ${errors.license_plate ? 'error' : ''}`}
-            placeholder="B 1234 ABC"
             value={licensePlate}
             onChange={(e) => {
               setLicensePlate(e.target.value.toUpperCase());
-              if (errors.license_plate) setErrors((p) => ({ ...p, license_plate: undefined }));
+              if (errors.license_plate) {
+                setErrors((prev) => ({ ...prev, license_plate: undefined }));
+              }
             }}
-            maxLength={12}
-            style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, fontSize: '1.1rem' }}
+            placeholder="Contoh: B 1234 ABC"
+            className={[
+              'input-field font-mono font-bold tracking-widest uppercase text-base',
+              errors.license_plate ? 'border-red-500 focus:border-red-500' : '',
+            ].join(' ')}
           />
           {errors.license_plate && (
-            <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
-              <AlertCircle size={12} /> {errors.license_plate}
+            <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+              <AlertCircle size={13} />
+              {errors.license_plate}
             </p>
           )}
         </div>
 
-        {/* ── Brand ── */}
+        {/* ── Brand Field ── */}
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-            Merek <span className="text-red-500">*</span>
+            Merek Kendaraan <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
-            className={`input-field ${errors.brand ? 'error' : ''}`}
-            placeholder="Contoh: Toyota, Honda, Yamaha"
             value={brand}
-            list="brand-suggestions"
             onChange={(e) => {
               setBrand(e.target.value);
-              if (errors.brand) setErrors((p) => ({ ...p, brand: undefined }));
+              if (errors.brand) {
+                setErrors((prev) => ({ ...prev, brand: undefined }));
+              }
             }}
+            placeholder={category === 'mobil' ? 'Contoh: Toyota, Honda' : 'Contoh: Honda, Yamaha'}
+            className={[
+              'input-field mb-2',
+              errors.brand ? 'border-red-500 focus:border-red-500' : '',
+            ].join(' ')}
           />
-          <datalist id="brand-suggestions">
-            {popularBrands.map((b) => (
-              <option key={b} value={b} />
-            ))}
-          </datalist>
           {errors.brand && (
-            <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
-              <AlertCircle size={12} /> {errors.brand}
+            <p className="mb-2 text-xs text-red-600 flex items-center gap-1 font-medium">
+              <AlertCircle size={13} />
+              {errors.brand}
             </p>
           )}
+
+          <div className="flex flex-wrap gap-1.5">
+            {popularBrands.map((b) => (
+              <button
+                key={b}
+                type="button"
+                onClick={() => {
+                  setBrand(b);
+                  if (errors.brand) {
+                    setErrors((prev) => ({ ...prev, brand: undefined }));
+                  }
+                }}
+                className={[
+                  'px-2.5 py-1 text-xs rounded-lg border transition-all font-medium cursor-pointer',
+                  brand === b
+                    ? 'border-blue-500 bg-blue-50 text-blue-700 font-bold'
+                    : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50',
+                ].join(' ')}
+              >
+                {b}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* ── Model + Variant ── */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* ── Model & Variant Grid ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">
               Model <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              className={`input-field ${errors.model ? 'error' : ''}`}
-              placeholder="Avanza, Vario, dll"
               value={model}
               onChange={(e) => {
                 setModel(e.target.value);
-                if (errors.model) setErrors((p) => ({ ...p, model: undefined }));
+                if (errors.model) {
+                  setErrors((prev) => ({ ...prev, model: undefined }));
+                }
               }}
+              placeholder={category === 'mobil' ? 'Contoh: Avanza, Civic' : 'Contoh: NMAX, Beat'}
+              className={[
+                'input-field',
+                errors.model ? 'border-red-500 focus:border-red-500' : '',
+              ].join(' ')}
             />
             {errors.model && (
-              <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
-                <AlertCircle size={12} /> {errors.model}
+              <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                <AlertCircle size={13} />
+                {errors.model}
               </p>
             )}
           </div>
+
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-              Varian <span className="text-slate-400 font-normal">(opsional)</span>
+              Varian / Tipe (Opsional)
             </label>
             <input
               type="text"
-              className="input-field"
-              placeholder="1.3 G MT, 150cc, dll"
               value={variant}
               onChange={(e) => setVariant(e.target.value)}
+              placeholder="Contoh: 1.5 G CVT, Connected"
+              className="input-field"
             />
           </div>
         </div>
 
-        {/* ── Year + Mileage ── */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* ── Year & Mileage Grid ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-              Tahun Produksi <span className="text-red-500">*</span>
+              Tahun Pembuatan <span className="text-red-500">*</span>
             </label>
             <select
-              className="input-field"
               value={year}
               onChange={(e) => setYear(Number(e.target.value))}
+              className="input-field bg-white"
             >
               {YEARS.map((y) => (
-                <option key={y} value={y}>{y}</option>
+                <option key={y} value={y}>
+                  {y}
+                </option>
               ))}
             </select>
           </div>
+
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-              Kilometer Saat Ini <span className="text-red-500">*</span>
+              Odometer KM Terakhir <span className="text-red-500">*</span>
             </label>
-            <div className="relative">
-              <input
-                type="number"
-                className={`input-field pr-10 ${errors.current_mileage ? 'error' : ''}`}
-                placeholder="0"
-                value={mileage}
-                min={0}
-                onChange={(e) => {
-                  setMileage(e.target.value);
-                  if (errors.current_mileage) setErrors((p) => ({ ...p, current_mileage: undefined }));
-                }}
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-medium">
-                km
-              </span>
-            </div>
+            <input
+              type="number"
+              value={mileage}
+              onChange={(e) => {
+                setMileage(e.target.value);
+                if (errors.current_mileage) {
+                  setErrors((prev) => ({ ...prev, current_mileage: undefined }));
+                }
+              }}
+              placeholder="Contoh: 45000"
+              min="0"
+              step="1"
+              className={[
+                'input-field',
+                errors.current_mileage ? 'border-red-500 focus:border-red-500' : '',
+              ].join(' ')}
+            />
             {errors.current_mileage && (
-              <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
-                <AlertCircle size={12} /> {errors.current_mileage}
+              <p className="mt-1 text-xs text-red-600 flex items-center gap-1 font-medium">
+                <AlertCircle size={13} />
+                {errors.current_mileage}
               </p>
             )}
           </div>
         </div>
 
-        {/* Global Error */}
-        {globalError && (
-          <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-            <AlertCircle size={16} className="shrink-0 mt-0.5" />
-            {globalError}
+        {/* ── STNK Information Section ── */}
+        <div className="bg-slate-100/70 border border-slate-200 rounded-2xl p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <ShieldAlert size={16} className="text-blue-600 shrink-0" />
+            <h4 className="text-xs font-extrabold text-slate-800">
+              Informasi STNK & Pajak Kendaraan (Opsional)
+            </h4>
           </div>
-        )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                Nomor STNK / BPKB
+              </label>
+              <input
+                type="text"
+                value={stnkNumber}
+                onChange={(e) => setStnkNumber(e.target.value.toUpperCase())}
+                placeholder="Contoh: 12345678/STNK/2024"
+                className="input-field text-xs font-mono uppercase bg-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                Tanggal Jatuh Tempo Pajak (STNK)
+              </label>
+              <input
+                type="date"
+                value={stnkExpiryDate}
+                onChange={(e) => setStnkExpiryDate(e.target.value)}
+                className="input-field text-xs bg-white"
+              />
+            </div>
+          </div>
+        </div>
       </form>
     </Modal>
   );

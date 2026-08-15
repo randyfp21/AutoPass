@@ -8,6 +8,7 @@ type Vehicle struct {
 	UserID          string    `json:"user_id"`
 	Nickname        *string   `json:"nickname"`
 	Category        string    `json:"category"`
+	FuelType        string    `json:"fuel_type"`
 	LicensePlate    string    `json:"license_plate"`
 	Brand           string    `json:"brand"`
 	Model           string    `json:"model"`
@@ -25,6 +26,7 @@ type Vehicle struct {
 type CreateVehicleRequest struct {
 	Nickname        *string `json:"nickname"`
 	Category        string  `json:"category" binding:"required,oneof=motor mobil"`
+	FuelType        string  `json:"fuel_type"`
 	LicensePlate    string  `json:"license_plate" binding:"required"`
 	Brand           string  `json:"brand" binding:"required"`
 	Model           string  `json:"model" binding:"required"`
@@ -40,6 +42,7 @@ type CreateVehicleRequest struct {
 type UpdateVehicleRequest struct {
 	Nickname        *string `json:"nickname"`
 	Category        string  `json:"category" binding:"required,oneof=motor mobil"`
+	FuelType        string  `json:"fuel_type"`
 	LicensePlate    string  `json:"license_plate" binding:"required"`
 	Brand           string  `json:"brand" binding:"required"`
 	Model           string  `json:"model" binding:"required"`
@@ -57,6 +60,7 @@ type VehicleResponse struct {
 	UserID          string    `json:"user_id"`
 	Nickname        *string   `json:"nickname"`
 	Category        string    `json:"category"`
+	FuelType        string    `json:"fuel_type"`
 	LicensePlate    string    `json:"license_plate"`
 	Brand           string    `json:"brand"`
 	Model           string    `json:"model"`

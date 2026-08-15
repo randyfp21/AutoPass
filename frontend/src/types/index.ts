@@ -33,6 +33,7 @@ export interface Vehicle {
   user_id: string;
   nickname?: string;
   category: VehicleCategory;
+  fuel_type?: 'bensin' | 'ev';
   license_plate: string;
   brand: string;
   model: string;
@@ -49,6 +50,7 @@ export interface Vehicle {
 export interface CreateVehicleData {
   nickname?: string;
   category: VehicleCategory;
+  fuel_type?: 'bensin' | 'ev';
   license_plate: string;
   brand: string;
   model: string;
@@ -63,6 +65,7 @@ export interface CreateVehicleData {
 export interface UpdateVehicleData {
   nickname?: string;
   category?: VehicleCategory;
+  fuel_type?: 'bensin' | 'ev';
   license_plate?: string;
   brand?: string;
   model?: string;

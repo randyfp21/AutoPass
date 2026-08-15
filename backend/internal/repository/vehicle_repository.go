@@ -31,9 +31,13 @@ func NewVehicleRepository(db *pgxpool.Pool) VehicleRepository {
 
 // CreateVehicle inserts a new vehicle into the database.
 func (r *vehicleRepository) CreateVehicle(ctx context.Context, vehicle *domain.Vehicle) error {
+	fuelType := vehicle.FuelType
+	if fuelType == "" {
+		fuelType = "bensin"
+	}
 	query := `
-		INSERT INTO vehicles (id, user_id, nickname, category, license_plate, brand, model, variant_type, manufacture_year, current_mileage, photo_url, stnk_number, stnk_expiry_date)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, CASE WHEN $13 = '' THEN NULL ELSE $13::date END)
+		INSERT INTO vehicles (id, user_id, nickname, category, fuel_type, license_plate, brand, model, variant_type, manufacture_year, current_mileage, photo_url, stnk_number, stnk_expiry_date)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, CASE WHEN $14 = '' THEN NULL ELSE $14::date END)
 		RETURNING created_at, updated_at
 	`
 	err := r.db.QueryRow(ctx, query,
@@ -41,6 +45,7 @@ func (r *vehicleRepository) CreateVehicle(ctx context.Context, vehicle *domain.V
 		vehicle.UserID,
 		vehicle.Nickname,
 		vehicle.Category,
+		fuelType,
 		vehicle.LicensePlate,
 		vehicle.Brand,
 		vehicle.Model,
@@ -60,7 +65,7 @@ func (r *vehicleRepository) CreateVehicle(ctx context.Context, vehicle *domain.V
 // GetVehiclesByUserID returns all vehicles belonging to a user.
 func (r *vehicleRepository) GetVehiclesByUserID(ctx context.Context, userID string) ([]*domain.Vehicle, error) {
 	query := `
-		SELECT id, user_id, nickname, category, license_plate, brand, model, variant_type, manufacture_year, current_mileage, photo_url, stnk_number, to_char(stnk_expiry_date, 'YYYY-MM-DD') AS stnk_expiry_date, created_at, updated_at
+		SELECT id, user_id, nickname, category, fuel_type, license_plate, brand, model, variant_type, manufacture_year, current_mileage, photo_url, stnk_number, to_char(stnk_expiry_date, 'YYYY-MM-DD') AS stnk_expiry_date, created_at, updated_at
 		FROM vehicles
 		WHERE user_id = $1
 		ORDER BY created_at DESC
@@ -75,7 +80,7 @@ func (r *vehicleRepository) GetVehiclesByUserID(ctx context.Context, userID stri
 	for rows.Next() {
 		v := &domain.Vehicle{}
 		if err := rows.Scan(
-			&v.ID, &v.UserID, &v.Nickname, &v.Category, &v.LicensePlate, &v.Brand, &v.Model,
+			&v.ID, &v.UserID, &v.Nickname, &v.Category, &v.FuelType, &v.LicensePlate, &v.Brand, &v.Model,
 			&v.VariantType, &v.ManufactureYear, &v.CurrentMileage, &v.PhotoURL,
 			&v.STNKNumber, &v.STNKExpiryDate,
 			&v.CreatedAt, &v.UpdatedAt,
@@ -93,13 +98,13 @@ func (r *vehicleRepository) GetVehiclesByUserID(ctx context.Context, userID stri
 // GetVehicleByID retrieves a single vehicle by its UUID.
 func (r *vehicleRepository) GetVehicleByID(ctx context.Context, id string) (*domain.Vehicle, error) {
 	query := `
-		SELECT id, user_id, nickname, category, license_plate, brand, model, variant_type, manufacture_year, current_mileage, photo_url, stnk_number, to_char(stnk_expiry_date, 'YYYY-MM-DD') AS stnk_expiry_date, created_at, updated_at
+		SELECT id, user_id, nickname, category, fuel_type, license_plate, brand, model, variant_type, manufacture_year, current_mileage, photo_url, stnk_number, to_char(stnk_expiry_date, 'YYYY-MM-DD') AS stnk_expiry_date, created_at, updated_at
 		FROM vehicles
 		WHERE id = $1
 	`
 	v := &domain.Vehicle{}
 	err := r.db.QueryRow(ctx, query, id).Scan(
-		&v.ID, &v.UserID, &v.Nickname, &v.Category, &v.LicensePlate, &v.Brand, &v.Model,
+		&v.ID, &v.UserID, &v.Nickname, &v.Category, &v.FuelType, &v.LicensePlate, &v.Brand, &v.Model,
 		&v.VariantType, &v.ManufactureYear, &v.CurrentMileage, &v.PhotoURL,
 		&v.STNKNumber, &v.STNKExpiryDate,
 		&v.CreatedAt, &v.UpdatedAt,
@@ -115,18 +120,23 @@ func (r *vehicleRepository) GetVehicleByID(ctx context.Context, id string) (*dom
 
 // UpdateVehicle updates all mutable fields for a vehicle.
 func (r *vehicleRepository) UpdateVehicle(ctx context.Context, vehicle *domain.Vehicle) error {
+	fuelType := vehicle.FuelType
+	if fuelType == "" {
+		fuelType = "bensin"
+	}
 	query := `
 		UPDATE vehicles
-		SET nickname = $1, category = $2, license_plate = $3, brand = $4, model = $5,
-		    variant_type = $6, manufacture_year = $7, current_mileage = $8, photo_url = $9,
-		    stnk_number = $10, stnk_expiry_date = CASE WHEN $11 = '' THEN NULL ELSE $11::date END,
+		SET nickname = $1, category = $2, fuel_type = $3, license_plate = $4, brand = $5, model = $6,
+		    variant_type = $7, manufacture_year = $8, current_mileage = $9, photo_url = $10,
+		    stnk_number = $11, stnk_expiry_date = CASE WHEN $12 = '' THEN NULL ELSE $12::date END,
 		    updated_at = CURRENT_TIMESTAMP
-		WHERE id = $12 AND user_id = $13
+		WHERE id = $13 AND user_id = $14
 		RETURNING updated_at
 	`
 	err := r.db.QueryRow(ctx, query,
 		vehicle.Nickname,
 		vehicle.Category,
+		fuelType,
 		vehicle.LicensePlate,
 		vehicle.Brand,
 		vehicle.Model,

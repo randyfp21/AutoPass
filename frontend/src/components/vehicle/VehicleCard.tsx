@@ -107,12 +107,22 @@ export function VehicleCard({ vehicle, serviceCount, lastServiceDate }: VehicleC
           </div>
         )}
 
-        {/* Category badge */}
-        <div className="absolute top-3 left-3">
+        {/* Category & Fuel Type badges */}
+        <div className="absolute top-3 left-3 flex items-center gap-1.5">
           <span
             className={`badge ${vehicle.category === 'mobil' ? 'badge-blue' : 'badge-red'}`}
           >
             {vehicle.category === 'mobil' ? '🚗 Mobil' : '🏍️ Motor'}
+          </span>
+
+          <span
+            className={`badge font-extrabold ${
+              vehicle.fuel_type === 'ev'
+                ? 'bg-emerald-600 text-white border border-emerald-500 shadow-2xs'
+                : 'bg-amber-500 text-white border border-amber-400 shadow-2xs'
+            }`}
+          >
+            {vehicle.fuel_type === 'ev' ? '⚡ EV' : '⛽ Bensin'}
           </span>
         </div>
 

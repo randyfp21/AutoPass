@@ -201,10 +201,20 @@ export function VehicleDetailPage() {
               )}
               {/* Gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-white/40 to-transparent" />
-              {/* Category badge */}
-              <div className="absolute top-4 left-4">
+              {/* Category & Fuel Type badges */}
+              <div className="absolute top-4 left-4 flex items-center gap-2">
                 <span className={`badge ${vehicle.category === 'mobil' ? 'badge-blue' : 'badge-red'}`}>
                   {vehicle.category === 'mobil' ? '🚗 Mobil' : '🏍️ Motor'}
+                </span>
+
+                <span
+                  className={`badge font-extrabold text-xs py-1 px-3 ${
+                    vehicle.fuel_type === 'ev'
+                      ? 'bg-emerald-600 text-white border border-emerald-500 shadow-sm'
+                      : 'bg-amber-500 text-white border border-amber-400 shadow-sm'
+                  }`}
+                >
+                  {vehicle.fuel_type === 'ev' ? '⚡ Kendaraan Listrik (EV)' : '⛽ Bensin / BBM'}
                 </span>
               </div>
             </div>

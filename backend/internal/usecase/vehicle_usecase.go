@@ -40,11 +40,17 @@ func NewVehicleUsecase(vehicleRepo repository.VehicleRepository, redisClient *re
 
 // CreateVehicle creates a new vehicle for the authenticated user.
 func (u *vehicleUsecase) CreateVehicle(ctx context.Context, userID string, req domain.CreateVehicleRequest) (*domain.VehicleResponse, error) {
+	fuelType := req.FuelType
+	if fuelType == "" {
+		fuelType = "bensin"
+	}
+
 	vehicle := &domain.Vehicle{
 		ID:              uuid.New().String(),
 		UserID:          userID,
 		Nickname:        req.Nickname,
 		Category:        req.Category,
+		FuelType:        fuelType,
 		LicensePlate:    req.LicensePlate,
 		Brand:           req.Brand,
 		Model:           req.Model,
@@ -125,8 +131,14 @@ func (u *vehicleUsecase) UpdateVehicle(ctx context.Context, vehicleID, userID st
 		return nil, errors.New("forbidden: vehicle does not belong to this user")
 	}
 
+	fuelType := req.FuelType
+	if fuelType == "" {
+		fuelType = "bensin"
+	}
+
 	vehicle.Nickname = req.Nickname
 	vehicle.Category = req.Category
+	vehicle.FuelType = fuelType
 	vehicle.LicensePlate = req.LicensePlate
 	vehicle.Brand = req.Brand
 	vehicle.Model = req.Model
@@ -180,6 +192,7 @@ func toVehicleResponse(v *domain.Vehicle) *domain.VehicleResponse {
 		UserID:          v.UserID,
 		Nickname:        v.Nickname,
 		Category:        v.Category,
+		FuelType:        v.FuelType,
 		LicensePlate:    v.LicensePlate,
 		Brand:           v.Brand,
 		Model:           v.Model,
