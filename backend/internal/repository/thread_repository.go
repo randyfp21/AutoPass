@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/autopass/backend/internal/domain"
 	"github.com/jackc/pgx/v5"
@@ -60,7 +61,9 @@ func (r *threadRepository) GetThreads(ctx context.Context, currentUserID string,
 	query := `
 		SELECT 
 			t.id, t.user_id, u.full_name, u.username, u.avatar_url, u.role::text,
-			t.vehicle_id, v.brand || ' ' || v.model AS vehicle_name, v.license_plate AS vehicle_plate,
+			t.vehicle_id, 
+			CASE WHEN v.id IS NOT NULL THEN (CASE WHEN v.category = 'mobil' THEN '🚗 Mobil' ELSE '🏍️ Motor' END) || ' · ' || v.brand || ' ' || v.model || COALESCE(' ' || v.variant_type, '') ELSE NULL END AS vehicle_name, 
+			NULL::text AS vehicle_plate,
 			t.content, t.photo_urls, t.category, t.likes_count, t.comments_count, t.bookmarks_count,
 			EXISTS(SELECT 1 FROM thread_likes tl WHERE tl.thread_id = t.id AND tl.user_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END) AS is_liked,
 			EXISTS(SELECT 1 FROM thread_bookmarks tb WHERE tb.thread_id = t.id AND tb.user_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END) AS is_bookmarked,
@@ -103,7 +106,9 @@ func (r *threadRepository) GetThreadByID(ctx context.Context, threadID string, c
 	query := `
 		SELECT 
 			t.id, t.user_id, u.full_name, u.username, u.avatar_url, u.role::text,
-			t.vehicle_id, v.brand || ' ' || v.model AS vehicle_name, v.license_plate AS vehicle_plate,
+			t.vehicle_id, 
+			CASE WHEN v.id IS NOT NULL THEN (CASE WHEN v.category = 'mobil' THEN '🚗 Mobil' ELSE '🏍️ Motor' END) || ' · ' || v.brand || ' ' || v.model || COALESCE(' ' || v.variant_type, '') ELSE NULL END AS vehicle_name, 
+			NULL::text AS vehicle_plate,
 			t.content, t.photo_urls, t.category, t.likes_count, t.comments_count, t.bookmarks_count,
 			EXISTS(SELECT 1 FROM thread_likes tl WHERE tl.thread_id = t.id AND tl.user_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END) AS is_liked,
 			EXISTS(SELECT 1 FROM thread_bookmarks tb WHERE tb.thread_id = t.id AND tb.user_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END) AS is_bookmarked,
@@ -198,7 +203,9 @@ func (r *threadRepository) GetBookmarkedThreads(ctx context.Context, userID stri
 	query := `
 		SELECT 
 			t.id, t.user_id, u.full_name, u.username, u.avatar_url, u.role::text,
-			t.vehicle_id, v.brand || ' ' || v.model AS vehicle_name, v.license_plate AS vehicle_plate,
+			t.vehicle_id, 
+			CASE WHEN v.id IS NOT NULL THEN (CASE WHEN v.category = 'mobil' THEN '🚗 Mobil' ELSE '🏍️ Motor' END) || ' · ' || v.brand || ' ' || v.model || COALESCE(' ' || v.variant_type, '') ELSE NULL END AS vehicle_name, 
+			NULL::text AS vehicle_plate,
 			t.content, t.photo_urls, t.category, t.likes_count, t.comments_count, t.bookmarks_count,
 			EXISTS(SELECT 1 FROM thread_likes tl WHERE tl.thread_id = t.id AND tl.user_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END) AS is_liked,
 			TRUE AS is_bookmarked,
@@ -243,7 +250,9 @@ func (r *threadRepository) GetUserThreads(ctx context.Context, targetUserID stri
 	query := `
 		SELECT 
 			t.id, t.user_id, u.full_name, u.username, u.avatar_url, u.role::text,
-			t.vehicle_id, v.brand || ' ' || v.model AS vehicle_name, v.license_plate AS vehicle_plate,
+			t.vehicle_id, 
+			CASE WHEN v.id IS NOT NULL THEN (CASE WHEN v.category = 'mobil' THEN '🚗 Mobil' ELSE '🏍️ Motor' END) || ' · ' || v.brand || ' ' || v.model || COALESCE(' ' || v.variant_type, '') ELSE NULL END AS vehicle_name, 
+			NULL::text AS vehicle_plate,
 			t.content, t.photo_urls, t.category, t.likes_count, t.comments_count, t.bookmarks_count,
 			EXISTS(SELECT 1 FROM thread_likes tl WHERE tl.thread_id = t.id AND tl.user_id = CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END) AS is_liked,
 			EXISTS(SELECT 1 FROM thread_bookmarks tb WHERE tb.thread_id = t.id AND tb.user_id = CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END) AS is_bookmarked,
@@ -284,28 +293,29 @@ func (r *threadRepository) GetUserThreads(ctx context.Context, targetUserID stri
 func (r *threadRepository) CreateComment(ctx context.Context, c *domain.ThreadComment) error {
 	query := `
 		INSERT INTO thread_comments (id, thread_id, user_id, content)
-		VALUES ($1, CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END, CASE WHEN $3 = '' THEN NULL ELSE $3::uuid END, $4)
+		VALUES ($1, $2, $3, $4)
 		RETURNING created_at, updated_at
 	`
-	err := r.db.QueryRow(ctx, query, c.ID, c.ThreadID, c.UserID, c.Content).Scan(&c.CreatedAt, &c.UpdatedAt)
+	err := r.db.QueryRow(ctx, query, c.ID, c.ThreadID, c.UserID, c.Content).
+		Scan(&c.CreatedAt, &c.UpdatedAt)
 	if err != nil {
 		return err
 	}
-	_, _ = r.db.Exec(ctx, `UPDATE threads SET comments_count = comments_count + 1 WHERE id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END`, c.ThreadID)
+	_, _ = r.db.Exec(ctx, `UPDATE threads SET comments_count = comments_count + 1 WHERE id = $1`, c.ThreadID)
 	return nil
 }
 
 func (r *threadRepository) GetThreadComments(ctx context.Context, threadID string, currentUserID string) ([]*domain.CommentResponse, error) {
 	query := `
 		SELECT 
-			tc.id, tc.thread_id, tc.user_id, u.full_name, u.username, u.avatar_url, u.role::text,
-			tc.content, tc.likes_count,
-			EXISTS(SELECT 1 FROM comment_likes cl WHERE cl.comment_id = tc.id AND cl.user_id = CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END) AS is_liked,
-			tc.created_at
-		FROM thread_comments tc
-		JOIN users u ON tc.user_id = u.id
-		WHERE tc.thread_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END
-		ORDER BY tc.created_at ASC
+			c.id, c.thread_id, c.user_id, u.full_name, u.username, u.avatar_url, u.role::text,
+			c.content, c.likes_count,
+			EXISTS(SELECT 1 FROM thread_likes tl WHERE tl.thread_id = c.id AND tl.user_id = CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END) AS is_liked,
+			c.created_at
+		FROM thread_comments c
+		JOIN users u ON c.user_id = u.id
+		WHERE c.thread_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END
+		ORDER BY c.created_at ASC
 	`
 	rows, err := r.db.Query(ctx, query, threadID, currentUserID)
 	if err != nil {
@@ -329,20 +339,20 @@ func (r *threadRepository) GetThreadComments(ctx context.Context, threadID strin
 
 func (r *threadRepository) ToggleLikeComment(ctx context.Context, commentID string, userID string) (bool, error) {
 	var exists bool
-	checkQuery := `SELECT EXISTS(SELECT 1 FROM comment_likes WHERE comment_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END AND user_id = CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END)`
+	checkQuery := `SELECT EXISTS(SELECT 1 FROM thread_likes WHERE thread_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END AND user_id = CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END)`
 	if err := r.db.QueryRow(ctx, checkQuery, commentID, userID).Scan(&exists); err != nil {
 		return false, err
 	}
 
 	if exists {
-		_, err := r.db.Exec(ctx, `DELETE FROM comment_likes WHERE comment_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END AND user_id = CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END`, commentID, userID)
+		_, err := r.db.Exec(ctx, `DELETE FROM thread_likes WHERE thread_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END AND user_id = CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END`, commentID, userID)
 		if err != nil {
 			return false, err
 		}
 		_, _ = r.db.Exec(ctx, `UPDATE thread_comments SET likes_count = GREATEST(0, likes_count - 1) WHERE id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END`, commentID)
 		return false, nil
 	} else {
-		_, err := r.db.Exec(ctx, `INSERT INTO comment_likes (comment_id, user_id) VALUES (CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END, CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END)`, commentID, userID)
+		_, err := r.db.Exec(ctx, `INSERT INTO thread_likes (thread_id, user_id) VALUES (CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END, CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END)`, commentID, userID)
 		if err != nil {
 			return false, err
 		}
@@ -353,41 +363,44 @@ func (r *threadRepository) ToggleLikeComment(ctx context.Context, commentID stri
 
 func (r *threadRepository) CreateNotification(ctx context.Context, recipientID, actorID string, threadID, commentID *string, notifType string) error {
 	if recipientID == actorID {
-		return nil // Don't notify self
+		return nil
 	}
+
 	threadIDStr := ""
 	if threadID != nil {
 		threadIDStr = *threadID
 	}
-	commentIDStr := ""
-	if commentID != nil {
-		commentIDStr = *commentID
+
+	actorUser, _ := r.db.Exec(ctx, "SELECT full_name FROM users WHERE id = $1", actorID)
+	_ = actorUser
+
+	message := "melakukan interaksi pada postingan Anda"
+	switch notifType {
+	case "like_thread":
+		message = "menyukai thread Anda"
+	case "comment_thread":
+		message = "membalas thread Anda"
 	}
 
 	query := `
-		INSERT INTO notifications (recipient_id, actor_id, thread_id, comment_id, type)
-		VALUES (
-			CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END,
-			CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END,
-			CASE WHEN $3 = '' THEN NULL ELSE $3::uuid END,
-			CASE WHEN $4 = '' THEN NULL ELSE $4::uuid END,
-			$5::notification_type
-		)
+		INSERT INTO thread_notifications (id, user_id, actor_id, thread_id, type, message)
+		VALUES ($1, CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END, CASE WHEN $3 = '' THEN NULL ELSE $3::uuid END, CASE WHEN $4 = '' THEN NULL ELSE $4::uuid END, $5, $6)
 	`
-	_, err := r.db.Exec(ctx, query, recipientID, actorID, threadIDStr, commentIDStr, notifType)
+	id := fmt.Sprintf("%d", time.Now().UnixNano())
+	_, err := r.db.Exec(ctx, query, id, recipientID, actorID, threadIDStr, notifType, message)
 	return err
 }
 
 func (r *threadRepository) GetUserNotifications(ctx context.Context, userID string) ([]*domain.NotificationResponse, error) {
 	query := `
 		SELECT 
-			n.id, n.recipient_id, n.actor_id, u.full_name AS actor_name, u.username AS actor_username, u.avatar_url AS actor_avatar,
-			n.thread_id, LEFT(t.content, 80) AS thread_preview,
-			n.comment_id, n.type::text, n.is_read, n.created_at
-		FROM notifications n
+			n.id, n.user_id, n.actor_id, u.full_name, u.username, u.avatar_url,
+			n.thread_id, LEFT(t.content, 60) AS thread_preview,
+			n.type, n.is_read, n.created_at
+		FROM thread_notifications n
 		JOIN users u ON n.actor_id = u.id
 		LEFT JOIN threads t ON n.thread_id = t.id
-		WHERE n.recipient_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END
+		WHERE n.user_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END
 		ORDER BY n.created_at DESC
 		LIMIT 50
 	`
@@ -402,15 +415,12 @@ func (r *threadRepository) GetUserNotifications(ctx context.Context, userID stri
 		nr := &domain.NotificationResponse{}
 		if err := rows.Scan(
 			&nr.ID, &nr.RecipientID, &nr.ActorID, &nr.ActorName, &nr.ActorUsername, &nr.ActorAvatar,
-			&nr.ThreadID, &nr.ThreadPreview, &nr.CommentID, &nr.Type, &nr.IsRead, &nr.CreatedAt,
+			&nr.ThreadID, &nr.ThreadPreview,
+			&nr.Type, &nr.IsRead, &nr.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
 		result = append(result, nr)
 	}
-
-	// Mark as read
-	_, _ = r.db.Exec(ctx, `UPDATE notifications SET is_read = TRUE WHERE recipient_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END`, userID)
-
 	return result, nil
 }

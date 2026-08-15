@@ -124,12 +124,12 @@ export function ThreadComposerModal({
           </select>
         </div>
 
-        {/* Optional Vehicle Tag Selector */}
+        {/* Optional Vehicle Tag Selector (Privacy Protected: Category, Brand, Model & Variant ONLY) */}
         {vehicles.length > 0 && (
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
               <Car size={13} className="text-purple-600" />
-              Sematkan Kendaraanmu (Opsional):
+              Sematkan Spesifikasi Kendaraan (Privasi Terjaga):
             </label>
             <select
               value={selectedVehicleId}
@@ -139,7 +139,7 @@ export function ThreadComposerModal({
               <option value="">-- Tanpa Tag Kendaraan --</option>
               {vehicles.map((v) => (
                 <option key={v.id} value={v.id}>
-                  {v.category === 'mobil' ? '🚗' : '🏍️'} {v.brand} {v.model} ({v.license_plate})
+                  {v.category === 'mobil' ? '🚗 Mobil' : '🏍️ Motor'} · {v.brand} {v.model} {v.variant_type ? `(${v.variant_type})` : ''}
                 </option>
               ))}
             </select>
@@ -176,7 +176,7 @@ export function ThreadComposerModal({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="text-xs text-purple-600 font-bold hover:underline flex items-center gap-1"
+                className="text-xs text-purple-600 font-bold hover:underline flex items-center gap-1 cursor-pointer"
               >
                 <Camera size={13} /> Tambah Foto
               </button>
@@ -200,7 +200,7 @@ export function ThreadComposerModal({
                   <button
                     type="button"
                     onClick={() => setPhotoUrls((prev) => prev.filter((_, i) => i !== idx))}
-                    className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                   >
                     <Trash2 size={11} />
                   </button>
@@ -218,7 +218,7 @@ export function ThreadComposerModal({
           <Button
             type="submit"
             isLoading={isLoading}
-            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold"
+            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold cursor-pointer"
             leftIcon={<Sparkles size={15} />}
           >
             Post Thread

@@ -154,16 +154,11 @@ export function ThreadCard({
           </div>
         </div>
 
-        {/* Optional Vehicle Chip */}
+        {/* Privacy Protected Vehicle Tag (Category, Brand, Model, Variant ONLY - NO License Plate) */}
         {thread.vehicle_name && (
-          <div className="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1 rounded-xl text-xs text-slate-800">
-            <Car size={14} className="text-purple-600" />
-            <span className="font-bold">{thread.vehicle_name}</span>
-            {thread.vehicle_plate && (
-              <span className="font-mono text-[10px] bg-amber-300 text-slate-900 font-bold px-1.5 py-0.5 rounded border border-amber-400">
-                {thread.vehicle_plate}
-              </span>
-            )}
+          <div className="inline-flex items-center gap-2 bg-purple-50/70 border border-purple-200/60 px-3 py-1 rounded-xl text-xs text-purple-900 font-semibold shadow-2xs">
+            <Car size={14} className="text-purple-600 shrink-0" />
+            <span>{thread.vehicle_name}</span>
           </div>
         )}
 
