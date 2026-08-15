@@ -19,6 +19,7 @@ import {
   Zap,
   Shield,
   Award,
+  Info,
 } from 'lucide-react';
 import { maintenanceService } from '../services/maintenanceService';
 import { vehicleService } from '../services/vehicleService';
@@ -488,22 +489,53 @@ export function TelemetryStudioPage() {
 
       {/* ── Main Studio Grid ── */}
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
-        {/* Left Column: Live Canvas Viewport Container */}
-        <div className="lg:col-span-7 flex flex-col items-center justify-center bg-slate-900 rounded-3xl p-6 border border-slate-800 shadow-xl relative">
-          <div className="w-full flex items-center justify-between mb-4">
-            <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Maximize2 size={14} className="text-purple-400" /> Live High-Res Canvas ({loadedImages.length} Foto Kolase Vertikal)
-            </span>
-            <span className="text-[11px] font-mono text-purple-300 bg-purple-950/80 px-2.5 py-1 rounded-full border border-purple-800/60">
+        {/* Left Column: Refactored Ultra-Clean Canvas Viewport Card */}
+        <div className="lg:col-span-7 bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4">
+          {/* Header Status Bar above Canvas */}
+          <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                <Maximize2 size={16} />
+              </div>
+              <div>
+                <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                  Kanvas Telemetri Pratinjau
+                </h3>
+                <p className="text-[11px] text-slate-500 font-medium">
+                  {loadedImages.length === 0
+                    ? '0 Foto · Menggunakan background shader telemetri'
+                    : `${loadedImages.length} Foto Kolase Vertikal Tersusun`}
+                </p>
+              </div>
+            </div>
+
+            <span className="text-[11px] font-mono font-bold text-purple-700 bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
               Rasio {ratio}
             </span>
           </div>
 
-          <div className="w-full flex justify-center items-center overflow-hidden">
+          {/* Dark Glass Canvas Studio Viewport Box */}
+          <div className="relative bg-slate-950 rounded-2xl p-4 sm:p-6 border border-slate-800 shadow-2xl flex items-center justify-center min-h-[440px] max-h-[600px] w-full overflow-hidden group">
             <canvas
               ref={canvasRef}
-              className="rounded-2xl shadow-2xl border border-slate-700 max-h-[580px] object-contain transition-all"
+              className="rounded-xl shadow-2xl max-h-[520px] max-w-full object-contain transition-transform duration-300 transform-gpu group-hover:scale-[1.01]"
             />
+
+            {/* Helper Floating Badge when 0 Photos */}
+            {loadedImages.length === 0 && (
+              <div className="absolute bottom-4 inset-x-6 text-center">
+                <div className="inline-flex items-center gap-2 text-[11px] font-bold text-slate-300 bg-slate-900/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-slate-700 shadow-lg">
+                  <Info size={14} className="text-amber-400 shrink-0" />
+                  <span>Tekan "📷 Kamera" atau "🖼️ Galeri" untuk menambah foto kolase</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Quick Studio Info */}
+          <div className="pt-2 flex items-center justify-between text-xs text-slate-500 font-medium">
+            <span>Resolusi Tinggi HD (1080p Export)</span>
+            <span className="text-purple-600 font-bold">Siap Dicetak & Bagikan</span>
           </div>
         </div>
 
