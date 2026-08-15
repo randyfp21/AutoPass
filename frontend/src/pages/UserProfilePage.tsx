@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { MessageSquare, Mail, ArrowLeft, AtSign, User as UserIcon, Edit3, Quote } from 'lucide-react';
+import { MessageSquare, Mail, ArrowLeft, AtSign, User as UserIcon, Edit3 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { threadsService } from '../services/threadsService';
 import { ThreadCard } from '../components/threads/ThreadCard';
@@ -126,7 +126,7 @@ export function UserProfilePage() {
               </div>
             )}
 
-            <div className="space-y-1.5 flex-1 min-w-0">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center justify-center sm:justify-start gap-2">
                 <h2 className="text-xl font-extrabold text-slate-900 tracking-tight font-mono">
                   {displayUsername}
@@ -136,9 +136,9 @@ export function UserProfilePage() {
                 {displayName}
               </p>
 
-              {/* Bio Section */}
-              <p className="text-xs text-slate-600 leading-relaxed font-medium bg-slate-50 border border-slate-100 p-2.5 rounded-xl italic">
-                "{userBio || 'Pecinta otomotif & pengguna setia Odomtr.'}"
+              {/* Bio Section - Minimal, Clean Muted Text with Vertical Spacing */}
+              <p className="text-xs text-slate-500 font-normal leading-relaxed my-2.5">
+                {userBio || 'Pecinta otomotif & pengguna setia Odomtr.'}
               </p>
 
               <div className="pt-1 flex flex-wrap items-center justify-center sm:justify-start gap-2">
