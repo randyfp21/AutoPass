@@ -16,6 +16,10 @@ import {
   Car,
   Check,
   Star,
+  MessageSquare,
+  Bookmark,
+  Heart,
+  Share2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -43,14 +47,15 @@ export function LandingPage() {
 
           {/* Nav Links (Desktop) */}
           <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-slate-600">
+            <a href="#threads" className="hover:text-purple-600 transition-colors flex items-center gap-1">
+              <Sparkles size={13} className="text-purple-600" />
+              Odo Threads
+            </a>
             <a href="#fitur" className="hover:text-blue-600 transition-colors">
               Fitur Utama
             </a>
             <a href="#telemetry" className="hover:text-blue-600 transition-colors">
               Odo Telemetry
-            </a>
-            <a href="#threads" className="hover:text-blue-600 transition-colors">
-              Odo Threads
             </a>
             <a href="#pwa" className="hover:text-blue-600 transition-colors">
               Aplikasi PWA
@@ -89,7 +94,7 @@ export function LandingPage() {
       </header>
 
       {/* ── 2. Hero Section ── */}
-      <section className="relative pt-12 pb-20 lg:pt-20 lg:pb-28 overflow-hidden bg-gradient-to-b from-white via-slate-50 to-slate-100 border-b border-slate-200/80">
+      <section className="relative pt-12 pb-16 lg:pt-20 lg:pb-24 overflow-hidden bg-gradient-to-b from-white via-slate-50 to-slate-100 border-b border-slate-200/80">
         {/* Ambient background decoration */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-1/3 right-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -257,7 +262,132 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── 4. Main Feature Highlights Section ── */}
+      {/* ── 4. Odo Threads Dedicated Social Media Showcase Section ── */}
+      <section id="threads" className="py-16 sm:py-24 bg-gradient-to-br from-slate-900 via-purple-950 to-slate-950 text-white relative overflow-hidden border-b border-purple-900/50">
+        {/* Glow Effects */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto space-y-4">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-1.5 rounded-full text-xs font-black text-white shadow-md">
+              <Sparkles size={14} className="text-yellow-300 animate-pulse" />
+              <span>Odo Threads — Media Sosial Otomotif Se-Indonesia</span>
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+              Bukan Sekadar Catat Servis. <br />
+              <span className="bg-gradient-to-r from-purple-400 via-pink-300 to-amber-300 bg-clip-text text-transparent">
+                Tempat Bicara & Berbagi Cerita Otomotif!
+              </span>
+            </h2>
+            <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-normal max-w-2xl mx-auto">
+              Terhubung langsung dengan komunitas pemilik kendaraan pribadi, komunitas touring, mekanik, serta bengkel terverifikasi di seluruh Indonesia.
+            </p>
+          </div>
+
+          {/* Feature Highlight Cards & Mock Feed Split */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left: 4 Features List (7 Cols) */}
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-3xl space-y-2.5 hover:bg-white/10 transition-colors">
+                <div className="w-10 h-10 rounded-2xl bg-purple-500/20 text-purple-300 flex items-center justify-center font-black text-lg">
+                  💬
+                </div>
+                <h3 className="font-extrabold text-white text-base">Diskusi & Tanya Jawab</h3>
+                <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                  Tanya saran kendala mesin, rekomendasi sparepart ori/aftermarket, hingga pilihan oli terbaik langsung dari pemilik kendaraan yang berpengalaman.
+                </p>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-3xl space-y-2.5 hover:bg-white/10 transition-colors">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-black text-lg">
+                  🚀
+                </div>
+                <h3 className="font-extrabold text-white text-base">Instant Telemetry Embed</h3>
+                <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                  Setiap story telemetri visual yang dibuat di Odo Telemetry Studio dapat langsung diposting ke Odo Threads hanya dengan 1 klik!
+                </p>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-3xl space-y-2.5 hover:bg-white/10 transition-colors">
+                <div className="w-10 h-10 rounded-2xl bg-pink-500/20 text-pink-300 flex items-center justify-center font-black text-lg">
+                  ❤️
+                </div>
+                <h3 className="font-extrabold text-white text-base">Suka, Komentar, & Bookmark</h3>
+                <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                  Apresiasi postingan sesama pecinta otomotif, tinggalkan komentar diskusi, atau simpan postingan ke koleksi bookmark pribadi Anda.
+                </p>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-3xl space-y-2.5 hover:bg-white/10 transition-colors">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-300 flex items-center justify-center font-black text-lg">
+                  👤
+                </div>
+                <h3 className="font-extrabold text-white text-base">Profil Otomotif & Garasi</h3>
+                <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                  Tampilkan seluruh koleksi kendaraanmu, total jarak odometer yang sudah ditempuh, serta postingan riwayat servicemu di profil `@username`.
+                </p>
+              </div>
+            </div>
+
+            {/* Right: Mock Interactive Odo Threads Post Card (5 Cols) */}
+            <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 flex items-center justify-center font-extrabold text-xs text-white shadow-xs">
+                    DN
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-white flex items-center gap-1">
+                      @dnazrl <span className="text-[10px] text-blue-400 font-mono">✓ Verified</span>
+                    </h4>
+                    <p className="text-[10px] text-slate-400 font-medium">Honda Vario 160 · 2 jam yang lalu</p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-mono font-extrabold text-purple-300 bg-purple-950 px-2 py-0.5 rounded border border-purple-800">
+                  MOTOR
+                </span>
+              </div>
+
+              <p className="text-xs text-slate-200 leading-relaxed">
+                "Servis rutin 45.000 KM di Bengkel Resmi Partner selesai! Ganti oli mesin, filter oli, dan tune up CVT. Motor kembali halus & responsif 🔥 #OdoThreads #Vario160"
+              </p>
+
+              {/* Sample Telemetry Canvas Image */}
+              <div className="bg-slate-950 rounded-2xl p-4 border border-slate-800 text-center space-y-2">
+                <span className="text-[10px] font-mono text-purple-400 font-extrabold uppercase tracking-wider">
+                  ✦ ODO TELEMETRY STORY ATTACHMENT ✦
+                </span>
+                <div className="bg-gradient-to-b from-purple-900/60 to-indigo-950/80 p-4 rounded-xl border border-purple-800/80 text-left">
+                  <p className="text-[10px] text-purple-200">Wah Perjalanan Vario160 sudah</p>
+                  <p className="text-2xl font-black font-tech text-white">45.000 KM</p>
+                  <p className="text-[10px] italic text-amber-300 font-semibold">Waktunya service rutin !</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 text-xs text-slate-400 font-semibold">
+                <span className="text-purple-400 flex items-center gap-1">❤️ 42 Suka</span>
+                <span className="text-slate-300 flex items-center gap-1">💬 14 Komentar</span>
+                <span className="text-amber-400 flex items-center gap-1">🔖 Disimpan</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom CTA to Threads */}
+          <div className="text-center pt-4">
+            <button
+              onClick={() => navigate('/threads')}
+              className="py-3.5 px-8 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-full text-xs font-black shadow-lg transition-transform active:scale-95 cursor-pointer inline-flex items-center gap-2"
+            >
+              <span>💬 Masuk & Jelajahi Odo Threads Sekarang</span>
+              <ArrowRight size={16} />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 5. Main Feature Highlights Section ── */}
       <section id="fitur" className="py-16 sm:py-24 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
           <div className="text-center max-w-2xl mx-auto space-y-3">
@@ -354,7 +484,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── 5. Telemetry & Threads Deep Dive Showcase Section ── */}
+      {/* ── 6. Telemetry & Threads Deep Dive Showcase Section ── */}
       <section id="telemetry" className="py-16 sm:py-24 bg-slate-950 text-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -427,7 +557,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── 6. Final Call to Action Section ── */}
+      {/* ── 7. Final Call to Action Section ── */}
       <section className="py-16 sm:py-24 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white text-center relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 space-y-6">
           <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
@@ -449,7 +579,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── 7. Footer ── */}
+      {/* ── 8. Footer ── */}
       <footer className="bg-slate-950 text-slate-400 text-xs py-8 border-t border-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
