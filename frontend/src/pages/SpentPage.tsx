@@ -165,7 +165,7 @@ export function SpentPage() {
             disabled={filteredRecords.length === 0}
             className="bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-md self-start sm:self-auto"
           >
-            Download Rekap PDF ({selectedMonthKey !== 'all' ? selectedMonthKey : 'Semua Bulan'})
+            Download Rekap
           </Button>
         </div>
 
@@ -247,10 +247,10 @@ export function SpentPage() {
               type="button"
               onClick={handleDownloadPDF}
               disabled={filteredRecords.length === 0}
-              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-all shadow-xs shrink-0 disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-all shadow-xs shrink-0 disabled:opacity-50 cursor-pointer"
             >
-              <FileText size={14} />
-              PDF Rekap
+              <Download size={14} />
+              Download Rekap
             </button>
 
             {/* Reset Filter Button */}
@@ -261,7 +261,7 @@ export function SpentPage() {
                   setSelectedVehicleId('all');
                   setSelectedMonthKey('all');
                 }}
-                className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors border border-slate-200 shrink-0"
+                className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors border border-slate-200 shrink-0 cursor-pointer"
               >
                 <RotateCcw size={13} />
                 Reset Filter
