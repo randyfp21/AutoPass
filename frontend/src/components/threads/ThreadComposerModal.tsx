@@ -124,7 +124,7 @@ export function ThreadComposerModal({
           </select>
         </div>
 
-        {/* Optional Vehicle Tag Selector (Privacy Protected: Category, Brand, Model & Variant ONLY) */}
+        {/* Optional Vehicle Tag Selector (Privacy Format: 🏍️ Motor · Yamaha Mio (2021) - 100cc) */}
         {vehicles.length > 0 && (
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
@@ -139,7 +139,7 @@ export function ThreadComposerModal({
               <option value="">-- Tanpa Tag Kendaraan --</option>
               {vehicles.map((v) => (
                 <option key={v.id} value={v.id}>
-                  {v.category === 'mobil' ? '🚗 Mobil' : '🏍️ Motor'} · {v.brand} {v.model} {v.variant_type ? `(${v.variant_type})` : ''}
+                  {v.category === 'mobil' ? '🚗 Mobil' : '🏍️ Motor'} · {v.brand} {v.model} ({v.manufacture_year}){v.variant_type ? ` - ${v.variant_type}` : ''}
                 </option>
               ))}
             </select>

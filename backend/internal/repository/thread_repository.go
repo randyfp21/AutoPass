@@ -62,7 +62,7 @@ func (r *threadRepository) GetThreads(ctx context.Context, currentUserID string,
 		SELECT 
 			t.id, t.user_id, u.full_name, u.username, u.avatar_url, u.role::text,
 			t.vehicle_id, 
-			CASE WHEN v.id IS NOT NULL THEN (CASE WHEN v.category = 'mobil' THEN '🚗 Mobil' ELSE '🏍️ Motor' END) || ' · ' || v.brand || ' ' || v.model || COALESCE(' ' || v.variant_type, '') ELSE NULL END AS vehicle_name, 
+			CASE WHEN v.id IS NOT NULL THEN (CASE WHEN v.category = 'mobil' THEN '🚗 Mobil' ELSE '🏍️ Motor' END) || ' · ' || v.brand || ' ' || v.model || ' (' || v.manufacture_year::text || ')' || CASE WHEN v.variant_type IS NOT NULL AND v.variant_type != '' THEN ' - ' || v.variant_type ELSE '' END ELSE NULL END AS vehicle_name, 
 			NULL::text AS vehicle_plate,
 			t.content, t.photo_urls, t.category, t.likes_count, t.comments_count, t.bookmarks_count,
 			EXISTS(SELECT 1 FROM thread_likes tl WHERE tl.thread_id = t.id AND tl.user_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END) AS is_liked,
@@ -107,7 +107,7 @@ func (r *threadRepository) GetThreadByID(ctx context.Context, threadID string, c
 		SELECT 
 			t.id, t.user_id, u.full_name, u.username, u.avatar_url, u.role::text,
 			t.vehicle_id, 
-			CASE WHEN v.id IS NOT NULL THEN (CASE WHEN v.category = 'mobil' THEN '🚗 Mobil' ELSE '🏍️ Motor' END) || ' · ' || v.brand || ' ' || v.model || COALESCE(' ' || v.variant_type, '') ELSE NULL END AS vehicle_name, 
+			CASE WHEN v.id IS NOT NULL THEN (CASE WHEN v.category = 'mobil' THEN '🚗 Mobil' ELSE '🏍️ Motor' END) || ' · ' || v.brand || ' ' || v.model || ' (' || v.manufacture_year::text || ')' || CASE WHEN v.variant_type IS NOT NULL AND v.variant_type != '' THEN ' - ' || v.variant_type ELSE '' END ELSE NULL END AS vehicle_name, 
 			NULL::text AS vehicle_plate,
 			t.content, t.photo_urls, t.category, t.likes_count, t.comments_count, t.bookmarks_count,
 			EXISTS(SELECT 1 FROM thread_likes tl WHERE tl.thread_id = t.id AND tl.user_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END) AS is_liked,
@@ -204,7 +204,7 @@ func (r *threadRepository) GetBookmarkedThreads(ctx context.Context, userID stri
 		SELECT 
 			t.id, t.user_id, u.full_name, u.username, u.avatar_url, u.role::text,
 			t.vehicle_id, 
-			CASE WHEN v.id IS NOT NULL THEN (CASE WHEN v.category = 'mobil' THEN '🚗 Mobil' ELSE '🏍️ Motor' END) || ' · ' || v.brand || ' ' || v.model || COALESCE(' ' || v.variant_type, '') ELSE NULL END AS vehicle_name, 
+			CASE WHEN v.id IS NOT NULL THEN (CASE WHEN v.category = 'mobil' THEN '🚗 Mobil' ELSE '🏍️ Motor' END) || ' · ' || v.brand || ' ' || v.model || ' (' || v.manufacture_year::text || ')' || CASE WHEN v.variant_type IS NOT NULL AND v.variant_type != '' THEN ' - ' || v.variant_type ELSE '' END ELSE NULL END AS vehicle_name, 
 			NULL::text AS vehicle_plate,
 			t.content, t.photo_urls, t.category, t.likes_count, t.comments_count, t.bookmarks_count,
 			EXISTS(SELECT 1 FROM thread_likes tl WHERE tl.thread_id = t.id AND tl.user_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END) AS is_liked,
@@ -251,7 +251,7 @@ func (r *threadRepository) GetUserThreads(ctx context.Context, targetUserID stri
 		SELECT 
 			t.id, t.user_id, u.full_name, u.username, u.avatar_url, u.role::text,
 			t.vehicle_id, 
-			CASE WHEN v.id IS NOT NULL THEN (CASE WHEN v.category = 'mobil' THEN '🚗 Mobil' ELSE '🏍️ Motor' END) || ' · ' || v.brand || ' ' || v.model || COALESCE(' ' || v.variant_type, '') ELSE NULL END AS vehicle_name, 
+			CASE WHEN v.id IS NOT NULL THEN (CASE WHEN v.category = 'mobil' THEN '🚗 Mobil' ELSE '🏍️ Motor' END) || ' · ' || v.brand || ' ' || v.model || ' (' || v.manufacture_year::text || ')' || CASE WHEN v.variant_type IS NOT NULL AND v.variant_type != '' THEN ' - ' || v.variant_type ELSE '' END ELSE NULL END AS vehicle_name, 
 			NULL::text AS vehicle_plate,
 			t.content, t.photo_urls, t.category, t.likes_count, t.comments_count, t.bookmarks_count,
 			EXISTS(SELECT 1 FROM thread_likes tl WHERE tl.thread_id = t.id AND tl.user_id = CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END) AS is_liked,
@@ -327,7 +327,7 @@ func (r *threadRepository) GetThreadComments(ctx context.Context, threadID strin
 	for rows.Next() {
 		cr := &domain.CommentResponse{}
 		if err := rows.Scan(
-			&cr.ID, &cr.ThreadID, &cr.UserID, &cr.UserName, &cr.UserUsername, &cr.UserAvatar, &cr.UserRole,
+			&cr.ID, &cr.ThreadID, &cr.UserName, &cr.UserUsername, &cr.UserAvatar, &cr.UserRole,
 			&cr.Content, &cr.LikesCount, &cr.IsLiked, &cr.CreatedAt,
 		); err != nil {
 			return nil, err
