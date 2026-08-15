@@ -40,10 +40,17 @@ body {
   color: var(--color-automotive-dark);
 }
 
-/* Lock background window scrolling when any modal is active */
+/* Lock background window scrolling and hide top/bottom navbars when any modal is active */
 body.modal-open, html.modal-open {
   overflow: hidden !important;
   touch-action: none;
+}
+
+body.modal-open header,
+body.modal-open nav.fixed,
+body.modal-open .sticky.top-0,
+body.modal-open .fixed.bottom-0 {
+  display: none !important;
 }
 
 /* Custom scrollbars */

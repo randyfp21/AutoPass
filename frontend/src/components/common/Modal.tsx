@@ -88,7 +88,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-3 sm:p-6 text-center select-none w-screen h-screen"
+      className="fixed inset-0 z-50 overflow-hidden flex items-start justify-center p-3 sm:p-6 pt-4 sm:pt-8 text-center select-none w-screen h-screen"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
@@ -100,12 +100,12 @@ export function Modal({
         aria-hidden="true"
       />
 
-      {/* Modal Box Container: Locked Height, Fully Contained & Perfectly Centered */}
+      {/* Modal Box Container: Top Aligned, Fully Contained */}
       <div
         ref={dialogRef}
         className={[
           'relative w-full bg-white rounded-3xl shadow-2xl border border-slate-200/90',
-          'flex flex-col my-auto max-h-[85vh] sm:max-h-[88vh]',
+          'flex flex-col mt-1 sm:mt-2 mb-auto max-h-[90vh] sm:max-h-[92vh]',
           'animate-slide-up z-10 text-left overflow-hidden select-text',
           sizeClasses[size],
         ].join(' ')}

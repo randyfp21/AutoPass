@@ -32,8 +32,8 @@ export function ServiceOptionSelectorModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-4 bg-slate-900/65 backdrop-blur-sm animate-in fade-in duration-200 select-none w-screen h-screen">
-      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200 my-auto text-left select-text max-h-[85vh] flex flex-col">
+    <div className="fixed inset-0 z-50 overflow-hidden flex items-start justify-center p-4 pt-6 sm:pt-10 bg-slate-900/65 backdrop-blur-sm animate-in fade-in duration-200 select-none w-screen h-screen">
+      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200 mt-2 mb-auto text-left select-text max-h-[88vh] flex flex-col">
         {/* Header */}
         <div className="p-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
