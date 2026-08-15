@@ -60,3 +60,17 @@ type UserResponse struct {
 	Bio         *string `json:"bio"`
 	Role        string  `json:"role"`
 }
+
+// SubscriptionResponse represents the response when toggling a subscription.
+type SubscriptionResponse struct {
+	IsSubscribed     bool `json:"is_subscribed"`
+	SubscribersCount int  `json:"subscribers_count"`
+}
+
+// UserProfileStatsResponse represents public profile info with subscriber metrics.
+type UserProfileStatsResponse struct {
+	User             UserResponse `json:"user"`
+	SubscribersCount int          `json:"subscribers_count"`
+	IsSubscribed     bool         `json:"is_subscribed"`
+	ThreadsCount     int          `json:"threads_count"`
+}

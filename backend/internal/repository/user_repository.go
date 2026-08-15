@@ -18,6 +18,8 @@ type UserRepository interface {
 	GetUserByPhoneOrEmail(ctx context.Context, identifier string) (*domain.User, error)
 	GetUserByID(ctx context.Context, id string) (*domain.User, error)
 	UpdateUser(ctx context.Context, user *domain.User) error
+	ToggleSubscription(ctx context.Context, subscriberID, targetUserID string) (bool, int, error)
+	GetUserSubscriptionStats(ctx context.Context, targetUserID, currentUserID string) (int, bool, error)
 }
 
 type userRepository struct {
@@ -191,4 +193,61 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *domain.User) erro
 		return fmt.Errorf("userRepository.UpdateUser: %w", err)
 	}
 	return nil
+}
+
+// ToggleSubscription subscribes or unsubscribes subscriberID to/from targetUserID.
+func (r *userRepository) ToggleSubscription(ctx context.Context, subscriberID, targetUserID string) (bool, int, error) {
+	cleanTarget := strings.TrimPrefix(targetUserID, "@")
+	var realTargetID string
+	err := r.db.QueryRow(ctx, "SELECT id::text FROM users WHERE id::text = $1 OR username = $1", cleanTarget).Scan(&realTargetID)
+	if err != nil {
+		return false, 0, fmt.Errorf("ToggleSubscription target not found: %w", err)
+	}
+
+	if subscriberID == realTargetID {
+		return false, 0, errors.New("cannot subscribe to yourself")
+	}
+
+	var exists bool
+	checkQuery := `SELECT EXISTS(SELECT 1 FROM user_subscriptions WHERE subscriber_id = $1::uuid AND target_user_id = $2::uuid)`
+	if err := r.db.QueryRow(ctx, checkQuery, subscriberID, realTargetID).Scan(&exists); err != nil {
+		return false, 0, err
+	}
+
+	if exists {
+		_, err := r.db.Exec(ctx, `DELETE FROM user_subscriptions WHERE subscriber_id = $1::uuid AND target_user_id = $2::uuid`, subscriberID, realTargetID)
+		if err != nil {
+			return false, 0, err
+		}
+	} else {
+		_, err := r.db.Exec(ctx, `INSERT INTO user_subscriptions (subscriber_id, target_user_id) VALUES ($1::uuid, $2::uuid)`, subscriberID, realTargetID)
+		if err != nil {
+			return false, 0, err
+		}
+	}
+
+	var count int
+	_ = r.db.QueryRow(ctx, `SELECT COUNT(*) FROM user_subscriptions WHERE target_user_id = $1::uuid`, realTargetID).Scan(&count)
+
+	return !exists, count, nil
+}
+
+// GetUserSubscriptionStats returns total subscriber count and whether currentUserID has subscribed.
+func (r *userRepository) GetUserSubscriptionStats(ctx context.Context, targetUserID, currentUserID string) (int, bool, error) {
+	cleanTarget := strings.TrimPrefix(targetUserID, "@")
+	var realTargetID string
+	err := r.db.QueryRow(ctx, "SELECT id::text FROM users WHERE id::text = $1 OR username = $1", cleanTarget).Scan(&realTargetID)
+	if err != nil {
+		return 0, false, err
+	}
+
+	var count int
+	_ = r.db.QueryRow(ctx, `SELECT COUNT(*) FROM user_subscriptions WHERE target_user_id = $1::uuid`, realTargetID).Scan(&count)
+
+	var isSubscribed bool
+	if currentUserID != "" {
+		_ = r.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM user_subscriptions WHERE subscriber_id = $1::uuid AND target_user_id = $2::uuid)`, currentUserID, realTargetID).Scan(&isSubscribed)
+	}
+
+	return count, isSubscribed, nil
 }

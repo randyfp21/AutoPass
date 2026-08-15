@@ -71,7 +71,7 @@ func (r *threadRepository) GetThreads(ctx context.Context, currentUserID string,
 		FROM threads t
 		JOIN users u ON t.user_id = u.id
 		LEFT JOIN vehicles v ON t.vehicle_id = v.id
-		WHERE ($2 = '' OR t.category = $2)
+		WHERE ($2 = '' OR ($2 != 'subscribed' AND t.category = $2) OR ($2 = 'subscribed' AND t.user_id IN (SELECT target_user_id FROM user_subscriptions WHERE subscriber_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END)))
 		ORDER BY t.created_at DESC
 		LIMIT 50
 	`

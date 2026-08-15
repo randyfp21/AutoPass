@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, Sparkles, Plus, AlertCircle, Filter } from 'lucide-react';
+import { MessageSquare, Sparkles, Plus, AlertCircle, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { vehicleService } from '../services/vehicleService';
 import { threadsService } from '../services/threadsService';
@@ -51,6 +51,7 @@ export function ThreadsFeedPage() {
 
   const categories = [
     { id: 'all', label: '🌟 Semua' },
+    { id: 'subscribed', label: '⭐ Subscribed' },
     { id: 'diskusi', label: '💬 Diskusi' },
     { id: 'kendala', label: '🚨 Kendala' },
     { id: 'sharing', label: '✨ Sharing' },
@@ -95,7 +96,9 @@ export function ThreadsFeedPage() {
               className={[
                 'px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer',
                 activeCategory === cat.id
-                  ? 'bg-purple-600 text-white shadow-xs'
+                  ? cat.id === 'subscribed'
+                    ? 'bg-gradient-to-r from-amber-500 to-purple-600 text-white shadow-md'
+                    : 'bg-purple-600 text-white shadow-xs'
                   : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100',
               ].join(' ')}
             >
@@ -112,27 +115,32 @@ export function ThreadsFeedPage() {
           </div>
         )}
 
-        {/* Feed List */}
+        {/* Threads List Feed */}
         {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="skeleton h-48 rounded-2xl" />
+              <div key={i} className="skeleton h-44 rounded-2xl" />
             ))}
           </div>
         ) : threads.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
-            <MessageSquare size={40} className="mx-auto text-slate-300 mb-3" />
-            <h3 className="font-bold text-slate-800 text-base">Belum Ada Thread Diskusi</h3>
-            <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-              Jadilah yang pertama membuat thread mengenai pengamalan atau pertanyaan otomotif Anda!
-            </p>
-            <button
-              onClick={() => setShowComposerModal(true)}
-              className="mt-4 inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition-colors"
-            >
-              <Plus size={16} />
-              Tulis Thread Pertama
-            </button>
+          <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center space-y-2">
+            {activeCategory === 'subscribed' ? (
+              <>
+                <Users size={40} className="mx-auto text-amber-500 mb-2" />
+                <h3 className="font-extrabold text-slate-800 text-base">Belum Ada Postingan Subscribed</h3>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+                  Kamu belum men-subscribe pengguna lain, atau pengguna yang kamu subscribe belum membuat postingan baru. Jelajahi profil pengguna dan klik tombol <strong>Subscribe</strong>!
+                </p>
+              </>
+            ) : (
+              <>
+                <MessageSquare size={36} className="mx-auto text-slate-300 mb-2" />
+                <h3 className="font-bold text-slate-800 text-sm">Belum ada thread di kategori ini</h3>
+                <p className="text-xs text-slate-400">
+                  Jadilah pengguna pertama yang memulai postingan thread di kategori ini!
+                </p>
+              </>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
@@ -149,7 +157,6 @@ export function ThreadsFeedPage() {
         )}
       </div>
 
-      {/* ── Modals ── */}
       <ThreadComposerModal
         isOpen={showComposerModal}
         onClose={() => setShowComposerModal(false)}

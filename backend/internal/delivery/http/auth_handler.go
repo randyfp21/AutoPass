@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AuthHandler handles HTTP requests for authentication.
+// AuthHandler handles HTTP requests for authentication and user profiles.
 type AuthHandler struct {
 	authUC usecase.AuthUsecase
 }
@@ -105,4 +105,47 @@ func (h *AuthHandler) UpdateProfile(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": userResp})
+}
+
+// ToggleSubscription godoc
+// POST /api/v1/users/:id/subscribe
+func (h *AuthHandler) ToggleSubscription(c *gin.Context) {
+	subscriberID := c.GetString(middleware.ContextUserID)
+	if subscriberID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	targetUserID := c.Param("id")
+	if targetUserID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user id is required"})
+		return
+	}
+
+	resp, err := h.authUC.ToggleSubscription(c.Request.Context(), subscriberID, targetUserID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": resp})
+}
+
+// GetUserProfileStats godoc
+// GET /api/v1/users/:id/profile
+func (h *AuthHandler) GetUserProfileStats(c *gin.Context) {
+	currentUserID := c.GetString(middleware.ContextUserID)
+	targetUserID := c.Param("id")
+	if targetUserID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user id is required"})
+		return
+	}
+
+	resp, err := h.authUC.GetUserProfileStats(c.Request.Context(), targetUserID, currentUserID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": resp})
 }

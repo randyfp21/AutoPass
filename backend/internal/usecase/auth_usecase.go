@@ -31,6 +31,8 @@ type AuthUsecase interface {
 	Logout(ctx context.Context, tokenString string) error
 	ValidateToken(tokenString string) (*Claims, error)
 	UpdateProfile(ctx context.Context, userID string, req domain.UpdateProfileRequest) (*domain.UserResponse, error)
+	ToggleSubscription(ctx context.Context, subscriberID, targetUserID string) (*domain.SubscriptionResponse, error)
+	GetUserProfileStats(ctx context.Context, targetUserID, currentUserID string) (*domain.UserProfileStatsResponse, error)
 }
 
 type authUsecase struct {
@@ -243,5 +245,51 @@ func (u *authUsecase) UpdateProfile(ctx context.Context, userID string, req doma
 		AvatarURL:   user.AvatarURL,
 		Bio:         user.Bio,
 		Role:        user.Role,
+	}, nil
+}
+
+// ToggleSubscription subscribes/unsubscribes subscriberID to/from targetUserID.
+func (u *authUsecase) ToggleSubscription(ctx context.Context, subscriberID, targetUserID string) (*domain.SubscriptionResponse, error) {
+	isSubscribed, count, err := u.userRepo.ToggleSubscription(ctx, subscriberID, targetUserID)
+	if err != nil {
+		return nil, fmt.Errorf("authUsecase.ToggleSubscription: %w", err)
+	}
+	return &domain.SubscriptionResponse{
+		IsSubscribed:     isSubscribed,
+		SubscribersCount: count,
+	}, nil
+}
+
+// GetUserProfileStats returns target user's public info and subscriber stats.
+func (u *authUsecase) GetUserProfileStats(ctx context.Context, targetUserID, currentUserID string) (*domain.UserProfileStatsResponse, error) {
+	user, err := u.userRepo.GetUserByID(ctx, targetUserID)
+	if err != nil {
+		return nil, fmt.Errorf("authUsecase.GetUserProfileStats get user: %w", err)
+	}
+	if user == nil {
+		return nil, errors.New("user not found")
+	}
+
+	count, isSubscribed, err := u.userRepo.GetUserSubscriptionStats(ctx, user.ID, currentUserID)
+	if err != nil {
+		return nil, fmt.Errorf("authUsecase.GetUserProfileStats stats: %w", err)
+	}
+
+	userResp := domain.UserResponse{
+		ID:          user.ID,
+		Email:       user.Email,
+		Username:    user.Username,
+		FullName:    user.FullName,
+		PhoneNumber: user.PhoneNumber,
+		AvatarURL:   user.AvatarURL,
+		Bio:         user.Bio,
+		Role:        user.Role,
+	}
+
+	return &domain.UserProfileStatsResponse{
+		User:             userResp,
+		SubscribersCount: count,
+		IsSubscribed:     isSubscribed,
+		ThreadsCount:     0,
 	}, nil
 }

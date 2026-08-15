@@ -30,7 +30,7 @@ export function getStoredUser(): User | null {
   }
 }
 
-// ─── Auth API Calls ───────────────────────────────────────────────────────────
+// ─── Auth & Profile API Calls ───────────────────────────────────────────────────────────
 
 export async function register(data: RegisterData): Promise<AuthResponse> {
   const response = await api.post<AuthResponse>('/auth/register', data);
@@ -59,6 +59,34 @@ export async function updateProfile(data: {
   return updatedUser;
 }
 
+export async function getUserProfile(userIdOrUsername: string): Promise<{
+  user: User;
+  subscribers_count: number;
+  is_subscribed: boolean;
+  threads_count: number;
+}> {
+  const clean = userIdOrUsername.startsWith('@') ? userIdOrUsername : `@${userIdOrUsername}`;
+  const response = await api.get<{
+    user: User;
+    subscribers_count: number;
+    is_subscribed: boolean;
+    threads_count: number;
+  }>(`/users/${encodeURIComponent(clean)}/profile`);
+  return response.data;
+}
+
+export async function toggleSubscription(userIdOrUsername: string): Promise<{
+  is_subscribed: boolean;
+  subscribers_count: number;
+}> {
+  const clean = userIdOrUsername.startsWith('@') ? userIdOrUsername : `@${userIdOrUsername}`;
+  const response = await api.post<{
+    is_subscribed: boolean;
+    subscribers_count: number;
+  }>(`/users/${encodeURIComponent(clean)}/subscribe`);
+  return response.data;
+}
+
 export function logout(): void {
   clearAuthData();
   window.location.href = '/login';
@@ -76,6 +104,8 @@ export const authService = {
   register,
   login,
   updateProfile,
+  getUserProfile,
+  toggleSubscription,
   logout,
   getCurrentUser,
   getStoredToken,

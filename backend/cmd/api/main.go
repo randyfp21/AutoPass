@@ -155,6 +155,8 @@ func main() {
 	// Activities & Notifications route (protected).
 	v1.GET("/activities", middleware.AuthMiddleware(authUC, redisClient), threadHandler.GetActivities)
 	v1.GET("/users/:id/threads", middleware.AuthMiddleware(authUC, redisClient), threadHandler.GetUserThreads)
+	v1.GET("/users/:id/profile", middleware.AuthMiddleware(authUC, redisClient), authHandler.GetUserProfileStats)
+	v1.POST("/users/:id/subscribe", middleware.AuthMiddleware(authUC, redisClient), authHandler.ToggleSubscription)
 
 	// Master data & workshop routes (public, cached).
 	master := v1.Group("/master")
