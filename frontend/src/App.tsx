@@ -92,7 +92,7 @@ function AppLayout({ children, onOpenAddPlanner }: AppLayoutProps) {
       <Navbar />
       <main
         key={location.pathname}
-        className="flex-1 flex flex-col transition-all duration-300 animate-in fade-in slide-in-from-bottom-2"
+        className="flex-1 flex flex-col animate-page-smooth"
       >
         {children}
       </main>
