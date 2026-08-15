@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, MessageSquare, Bookmark, Trash2, Car, Share2, Check, AlertTriangle, Maximize2 } from 'lucide-react';
+import { Heart, MessageSquare, Bookmark, Trash2, Car, Share2, Check, AlertTriangle, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Thread } from '../../types';
 import { threadsService } from '../../services/threadsService';
 import { timeAgo } from '../../utils/formatters';
@@ -25,7 +25,8 @@ export function ThreadCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
-  // Lightbox Modal state
+  // In-Card Photo Carousel & Lightbox Modal state
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [showLightbox, setShowLightbox] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -216,116 +217,75 @@ export function ThreadCard({
           {thread.content}
         </p>
 
-        {/* Adaptive Photo Grid & Aspect Ratio System */}
+        {/* In-Card Interactive Single-Image Photo Carousel / Slider */}
         {thread.photo_urls && thread.photo_urls.length > 0 && (
-          <div className="rounded-2xl overflow-hidden border border-slate-200/90 shadow-2xs bg-slate-950">
-            {/* Case 1: Single Image (Auto Aspect Ratio: Portrait / Landscape / Square) */}
-            {thread.photo_urls.length === 1 && (
-              <div
-                className="relative w-full flex items-center justify-center bg-slate-950 p-1 sm:p-2 group cursor-pointer overflow-hidden"
-                onClick={(e) => openLightbox(e, 0)}
-              >
-                <img
-                  src={thread.photo_urls[0]}
-                  alt="Post media"
-                  className="w-auto max-w-full max-h-[580px] rounded-xl object-contain shadow-md group-hover:scale-[1.01] transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <span className="bg-slate-900/90 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-full border border-slate-700/80 flex items-center gap-1.5 shadow-xl backdrop-blur-md">
-                    <Maximize2 size={13} className="text-purple-400" /> Perbesar Foto
-                  </span>
+          <div className="relative w-full rounded-2xl overflow-hidden border border-slate-200/90 shadow-2xs bg-slate-950 flex items-center justify-center p-1 sm:p-2 group">
+            {/* Active Single Photo Display */}
+            <img
+              src={thread.photo_urls[activePhotoIndex]}
+              alt={`Post media ${activePhotoIndex + 1}`}
+              onClick={(e) => openLightbox(e, activePhotoIndex)}
+              className="w-auto max-w-full max-h-[580px] rounded-xl object-contain shadow-md cursor-pointer transition-all duration-300 group-hover:scale-[1.005]"
+            />
+
+            {/* Overlaid Hover Lightbox Trigger */}
+            <div
+              className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none"
+            >
+              <span className="bg-slate-900/90 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-full border border-slate-700/80 flex items-center gap-1.5 shadow-xl backdrop-blur-md">
+                <Maximize2 size={13} className="text-purple-400" /> Perbesar Foto
+              </span>
+            </div>
+
+            {/* Multi-Photo Carousel Controls (Only shown if > 1 photo) */}
+            {thread.photo_urls.length > 1 && (
+              <>
+                {/* Photo Counter Badge (Top Right) */}
+                <div className="absolute top-3 right-3 bg-slate-900/85 backdrop-blur-md text-white text-[11px] font-mono font-extrabold px-3 py-1 rounded-full border border-slate-700/80 shadow-md pointer-events-none">
+                  {activePhotoIndex + 1} / {thread.photo_urls.length}
                 </div>
-              </div>
-            )}
 
-            {/* Case 2: 2 Images (Side-by-Side 50%-50%) */}
-            {thread.photo_urls.length === 2 && (
-              <div className="grid grid-cols-2 gap-1.5 aspect-[16/10] max-h-[380px]">
-                {thread.photo_urls.map((photoUrl, idx) => (
-                  <div
-                    key={idx}
-                    className="relative w-full h-full group cursor-pointer overflow-hidden bg-slate-900"
-                    onClick={(e) => openLightbox(e, idx)}
-                  >
-                    <img
-                      src={photoUrl}
-                      alt={`Media ${idx + 1}`}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Maximize2 size={18} className="text-white drop-shadow-md" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Case 3: 3 Images (1 Hero Left, 2 Stacked Right) */}
-            {thread.photo_urls.length === 3 && (
-              <div className="grid grid-cols-3 gap-1.5 max-h-[380px] aspect-[16/10]">
-                <div
-                  className="col-span-2 relative h-full group cursor-pointer overflow-hidden bg-slate-900"
-                  onClick={(e) => openLightbox(e, 0)}
+                {/* Left Navigation Arrow */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActivePhotoIndex((prev) => (prev - 1 + thread.photo_urls.length) % thread.photo_urls.length);
+                  }}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white flex items-center justify-center backdrop-blur-md border border-slate-700/80 shadow-lg transition-transform active:scale-90 cursor-pointer"
+                  title="Foto Sebelumnya"
                 >
-                  <img
-                    src={thread.photo_urls[0]}
-                    alt="Media 1"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Maximize2 size={18} className="text-white drop-shadow-md" />
-                  </div>
-                </div>
+                  <ChevronLeft size={20} />
+                </button>
 
-                <div className="col-span-1 grid grid-rows-2 gap-1.5 h-full">
-                  {thread.photo_urls.slice(1, 3).map((photoUrl, idx) => (
-                    <div
-                      key={idx + 1}
-                      className="relative w-full h-full group cursor-pointer overflow-hidden bg-slate-900"
-                      onClick={(e) => openLightbox(e, idx + 1)}
-                    >
-                      <img
-                        src={photoUrl}
-                        alt={`Media ${idx + 2}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
+                {/* Right Navigation Arrow */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActivePhotoIndex((prev) => (prev + 1) % thread.photo_urls.length);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white flex items-center justify-center backdrop-blur-md border border-slate-700/80 shadow-lg transition-transform active:scale-90 cursor-pointer"
+                  title="Foto Selanjutnya"
+                >
+                  <ChevronRight size={20} />
+                </button>
+
+                {/* Bottom Pagination Dots */}
+                <div className="absolute bottom-3 inset-x-0 flex items-center justify-center gap-1.5 pointer-events-none">
+                  {thread.photo_urls.map((_, idx) => (
+                    <span
+                      key={idx}
+                      className={[
+                        'h-2 rounded-full transition-all duration-300 shadow-sm',
+                        idx === activePhotoIndex
+                          ? 'w-6 bg-purple-500'
+                          : 'w-2 bg-white/60',
+                      ].join(' ')}
+                    />
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Case 4+: 4 or More Images (2x2 Quad Grid with +N Badge on 4th Photo) */}
-            {thread.photo_urls.length >= 4 && (
-              <div className="grid grid-cols-2 gap-1.5 max-h-[400px] aspect-video">
-                {thread.photo_urls.slice(0, 4).map((photoUrl, idx) => {
-                  const isFourthAndHasMore = idx === 3 && thread.photo_urls.length > 4;
-                  const remainingCount = thread.photo_urls.length - 4;
-
-                  return (
-                    <div
-                      key={idx}
-                      className="relative w-full h-full group cursor-pointer overflow-hidden bg-slate-900"
-                      onClick={(e) => openLightbox(e, idx)}
-                    >
-                      <img
-                        src={photoUrl}
-                        alt={`Media ${idx + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      {isFourthAndHasMore ? (
-                        <div className="absolute inset-0 bg-slate-950/70 flex items-center justify-center font-extrabold text-white text-base">
-                          +{remainingCount} Foto Lainnya
-                        </div>
-                      ) : (
-                        <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <Maximize2 size={16} className="text-white drop-shadow-md" />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              </>
             )}
           </div>
         )}
