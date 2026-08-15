@@ -310,7 +310,7 @@ func (r *threadRepository) GetThreadComments(ctx context.Context, threadID strin
 		SELECT 
 			c.id, c.thread_id, c.user_id, u.full_name, u.username, u.avatar_url, u.role::text,
 			c.parent_id::text, c.content, c.likes_count,
-			EXISTS(SELECT 1 FROM thread_likes tl WHERE tl.thread_id = c.id AND tl.user_id = CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END) AS is_liked,
+			EXISTS(SELECT 1 FROM comment_likes cl WHERE cl.comment_id = c.id AND cl.user_id = CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END) AS is_liked,
 			c.created_at
 		FROM thread_comments c
 		JOIN users u ON c.user_id = u.id
@@ -339,20 +339,20 @@ func (r *threadRepository) GetThreadComments(ctx context.Context, threadID strin
 
 func (r *threadRepository) ToggleLikeComment(ctx context.Context, commentID string, userID string) (bool, error) {
 	var exists bool
-	checkQuery := `SELECT EXISTS(SELECT 1 FROM thread_likes WHERE thread_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END AND user_id = CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END)`
+	checkQuery := `SELECT EXISTS(SELECT 1 FROM comment_likes WHERE comment_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END AND user_id = CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END)`
 	if err := r.db.QueryRow(ctx, checkQuery, commentID, userID).Scan(&exists); err != nil {
 		return false, err
 	}
 
 	if exists {
-		_, err := r.db.Exec(ctx, `DELETE FROM thread_likes WHERE thread_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END AND user_id = CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END`, commentID, userID)
+		_, err := r.db.Exec(ctx, `DELETE FROM comment_likes WHERE comment_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END AND user_id = CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END`, commentID, userID)
 		if err != nil {
 			return false, err
 		}
 		_, _ = r.db.Exec(ctx, `UPDATE thread_comments SET likes_count = GREATEST(0, likes_count - 1) WHERE id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END`, commentID)
 		return false, nil
 	} else {
-		_, err := r.db.Exec(ctx, `INSERT INTO thread_likes (thread_id, user_id) VALUES (CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END, CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END)`, commentID, userID)
+		_, err := r.db.Exec(ctx, `INSERT INTO comment_likes (comment_id, user_id) VALUES (CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END, CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END)`, commentID, userID)
 		if err != nil {
 			return false, err
 		}
