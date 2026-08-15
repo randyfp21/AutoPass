@@ -20,7 +20,8 @@ export function UserProfilePage() {
   const [showComposerModal, setShowComposerModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
 
-  // Subscription State
+  // Subscription & Profile State
+  const [fetchedUser, setFetchedUser] = useState<any>(null);
   const [subscribersCount, setSubscribersCount] = useState<number>(0);
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
   const [isSubscribing, setIsSubscribing] = useState<boolean>(false);
@@ -49,6 +50,9 @@ export function UserProfilePage() {
 
       setThreads(userThreadList);
       if (statsData) {
+        if (statsData.user) {
+          setFetchedUser(statsData.user);
+        }
         setSubscribersCount(statsData.subscribers_count || 0);
         setIsSubscribed(!!statsData.is_subscribed);
       }
@@ -78,7 +82,7 @@ export function UserProfilePage() {
   };
 
   const firstThread = threads[0];
-  const profileUser = isOwnProfile ? currentUser : null;
+  const profileUser = isOwnProfile ? currentUser : (fetchedUser || null);
 
   const avatarUrl = profileUser?.avatar_url || firstThread?.user_avatar;
   const displayName = profileUser?.full_name || firstThread?.user_name || 'Vehicle Owner';

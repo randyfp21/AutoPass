@@ -65,7 +65,7 @@ export async function getUserProfile(userIdOrUsername: string): Promise<{
   is_subscribed: boolean;
   threads_count: number;
 }> {
-  const clean = userIdOrUsername.startsWith('@') ? userIdOrUsername : `@${userIdOrUsername}`;
+  const clean = userIdOrUsername.replace(/^%40/, '').replace(/^@/, '');
   const response = await api.get<{
     user: User;
     subscribers_count: number;
@@ -79,7 +79,7 @@ export async function toggleSubscription(userIdOrUsername: string): Promise<{
   is_subscribed: boolean;
   subscribers_count: number;
 }> {
-  const clean = userIdOrUsername.startsWith('@') ? userIdOrUsername : `@${userIdOrUsername}`;
+  const clean = userIdOrUsername.replace(/^%40/, '').replace(/^@/, '');
   const response = await api.post<{
     is_subscribed: boolean;
     subscribers_count: number;

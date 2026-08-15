@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/autopass/backend/internal/domain"
@@ -29,6 +30,16 @@ type userRepository struct {
 // NewUserRepository returns a new postgres-backed UserRepository.
 func NewUserRepository(db *pgxpool.Pool) UserRepository {
 	return &userRepository{db: db}
+}
+
+func cleanUserIdentifier(id string) string {
+	decoded, err := url.QueryUnescape(id)
+	if err != nil {
+		decoded = id
+	}
+	decoded = strings.TrimPrefix(decoded, "%40")
+	decoded = strings.TrimPrefix(decoded, "@")
+	return strings.TrimSpace(decoded)
 }
 
 // CreateUser inserts a new user record into the database.
@@ -108,7 +119,7 @@ func (r *userRepository) GetUserByPhoneOrEmail(ctx context.Context, identifier s
 		p3 = "0" + identifier
 	}
 
-	cleanUsername := strings.TrimPrefix(identifier, "@")
+	cleanUsername := cleanUserIdentifier(identifier)
 
 	query := `
 		SELECT id, email, username, password_hash, full_name, phone_number, avatar_url, bio, role, auth_provider, google_id, created_at, updated_at
@@ -142,7 +153,7 @@ func (r *userRepository) GetUserByPhoneOrEmail(ctx context.Context, identifier s
 
 // GetUserByID retrieves a user by their UUID OR Username (e.g. @dnazrl or dnazrl).
 func (r *userRepository) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
-	cleanIdentifier := strings.TrimPrefix(id, "@")
+	cleanIdentifier := cleanUserIdentifier(id)
 	query := `
 		SELECT id, email, username, password_hash, full_name, phone_number, avatar_url, bio, role, auth_provider, google_id, created_at, updated_at
 		FROM users
@@ -197,7 +208,7 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *domain.User) erro
 
 // ToggleSubscription subscribes or unsubscribes subscriberID to/from targetUserID.
 func (r *userRepository) ToggleSubscription(ctx context.Context, subscriberID, targetUserID string) (bool, int, error) {
-	cleanTarget := strings.TrimPrefix(targetUserID, "@")
+	cleanTarget := cleanUserIdentifier(targetUserID)
 	var realTargetID string
 	err := r.db.QueryRow(ctx, "SELECT id::text FROM users WHERE id::text = $1 OR username = $1", cleanTarget).Scan(&realTargetID)
 	if err != nil {
@@ -234,7 +245,7 @@ func (r *userRepository) ToggleSubscription(ctx context.Context, subscriberID, t
 
 // GetUserSubscriptionStats returns total subscriber count and whether currentUserID has subscribed.
 func (r *userRepository) GetUserSubscriptionStats(ctx context.Context, targetUserID, currentUserID string) (int, bool, error) {
-	cleanTarget := strings.TrimPrefix(targetUserID, "@")
+	cleanTarget := cleanUserIdentifier(targetUserID)
 	var realTargetID string
 	err := r.db.QueryRow(ctx, "SELECT id::text FROM users WHERE id::text = $1 OR username = $1", cleanTarget).Scan(&realTargetID)
 	if err != nil {
