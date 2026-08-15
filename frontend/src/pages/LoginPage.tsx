@@ -18,6 +18,7 @@ import {
   ArrowRight,
   Zap,
   CheckCircle2,
+  Users,
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { useAuth } from '../context/AuthContext';
@@ -57,6 +58,40 @@ export function LoginPage() {
 
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const langDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Dynamic Hero Carousel Slides (5.5s auto rotation explaining Odo Threads & Automotive Community)
+  const [heroSlide, setHeroSlide] = useState(0);
+
+  const heroSlides = [
+    {
+      badge: '🔥 Odo Threads Automotive Network',
+      titleLine1: 'Komunitas Otomotif',
+      titleLine2: 'Se-Indonesia 🇮🇩',
+      gradientClass: 'from-purple-400 via-pink-300 to-amber-300',
+      desc: 'Terhubung langsung dengan ribuan pecinta mobil & motor se-Indonesia! Saling berbagi pengalaman servis, tips perawatan, modifikasi, hingga agenda touring.',
+    },
+    {
+      badge: '✨ Passport Digital Kendaraan',
+      titleLine1: 'Passport Digital',
+      titleLine2: 'Kendaraan Anda',
+      gradientClass: 'from-blue-400 via-indigo-300 to-purple-300',
+      desc: 'Rekam, kelola, dan bagikan riwayat servis kendaraan Anda secara transparan, akurat, dan terverifikasi.',
+    },
+    {
+      badge: '🏎️ Odo Telemetry & Story Studio',
+      titleLine1: 'Cetak Telemetri Story',
+      titleLine2: 'Resolusi Tinggi HD',
+      gradientClass: 'from-amber-400 via-orange-300 to-red-400',
+      desc: 'Ubah catatan servis rutin kendaraanmu menjadi story telemetri visual unik dengan aspek rasio & filter khusus, siap diposting ke Odo Threads!',
+    },
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHeroSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5500);
+    return () => clearInterval(timer);
+  }, [heroSlides.length]);
 
   // Close lang dropdown on outside click
   useEffect(() => {
@@ -158,31 +193,49 @@ export function LoginPage() {
           </span>
         </div>
 
-        {/* Center Hero Text & Features */}
-        <div className="relative z-10 space-y-8 max-w-lg my-auto py-8">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-1.5 bg-blue-500/10 border border-blue-400/20 px-3 py-1 rounded-full text-xs font-semibold text-blue-300">
+        {/* Center Hero Dynamic Rotating Showcase */}
+        <div className="relative z-10 space-y-8 max-w-lg my-auto py-8 transition-all duration-500">
+          <div className="space-y-3 min-h-[190px]">
+            <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 px-3.5 py-1 rounded-full text-xs font-bold text-blue-300 shadow-2xs">
               <Sparkles size={14} className="text-yellow-400" />
-              <span>Sistem Telemetri & Riwayat Servis Otomotif</span>
+              <span>{heroSlides[heroSlide].badge}</span>
             </div>
+
             <h1 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
-              Passport Digital <br />
-              <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-300 bg-clip-text text-transparent">
-                Kendaraan Anda
+              {heroSlides[heroSlide].titleLine1} <br />
+              <span className={`bg-gradient-to-r ${heroSlides[heroSlide].gradientClass} bg-clip-text text-transparent`}>
+                {heroSlides[heroSlide].titleLine2}
               </span>
             </h1>
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-normal">
-              Kelola riwayat servis, odometer, rencana perawatan berkala, serta bagikan telemetri story sosial ke komunitas otomotif dalam satu genggaman.
+
+            <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-normal transition-all duration-300">
+              {heroSlides[heroSlide].desc}
             </p>
+          </div>
+
+          {/* Slide Indicator Dots */}
+          <div className="flex items-center gap-2">
+            {heroSlides.map((_, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setHeroSlide(idx)}
+                className={[
+                  'h-2 rounded-full transition-all duration-300 cursor-pointer',
+                  idx === heroSlide ? 'w-8 bg-blue-400 shadow-md' : 'w-2 bg-white/30 hover:bg-white/60',
+                ].join(' ')}
+                aria-label={`Slide ${idx + 1}`}
+              />
+            ))}
           </div>
 
           {/* Feature Showcase Grid */}
           <div className="grid grid-cols-1 gap-3.5 pt-2">
             {[
               {
-                icon: <ShieldCheck size={20} className="text-blue-400" />,
-                title: 'Buku Servis Digital Terverifikasi',
-                desc: 'Catatan servis resmi partner bengkel & DIY terlindungi.',
+                icon: <Users size={20} className="text-purple-400" />,
+                title: 'Komunitas Otomotif Se-Indonesia',
+                desc: 'Terhubung dengan sesama pengguna & bengkel pecinta mobil/motor.',
               },
               {
                 icon: <Zap size={20} className="text-amber-400" />,
@@ -190,9 +243,9 @@ export function LoginPage() {
                 desc: 'Cetak story telemetri kendaraan beresolusi tinggi.',
               },
               {
-                icon: <TrendingUp size={20} className="text-emerald-400" />,
-                title: 'Odo Threads Social Community',
-                desc: 'Berbagi pengalaman, tips, & diskusi seputar otomotif.',
+                icon: <ShieldCheck size={20} className="text-blue-400" />,
+                title: 'Buku Servis Digital Terverifikasi',
+                desc: 'Catatan servis resmi partner bengkel & DIY terlindungi.',
               },
             ].map((f, i) => (
               <div
