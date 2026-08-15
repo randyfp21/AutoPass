@@ -11,9 +11,10 @@ import {
   AlertCircle,
   ShieldAlert,
   FileText,
+  Sparkles,
+  CheckCircle2,
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
-import { VehicleSummaryBadge } from '../components/vehicle/VehicleSummaryBadge';
 import { AddVehicleModal } from '../components/vehicle/AddVehicleModal';
 import { ServiceHistoryItem } from '../components/service/ServiceHistoryItem';
 import { AddServiceModal } from '../components/service/AddServiceModal';
@@ -27,15 +28,15 @@ import { formatMileage, formatDate } from '../utils/formatters';
 
 function HeroSkeleton() {
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden mb-6">
-      <div className="skeleton h-56" />
+    <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden mb-6 shadow-sm">
+      <div className="skeleton h-64" />
       <div className="p-6 space-y-4">
-        <div className="skeleton h-7 w-48" />
-        <div className="skeleton h-5 w-32" />
-        <div className="flex gap-2">
-          <div className="skeleton h-6 w-20 rounded-full" />
-          <div className="skeleton h-6 w-24 rounded-full" />
-          <div className="skeleton h-6 w-16 rounded-full" />
+        <div className="skeleton h-8 w-56 rounded-xl" />
+        <div className="skeleton h-5 w-36 rounded-lg" />
+        <div className="grid grid-cols-3 gap-4 pt-4">
+          <div className="skeleton h-20 rounded-2xl" />
+          <div className="skeleton h-20 rounded-2xl" />
+          <div className="skeleton h-20 rounded-2xl" />
         </div>
       </div>
     </div>
@@ -114,10 +115,10 @@ export function VehicleDetailPage() {
 
   if (error) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle size={40} className="text-red-400 mx-auto mb-3" />
-          <h2 className="text-lg font-bold text-slate-800 mb-2">{error}</h2>
+      <div className="flex-1 flex items-center justify-center p-6 bg-slate-50">
+        <div className="text-center max-w-sm bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+          <AlertCircle size={44} className="text-red-500 mx-auto mb-3" />
+          <h2 className="text-lg font-extrabold text-slate-800 mb-2">{error}</h2>
           <Button variant="ghost" onClick={() => navigate('/dashboard')} leftIcon={<ArrowLeft size={15} />}>
             Kembali ke Dashboard
           </Button>
@@ -127,47 +128,48 @@ export function VehicleDetailPage() {
   }
 
   return (
-    <div className="flex-1 bg-slate-50">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* ── Back + Action Bar ── */}
-        <div className="flex items-center justify-between mb-6">
+    <div className="flex-1 bg-slate-50 pb-28">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {/* ── Top Navigation & Action Bar ── */}
+        <div className="flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors group"
+            className="flex items-center gap-2 text-xs font-extrabold text-slate-700 hover:text-slate-900 bg-white border border-slate-200/80 px-3.5 py-2 rounded-full shadow-2xs transition-all hover:bg-slate-100 cursor-pointer"
           >
-            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            Kembali
+            <ArrowLeft size={15} />
+            <span>Kembali</span>
           </button>
 
           {vehicle && (
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                leftIcon={<Edit size={14} />}
+              <button
+                type="button"
                 onClick={() => setShowEditModal(true)}
+                className="py-2 px-3.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-full text-xs font-extrabold flex items-center gap-1.5 border border-blue-200 transition-all cursor-pointer"
               >
-                Edit Kendaraan
-              </Button>
-              <Button
-                variant="danger"
-                size="sm"
-                leftIcon={<Trash2 size={14} />}
+                <Edit size={14} />
+                <span>Edit Data</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setShowDeleteConfirm(true)}
+                className="py-2 px-3.5 bg-red-50 text-red-700 hover:bg-red-100 rounded-full text-xs font-extrabold flex items-center gap-1.5 border border-red-200 transition-all cursor-pointer"
               >
-                Hapus
-              </Button>
+                <Trash2 size={14} />
+                <span>Hapus</span>
+              </button>
             </div>
           )}
         </div>
 
-        {/* ── Hero Card ── */}
+        {/* ── Hero Card Component ── */}
         {isLoading ? (
           <HeroSkeleton />
         ) : vehicle ? (
-          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden mb-6 shadow-sm">
-            {/* Vehicle photo / illustration */}
-            <div className="h-48 sm:h-64 relative overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
+          <div className="bg-white border border-slate-200/90 rounded-3xl overflow-hidden shadow-xs">
+            {/* Media Banner */}
+            <div className="h-60 sm:h-72 relative overflow-hidden bg-slate-950">
               {vehicle.photo_url ? (
                 <img
                   src={vehicle.photo_url}
@@ -175,9 +177,9 @@ export function VehicleDetailPage() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="text-slate-200">
-                    <svg viewBox="0 0 200 100" className="w-64 h-32">
+                <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-950 flex items-center justify-center p-12">
+                  <div className="w-64 h-32 opacity-80">
+                    <svg viewBox="0 0 200 100" className="w-full h-full">
                       {vehicle.category === 'mobil' ? (
                         <>
                           <rect x="20" y="45" width="160" height="38" fill="#CBD5E1" rx="8" />
@@ -199,177 +201,186 @@ export function VehicleDetailPage() {
                   </div>
                 </div>
               )}
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-white/40 to-transparent" />
-              {/* Category & Fuel Type badges */}
+
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent" />
+
+              {/* Glassmorphism Badges Bar */}
               <div className="absolute top-4 left-4 flex items-center gap-2">
-                <span className={`badge ${vehicle.category === 'mobil' ? 'badge-blue' : 'badge-red'}`}>
+                <span className="px-3.5 py-1 rounded-full text-xs font-extrabold backdrop-blur-md bg-slate-900/80 text-white border border-white/20 shadow-xs">
                   {vehicle.category === 'mobil' ? '🚗 Mobil' : '🏍️ Motor'}
                 </span>
 
                 <span
-                  className={`badge font-extrabold text-xs py-1 px-3 ${
+                  className={`px-3.5 py-1 rounded-full text-xs font-extrabold backdrop-blur-md border shadow-xs ${
                     vehicle.fuel_type === 'ev'
-                      ? 'bg-emerald-600 text-white border border-emerald-500 shadow-sm'
-                      : 'bg-amber-500 text-white border border-amber-400 shadow-sm'
+                      ? 'bg-emerald-600/90 text-white border-emerald-400/40'
+                      : 'bg-amber-500/90 text-white border-amber-400/40'
                   }`}
                 >
                   {vehicle.fuel_type === 'ev' ? '⚡ Kendaraan Listrik (EV)' : '⛽ Bensin / BBM'}
                 </span>
               </div>
-            </div>
 
-            {/* Info */}
-            <div className="p-5 sm:p-6">
-              <div className="flex items-start justify-between gap-4">
+              {/* Hero Title & Plate inside Image */}
+              <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
+                  {vehicle.nickname && (
+                    <span className="inline-flex items-center gap-1 text-xs font-extrabold text-amber-300 bg-slate-900/80 backdrop-blur-md px-3 py-1 rounded-md border border-amber-400/30 mb-1.5">
+                      <Sparkles size={12} className="text-amber-400" />
+                      "{vehicle.nickname}"
+                    </span>
+                  )}
+                  <h1 className="text-2xl sm:text-3xl font-black text-white font-tech tracking-wide leading-tight drop-shadow-md">
                     {vehicle.brand} {vehicle.model}
                   </h1>
                   {vehicle.variant_type && (
-                    <p className="text-slate-500 mt-0.5">{vehicle.variant_type}</p>
+                    <p className="text-xs sm:text-sm text-slate-300 font-semibold mt-0.5">{vehicle.variant_type}</p>
                   )}
                 </div>
-                <span className="license-plate text-lg shrink-0">{vehicle.license_plate}</span>
-              </div>
 
-              <div className="mt-4">
-                <VehicleSummaryBadge vehicle={vehicle} />
+                <div className="bg-amber-400 text-slate-950 font-black font-mono tracking-widest text-sm sm:text-base px-3.5 py-1.5 rounded-xl border-2 border-slate-950 shadow-lg shrink-0">
+                  {vehicle.license_plate}
+                </div>
               </div>
+            </div>
 
-              {/* 📜 STNK & Pajak Card */}
+            {/* Content Details & Specs Section */}
+            <div className="p-5 sm:p-6 space-y-6">
+              {/* 📜 STNK & Pajak Info Banner */}
               {(vehicle.stnk_number || vehicle.stnk_expiry_date) ? (
-                <div className="mt-4 p-3.5 bg-amber-50/70 border border-amber-200 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs text-amber-900 shadow-2xs">
-                  <div className="flex items-center gap-2.5">
-                    <FileText size={18} className="text-amber-600 shrink-0" />
+                <div className="p-4 bg-amber-50/80 border border-amber-200 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs text-amber-950 shadow-2xs">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
+                      <FileText size={20} />
+                    </div>
                     <div>
-                      <span className="font-bold text-amber-950">STNK / Registrasi: </span>
-                      {vehicle.stnk_number ? (
-                        <span className="font-mono font-bold bg-white px-2 py-0.5 rounded border border-amber-200 mr-2 text-slate-900">
-                          {vehicle.stnk_number}
-                        </span>
-                      ) : (
-                        <span className="text-amber-700 italic mr-2">Tidak diisi</span>
-                      )}
-                      {vehicle.stnk_expiry_date && (
-                        <span>
-                          Masa Berlaku Pajak: <strong>{formatDate(vehicle.stnk_expiry_date, 'full')}</strong>
-                        </span>
-                      )}
+                      <p className="font-extrabold text-slate-900">STNK & Pajak Kendaraan</p>
+                      <div className="flex items-center gap-3 mt-0.5 text-[11px]">
+                        {vehicle.stnk_number && (
+                          <span>
+                            No. STNK: <strong className="font-mono font-bold text-amber-900 bg-white px-1.5 py-0.5 rounded border border-amber-200">{vehicle.stnk_number}</strong>
+                          </span>
+                        )}
+                        {vehicle.stnk_expiry_date && (
+                          <span>
+                            Jatuh Tempo Pajak: <strong>{formatDate(vehicle.stnk_expiry_date, 'full')}</strong>
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
                   <button
                     type="button"
                     onClick={() => setShowEditModal(true)}
-                    className="font-bold text-amber-700 hover:underline flex items-center gap-1"
+                    className="font-extrabold text-amber-700 hover:text-amber-900 flex items-center gap-1 bg-white px-3 py-1.5 rounded-xl border border-amber-300 shadow-2xs cursor-pointer"
                   >
-                    <Edit size={12} /> Edit STNK
+                    <Edit size={13} /> Edit STNK
                   </button>
                 </div>
               ) : (
-                <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs text-slate-500">
-                  <span className="flex items-center gap-1.5">
-                    <ShieldAlert size={15} className="text-slate-400" />
-                    Belum ada data Nomor STNK / Masa Berlaku Pajak
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between text-xs text-slate-600">
+                  <span className="flex items-center gap-2 font-medium">
+                    <ShieldAlert size={16} className="text-amber-500 shrink-0" />
+                    Belum ada data Nomor STNK atau Masa Berlaku Pajak
                   </span>
                   <button
                     type="button"
                     onClick={() => setShowEditModal(true)}
-                    className="font-bold text-blue-600 hover:underline"
+                    className="font-extrabold text-purple-600 hover:text-purple-700 bg-purple-50 px-3 py-1 rounded-xl border border-purple-200 cursor-pointer"
                   >
                     + Tambah STNK
                   </button>
                 </div>
               )}
 
-              {/* Stats row */}
-              <div className="mt-5 grid grid-cols-3 gap-4 pt-5 border-t border-slate-100">
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 text-blue-600 mb-1">
-                    <Gauge size={16} />
+              {/* 📊 3-Column Spec Cards Grid */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 text-center space-y-1">
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 mx-auto flex items-center justify-center">
+                    <Gauge size={18} />
                   </div>
-                  <p className="text-lg font-bold text-slate-900">{formatMileage(vehicle.current_mileage)}</p>
-                  <p className="text-xs text-slate-500">Kilometer</p>
+                  <p className="text-sm sm:text-base font-black text-slate-900">{formatMileage(vehicle.current_mileage)}</p>
+                  <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Kilometer</p>
                 </div>
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 text-slate-400 mb-1">
-                    <Calendar size={16} />
+
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 text-center space-y-1">
+                  <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 mx-auto flex items-center justify-center">
+                    <Calendar size={18} />
                   </div>
-                  <p className="text-lg font-bold text-slate-900">{vehicle.manufacture_year}</p>
-                  <p className="text-xs text-slate-500">Tahun Produksi</p>
+                  <p className="text-sm sm:text-base font-black text-slate-900">{vehicle.manufacture_year}</p>
+                  <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Tahun Produksi</p>
                 </div>
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 text-orange-500 mb-1">
-                    <Wrench size={16} />
+
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 text-center space-y-1">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center">
+                    <Wrench size={18} />
                   </div>
-                  <p className="text-lg font-bold text-slate-900">{serviceHistory.length}</p>
-                  <p className="text-xs text-slate-500">Total Servis</p>
+                  <p className="text-sm sm:text-base font-black text-slate-900">{serviceHistory.length}</p>
+                  <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Total Servis</p>
                 </div>
               </div>
             </div>
           </div>
         ) : null}
 
-        {/* ── Log Service CTA ── */}
-        {vehicle && (
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-slate-900">Riwayat Servis</h2>
-            <Button
-              leftIcon={<Plus size={15} />}
-              onClick={() => setShowAddService(true)}
-            >
-              Log Servis
-            </Button>
-          </div>
-        )}
-
-        {/* ── Service History ── */}
-        {historyLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="skeleton h-20 rounded-xl" />
-            ))}
-          </div>
-        ) : serviceHistory.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-2xl p-12 flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mb-4">
-              <Wrench size={28} className="text-orange-300" />
+        {/* ── Service History Section ── */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-black text-slate-900 font-tech tracking-tight flex items-center gap-2">
+                <Wrench size={20} className="text-purple-600" />
+                Riwayat & Log Servis
+              </h2>
+              <p className="text-xs text-slate-500 font-medium">Catatan perawatan digital kendaraan Anda</p>
             </div>
-            <h3 className="text-base font-bold text-slate-800 mb-2">Belum ada riwayat servis</h3>
-            <p className="text-slate-500 text-sm mb-6 max-w-xs">
-              Catat servis pertama kendaraan ini untuk memulai rekam jejak perawatan
-            </p>
-            <Button
-              leftIcon={<Plus size={15} />}
+
+            <button
               onClick={() => setShowAddService(true)}
+              className="py-2.5 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-full text-xs font-extrabold flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all cursor-pointer"
             >
-              Log Servis Pertama
-            </Button>
+              <Plus size={16} />
+              <span>Catat Servis Baru</span>
+            </button>
           </div>
-        ) : (
-          <div className="space-y-3">
-            {serviceHistory.map((record) => (
-              <ServiceHistoryItem key={record.id} record={record} />
-            ))}
-          </div>
-        )}
+
+          {historyLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="skeleton h-24 rounded-2xl" />
+              ))}
+            </div>
+          ) : serviceHistory.length === 0 ? (
+            <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-2">
+              <CheckCircle2 size={40} className="mx-auto text-slate-300 mb-2" />
+              <h3 className="font-extrabold text-slate-800 text-sm">Belum Ada Catatan Servis</h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed font-medium">
+                Klik tombol <strong>Catat Servis Baru</strong> di atas untuk menyimpan nota, bengkel, suku cadang, dan foto struk servis pertama kendaraan ini.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {serviceHistory.map((record) => (
+                <ServiceHistoryItem key={record.id} record={record} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* ── Edit Vehicle Modal ── */}
+      {/* Modals */}
       {vehicle && (
         <AddVehicleModal
           isOpen={showEditModal}
           onClose={() => setShowEditModal(false)}
-          initialData={vehicle}
           onSubmit={async (data) => {
             await vehicleService.updateVehicle(vehicle.id, data);
             await fetchVehicle();
           }}
+          initialData={vehicle}
         />
       )}
 
-      {/* ── Add Service Modal ── */}
       {vehicle && (
         <AddServiceModal
           isOpen={showAddService}
@@ -380,41 +391,25 @@ export function VehicleDetailPage() {
         />
       )}
 
-      {/* ── Delete Confirm Modal ── */}
+      {/* Delete Confirmation Modal */}
       <Modal
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         title="Hapus Kendaraan"
         size="sm"
-        footer={
-          <div className="flex items-center justify-end gap-3">
-            <Button
-              variant="ghost"
-              onClick={() => setShowDeleteConfirm(false)}
-              disabled={isDeleting}
-            >
+      >
+        <div className="space-y-4">
+          <p className="text-xs text-slate-600 leading-relaxed font-medium">
+            Apakah Anda yakin ingin menghapus <strong>{vehicle?.brand} {vehicle?.model} ({vehicle?.license_plate})</strong>? Seluruh riwayat servis terkait kendaraan ini juga akan terhapus.
+          </p>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="ghost" onClick={() => setShowDeleteConfirm(false)} disabled={isDeleting}>
               Batal
             </Button>
-            <Button variant="danger" isLoading={isDeleting} onClick={handleDelete}>
+            <Button variant="danger" onClick={handleDelete} isLoading={isDeleting}>
               Ya, Hapus
             </Button>
           </div>
-        }
-      >
-        <div className="text-center py-2">
-          <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Trash2 size={24} className="text-red-500" />
-          </div>
-          <p className="text-slate-700">
-            Apakah Anda yakin ingin menghapus{' '}
-            <strong>
-              {vehicle?.brand} {vehicle?.model}
-            </strong>
-            ?
-          </p>
-          <p className="text-sm text-slate-500 mt-2">
-            Semua riwayat servis kendaraan ini juga akan dihapus secara permanen.
-          </p>
         </div>
       </Modal>
     </div>
