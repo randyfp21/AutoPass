@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Heart, MessageSquare, AtSign, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Bell, Heart, MessageSquare, AtSign, CheckCircle2, ChevronRight } from 'lucide-react';
 import { threadsService } from '../services/threadsService';
 import { ThreadComposerModal } from '../components/threads/ThreadComposerModal';
 import type { NotificationItem } from '../types';
 import { timeAgo } from '../utils/formatters';
 
 export function ThreadsActivityPage() {
+  const navigate = useNavigate();
   const [activities, setActivities] = useState<NotificationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showComposerModal, setShowComposerModal] = useState(false);
@@ -26,14 +28,14 @@ export function ThreadsActivityPage() {
     fetchActivities();
   }, []);
 
-  const notifIconMap = {
+  const notifIconMap: Record<string, React.ReactNode> = {
     like_thread: <Heart size={16} className="text-rose-500 fill-rose-500" />,
     comment_thread: <MessageSquare size={16} className="text-purple-600" />,
     like_comment: <Heart size={16} className="text-rose-500" />,
     mention: <AtSign size={16} className="text-blue-600" />,
   };
 
-  const notifTextMap = {
+  const notifTextMap: Record<string, string> = {
     like_thread: 'menyukai thread Anda',
     comment_thread: 'membalas thread Anda',
     like_comment: 'menyukai balasan Anda',
@@ -68,16 +70,24 @@ export function ThreadsActivityPage() {
             </p>
           </div>
         ) : (
-          <div className="bg-white border border-slate-200 rounded-2xl divide-y divide-slate-100 overflow-hidden shadow-xs">
+          <div className="bg-white border border-slate-200 rounded-3xl divide-y divide-slate-100 overflow-hidden shadow-xs">
             {activities.map((a) => (
-              <div key={a.id} className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
+              <div
+                key={a.id}
+                onClick={() => {
+                  if (a.thread_id) {
+                    navigate(`/threads/${a.thread_id}`);
+                  }
+                }}
+                className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 transition-colors cursor-pointer group"
+              >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 bg-slate-100 rounded-full flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 bg-slate-100 rounded-full flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                     {notifIconMap[a.type] || <Bell size={16} />}
                   </div>
                   <div className="min-w-0 text-xs">
                     <p className="text-slate-800 font-medium">
-                      <strong className="font-bold text-slate-900">{a.actor_name}</strong>{' '}
+                      <strong className="font-bold text-slate-900">@{a.actor_username || a.actor_name}</strong>{' '}
                       {notifTextMap[a.type] || 'melakukan interaksi'}
                     </p>
                     {a.thread_preview && (
@@ -87,7 +97,11 @@ export function ThreadsActivityPage() {
                     )}
                   </div>
                 </div>
-                <span className="text-[10px] text-slate-400 shrink-0">{timeAgo(a.created_at)}</span>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-[10px] text-slate-400 font-medium">{timeAgo(a.created_at)}</span>
+                  <ChevronRight size={14} className="text-slate-300 group-hover:text-purple-600 transition-colors" />
+                </div>
               </div>
             ))}
           </div>

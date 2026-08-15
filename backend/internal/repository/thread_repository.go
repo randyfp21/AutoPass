@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/autopass/backend/internal/domain"
 	"github.com/jackc/pgx/v5"
@@ -362,45 +361,39 @@ func (r *threadRepository) ToggleLikeComment(ctx context.Context, commentID stri
 }
 
 func (r *threadRepository) CreateNotification(ctx context.Context, recipientID, actorID string, threadID, commentID *string, notifType string) error {
-	if recipientID == actorID {
-		return nil
-	}
-
 	threadIDStr := ""
 	if threadID != nil {
 		threadIDStr = *threadID
 	}
-
-	actorUser, _ := r.db.Exec(ctx, "SELECT full_name FROM users WHERE id = $1", actorID)
-	_ = actorUser
-
-	message := "melakukan interaksi pada postingan Anda"
-	switch notifType {
-	case "like_thread":
-		message = "menyukai thread Anda"
-	case "comment_thread":
-		message = "membalas thread Anda"
+	commentIDStr := ""
+	if commentID != nil {
+		commentIDStr = *commentID
 	}
 
 	query := `
-		INSERT INTO thread_notifications (id, user_id, actor_id, thread_id, type, message)
-		VALUES ($1, CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END, CASE WHEN $3 = '' THEN NULL ELSE $3::uuid END, CASE WHEN $4 = '' THEN NULL ELSE $4::uuid END, $5, $6)
+		INSERT INTO notifications (recipient_id, actor_id, thread_id, comment_id, type)
+		VALUES (
+			CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END,
+			CASE WHEN $2 = '' THEN NULL ELSE $2::uuid END,
+			CASE WHEN $3 = '' THEN NULL ELSE $3::uuid END,
+			CASE WHEN $4 = '' THEN NULL ELSE $4::uuid END,
+			$5::notification_type
+		)
 	`
-	id := fmt.Sprintf("%d", time.Now().UnixNano())
-	_, err := r.db.Exec(ctx, query, id, recipientID, actorID, threadIDStr, notifType, message)
+	_, err := r.db.Exec(ctx, query, recipientID, actorID, threadIDStr, commentIDStr, notifType)
 	return err
 }
 
 func (r *threadRepository) GetUserNotifications(ctx context.Context, userID string) ([]*domain.NotificationResponse, error) {
 	query := `
 		SELECT 
-			n.id, n.user_id, n.actor_id, u.full_name, u.username, u.avatar_url,
-			n.thread_id, LEFT(t.content, 60) AS thread_preview,
-			n.type, n.is_read, n.created_at
-		FROM thread_notifications n
+			n.id, n.recipient_id, n.actor_id, u.full_name, u.username, u.avatar_url,
+			n.thread_id::text, LEFT(t.content, 60) AS thread_preview, n.comment_id::text,
+			n.type::text, n.is_read, n.created_at
+		FROM notifications n
 		JOIN users u ON n.actor_id = u.id
 		LEFT JOIN threads t ON n.thread_id = t.id
-		WHERE n.user_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END
+		WHERE n.recipient_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END
 		ORDER BY n.created_at DESC
 		LIMIT 50
 	`
@@ -415,7 +408,7 @@ func (r *threadRepository) GetUserNotifications(ctx context.Context, userID stri
 		nr := &domain.NotificationResponse{}
 		if err := rows.Scan(
 			&nr.ID, &nr.RecipientID, &nr.ActorID, &nr.ActorName, &nr.ActorUsername, &nr.ActorAvatar,
-			&nr.ThreadID, &nr.ThreadPreview,
+			&nr.ThreadID, &nr.ThreadPreview, &nr.CommentID,
 			&nr.Type, &nr.IsRead, &nr.CreatedAt,
 		); err != nil {
 			return nil, err
