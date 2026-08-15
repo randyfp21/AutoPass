@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Calendar, X, Sparkles, Upload } from 'lucide-react';
 
 interface ServiceOptionSelectorModalProps {
@@ -14,13 +14,28 @@ export function ServiceOptionSelectorModal({
   onSelectSchedulePlan,
   onSelectInstantLog,
 }: ServiceOptionSelectorModalProps) {
+  useEffect(() => {
+    if (!isOpen) return;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    document.body.classList.add('modal-open');
+    document.documentElement.classList.add('modal-open');
+
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      document.body.classList.remove('modal-open');
+      document.documentElement.classList.remove('modal-open');
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex min-h-full items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 select-none">
-      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200 my-auto text-left select-text">
+    <div className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-4 bg-slate-900/65 backdrop-blur-sm animate-in fade-in duration-200 select-none w-screen h-screen">
+      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200 my-auto text-left select-text max-h-[85vh] flex flex-col">
         {/* Header */}
-        <div className="p-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
+        <div className="p-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <Sparkles size={20} className="text-yellow-300" />
             <h3 className="font-extrabold text-base">Pilih Jenis Servis</h3>
@@ -35,7 +50,7 @@ export function ServiceOptionSelectorModal({
         </div>
 
         {/* Options */}
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 flex-1 overflow-y-auto">
           {/* Option 1: Rencana service (Buat Planner) */}
           <button
             type="button"

@@ -36,7 +36,7 @@ export function Modal({
   const dialogRef = useRef<HTMLDivElement>(null);
   const firstFocusableRef = useRef<HTMLButtonElement>(null);
 
-  // Focus trap + escape key + modal-open body class for hiding bottom nav
+  // Focus trap + escape key + lock window/body background scroll
   useEffect(() => {
     if (!isOpen) return;
 
@@ -70,12 +70,16 @@ export function Modal({
 
     document.addEventListener('keydown', handleKeyDown);
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
     document.body.classList.add('modal-open');
+    document.documentElement.classList.add('modal-open');
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
       document.body.classList.remove('modal-open');
+      document.documentElement.classList.remove('modal-open');
       previouslyFocused?.focus();
     };
   }, [isOpen, onClose]);
@@ -84,33 +88,33 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto flex min-h-full items-center justify-center p-3 sm:p-6 text-center select-none"
+      className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-3 sm:p-6 text-center select-none w-screen h-screen"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in z-0"
+        className="fixed inset-0 bg-slate-900/65 backdrop-blur-sm animate-fade-in z-0"
         onClick={closeOnBackdrop ? onClose : undefined}
         aria-hidden="true"
       />
 
-      {/* Modal Panel */}
+      {/* Modal Box Container: Locked Height, Fully Contained & Perfectly Centered */}
       <div
         ref={dialogRef}
         className={[
           'relative w-full bg-white rounded-3xl shadow-2xl border border-slate-200/90',
-          'flex flex-col my-auto max-h-[84vh] sm:max-h-[88vh]',
+          'flex flex-col my-auto max-h-[85vh] sm:max-h-[88vh]',
           'animate-slide-up z-10 text-left overflow-hidden select-text',
           sizeClasses[size],
         ].join(' ')}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100 shrink-0 bg-white">
+        {/* Header (Fixed at top of modal box) */}
+        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100 shrink-0 bg-white z-10">
           <h2
             id="modal-title"
-            className="text-base sm:text-lg font-bold text-slate-900 font-sans tracking-tight"
+            className="text-base sm:text-lg font-extrabold text-slate-900 font-sans tracking-tight"
           >
             {title}
           </h2>
@@ -124,14 +128,14 @@ export function Modal({
           </button>
         </div>
 
-        {/* Scrollable Body */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 min-h-0">
+        {/* Scrollable Inner Body (Only the inner form contents scroll if long, header & footer stay 100% visible & locked) */}
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 min-h-0 scrollbar-thin">
           {children}
         </div>
 
-        {/* Footer */}
+        {/* Footer (Fixed at bottom of modal box) */}
         {footer && (
-          <div className="px-5 sm:px-6 py-4 border-t border-slate-100 bg-slate-50/80 rounded-b-3xl shrink-0">
+          <div className="px-5 sm:px-6 py-4 border-t border-slate-100 bg-slate-50/90 rounded-b-3xl shrink-0 z-10">
             {footer}
           </div>
         )}

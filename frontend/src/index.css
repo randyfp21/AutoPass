@@ -40,6 +40,12 @@ body {
   color: var(--color-automotive-dark);
 }
 
+/* Lock background window scrolling when any modal is active */
+body.modal-open, html.modal-open {
+  overflow: hidden !important;
+  touch-action: none;
+}
+
 /* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
