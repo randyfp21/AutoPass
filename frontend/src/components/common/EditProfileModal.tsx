@@ -165,8 +165,8 @@ export function EditProfileModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="👤 Edit Profil Saya" size="sm">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <Modal isOpen={isOpen} onClose={onClose} title="👤 Edit Profil Saya" size="md">
+      <form onSubmit={handleSubmit} className="space-y-4 pb-4">
         {error && (
           <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
             <AlertCircle size={15} className="shrink-0" />
@@ -342,8 +342,8 @@ export function EditProfileModal({
           </p>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+        {/* Sticky Actions Footer with Buffer Padding */}
+        <div className="sticky bottom-0 bg-white pt-3 pb-2 border-t border-slate-100 flex items-center justify-end gap-2 z-10">
           <Button type="button" variant="ghost" size="md" onClick={onClose}>
             Batal
           </Button>
