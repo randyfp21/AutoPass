@@ -318,7 +318,7 @@ export function TelemetryStudioPage() {
   const [preset, setPreset] = useState<TypographyPreset>('athletic');
 
   // Overlays Toggles
-  const [showPlate, setShowPlate] = useState(true);
+  const [showPlate, setShowPlate] = useState(false);
   const [showCost, setShowCost] = useState(true);
   const [showMileage, setShowMileage] = useState(true);
   const [showItems, setShowItems] = useState(true);
