@@ -114,7 +114,7 @@ function renderTelemetryCanvas(
   const grad = ctx.createLinearGradient(0, height - gradHeight, 0, height);
   grad.addColorStop(0, 'rgba(0,0,0,0)');
   grad.addColorStop(0.35, 'rgba(15,23,42,0.5)');
-  grad.addColorStop(1, 'rgba(2,6,23,0.96)');
+  grad.addColorStop(1, 'rgba(2,6,23,0.95)');
   ctx.fillStyle = grad;
   ctx.fillRect(0, height - gradHeight, width, gradHeight);
 
@@ -271,7 +271,6 @@ export function TelemetryStudioPage() {
     const fetch = async () => {
       setIsLoading(true);
       try {
-        // We can fetch service detail or history
         const s = await maintenanceService.getServiceRecord('global', serviceId);
         setRecord(s);
         if (s.vehicle_id) {
@@ -359,9 +358,9 @@ export function TelemetryStudioPage() {
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center p-8 bg-slate-900 text-white">
+      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50 text-slate-800">
         <div className="text-center space-y-3">
-          <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-sm font-extrabold">Memuat Odo Telemetry Studio...</p>
         </div>
       </div>
@@ -386,26 +385,26 @@ export function TelemetryStudioPage() {
   }
 
   return (
-    <div className="flex-1 bg-slate-950 text-slate-100 min-h-screen flex flex-col pb-20">
+    <div className="flex-1 bg-slate-50 text-slate-900 min-h-screen flex flex-col pb-24">
       {/* Hidden File Inputs */}
       <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && loadFile(e.target.files[0])} />
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && loadFile(e.target.files[0])} />
 
-      {/* ── Studio Top Bar Navigation ── */}
-      <div className="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 py-4 sticky top-0 z-30 flex items-center justify-between">
+      {/* ── Studio Top Bar Navigation (Clean Light Theme) ── */}
+      <div className="bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-4 sticky top-0 z-30 flex items-center justify-between shadow-2xs">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 rounded-full bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors cursor-pointer"
+            className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
           >
             <ArrowLeft size={18} />
           </button>
           <div>
-            <h1 className="text-lg font-black font-tech tracking-wide text-white flex items-center gap-2">
-              <Sparkles size={18} className="text-purple-400" />
+            <h1 className="text-lg font-black font-tech tracking-wide text-slate-900 flex items-center gap-2">
+              <Sparkles size={18} className="text-purple-600" />
               Odo Telemetry & Story Studio
             </h1>
-            <p className="text-[11px] text-slate-400 font-medium">
+            <p className="text-[11px] text-slate-500 font-medium">
               {vehicle.brand} {vehicle.model} · {vehicle.license_plate}
             </p>
           </div>
@@ -414,7 +413,7 @@ export function TelemetryStudioPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={handleDownload}
-            className="py-2 px-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-full text-xs font-extrabold flex items-center gap-1.5 border border-slate-700 transition-all cursor-pointer"
+            className="py-2 px-3.5 bg-white hover:bg-slate-100 text-slate-800 rounded-full text-xs font-extrabold flex items-center gap-1.5 border border-slate-200 shadow-2xs transition-all cursor-pointer"
           >
             <Download size={14} />
             <span className="hidden sm:inline">Download PNG</span>
@@ -432,13 +431,13 @@ export function TelemetryStudioPage() {
 
       {/* ── Main Studio Grid ── */}
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
-        {/* Left Column: Live Canvas Preview Area */}
-        <div className="lg:col-span-7 flex flex-col items-center justify-center bg-slate-900/60 rounded-3xl p-6 border border-slate-800/80 shadow-2xl relative">
+        {/* Left Column: Live Canvas Viewport Container */}
+        <div className="lg:col-span-7 flex flex-col items-center justify-center bg-slate-900 rounded-3xl p-6 border border-slate-800 shadow-xl relative">
           <div className="w-full flex items-center justify-between mb-4">
             <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
               <Maximize2 size={14} className="text-purple-400" /> Preview High-Res Canvas
             </span>
-            <span className="text-[11px] font-mono text-purple-400 bg-purple-950/60 px-2.5 py-1 rounded-full border border-purple-800/50">
+            <span className="text-[11px] font-mono text-purple-300 bg-purple-950/80 px-2.5 py-1 rounded-full border border-purple-800/60">
               Rasio {ratio}
             </span>
           </div>
@@ -446,17 +445,17 @@ export function TelemetryStudioPage() {
           <div className="w-full flex justify-center items-center overflow-hidden">
             <canvas
               ref={canvasRef}
-              className="rounded-2xl shadow-2xl border border-slate-700 max-h-[600px] object-contain transition-all"
+              className="rounded-2xl shadow-2xl border border-slate-700 max-h-[580px] object-contain transition-all"
             />
           </div>
         </div>
 
-        {/* Right Column: Studio Control Panel */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* Right Column: Light Studio Control Panel */}
+        <div className="lg:col-span-5 space-y-5">
           {/* 1. Media Source Bar */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3">
-            <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Camera size={15} className="text-purple-400" /> Photo Media Source
+          <div className="bg-white border border-slate-200/90 rounded-3xl p-5 space-y-3 shadow-xs">
+            <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+              <Camera size={15} className="text-purple-600" /> Photo Media Source
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -471,18 +470,18 @@ export function TelemetryStudioPage() {
               <button
                 type="button"
                 onClick={() => galleryInputRef.current?.click()}
-                className="py-3 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 cursor-pointer transition-transform active:scale-95"
+                className="py-3 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 cursor-pointer transition-transform active:scale-95"
               >
-                <ImageIcon size={16} className="text-purple-400" />
+                <ImageIcon size={16} className="text-purple-600" />
                 <span>🖼️ Galeri</span>
               </button>
             </div>
           </div>
 
           {/* 2. Aspect Ratio Selector */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3">
-            <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Maximize2 size={15} className="text-purple-400" /> Aspek Rasio Kanvas
+          <div className="bg-white border border-slate-200/90 rounded-3xl p-5 space-y-3 shadow-xs">
+            <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+              <Maximize2 size={15} className="text-purple-600" /> Aspek Rasio Kanvas
             </h3>
             <div className="grid grid-cols-4 gap-2">
               {(
@@ -499,8 +498,8 @@ export function TelemetryStudioPage() {
                   className={[
                     'py-2.5 px-2 rounded-xl text-xs font-extrabold border transition-all cursor-pointer text-center',
                     ratio === item.id
-                      ? 'bg-purple-600 text-white border-purple-500 shadow-md'
-                      : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-white',
+                      ? 'bg-slate-900 text-white border-slate-900 shadow-md'
+                      : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900',
                   ].join(' ')}
                 >
                   {item.label}
@@ -510,9 +509,9 @@ export function TelemetryStudioPage() {
           </div>
 
           {/* 3. Photo Filter Matrix */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3">
-            <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Sliders size={15} className="text-purple-400" /> Filter Warna Telemetri
+          <div className="bg-white border border-slate-200/90 rounded-3xl p-5 space-y-3 shadow-xs">
+            <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+              <Sliders size={15} className="text-purple-600" /> Filter Warna Telemetri
             </h3>
             <div className="grid grid-cols-3 gap-2">
               {(
@@ -531,8 +530,8 @@ export function TelemetryStudioPage() {
                   className={[
                     'py-2.5 px-2 rounded-xl text-xs font-extrabold border transition-all cursor-pointer text-center',
                     filter === f.id
-                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-400 shadow-md'
-                      : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-white',
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-500 shadow-md'
+                      : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900',
                   ].join(' ')}
                 >
                   {f.label}
@@ -542,9 +541,9 @@ export function TelemetryStudioPage() {
           </div>
 
           {/* 4. Font Typography Style */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3">
-            <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Type size={15} className="text-purple-400" /> Font Typography
+          <div className="bg-white border border-slate-200/90 rounded-3xl p-5 space-y-3 shadow-xs">
+            <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+              <Type size={15} className="text-purple-600" /> Font Typography
             </h3>
             <div className="grid grid-cols-2 gap-2">
               {(
@@ -561,8 +560,8 @@ export function TelemetryStudioPage() {
                   className={[
                     'py-2.5 px-3 rounded-xl text-xs font-extrabold border transition-all cursor-pointer text-center',
                     fontStyle === font.id
-                      ? 'bg-purple-600 text-white border-purple-500 shadow-md'
-                      : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-white',
+                      ? 'bg-slate-900 text-white border-slate-900 shadow-md'
+                      : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-slate-900',
                   ].join(' ')}
                 >
                   {font.label}
@@ -572,9 +571,9 @@ export function TelemetryStudioPage() {
           </div>
 
           {/* 5. Telemetry Overlays Toggle Switches */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3">
-            <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <CheckCircle2 size={15} className="text-purple-400" /> Elemen Telemetri Ditampilkan
+          <div className="bg-white border border-slate-200/90 rounded-3xl p-5 space-y-3 shadow-xs">
+            <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+              <CheckCircle2 size={15} className="text-purple-600" /> Elemen Telemetri Ditampilkan
             </h3>
 
             <div className="grid grid-cols-2 gap-2 text-xs font-bold">
@@ -591,15 +590,15 @@ export function TelemetryStudioPage() {
                   className={[
                     'p-2.5 rounded-xl border flex items-center justify-between transition-all cursor-pointer',
                     item.state
-                      ? 'bg-purple-950/60 border-purple-600 text-purple-200'
-                      : 'bg-slate-800/60 border-slate-700 text-slate-500',
+                      ? 'bg-purple-50 border-purple-200 text-purple-900'
+                      : 'bg-slate-50 border-slate-200 text-slate-500',
                   ].join(' ')}
                 >
                   <span>{item.label}</span>
                   <div
                     className={[
                       'w-4 h-4 rounded-md border flex items-center justify-center',
-                      item.state ? 'bg-purple-600 border-purple-400 text-white' : 'border-slate-600',
+                      item.state ? 'bg-purple-600 border-purple-600 text-white' : 'border-slate-300',
                     ].join(' ')}
                   >
                     {item.state && <CheckCircle2 size={12} />}
