@@ -17,7 +17,8 @@ import {
   Layers,
   Info,
   Send,
-  MessageSquare,
+  RefreshCw,
+  X,
 } from 'lucide-react';
 import { maintenanceService } from '../services/maintenanceService';
 import { vehicleService } from '../services/vehicleService';
@@ -305,6 +306,7 @@ export function TelemetryStudioPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const liveVideoRef = useRef<HTMLVideoElement>(null);
 
   const [record, setRecord] = useState<ServiceRecord | null>(null);
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
@@ -323,6 +325,11 @@ export function TelemetryStudioPage() {
   const [showMileage, setShowMileage] = useState(true);
   const [showItems, setShowItems] = useState(true);
   const [showWatermark, setShowWatermark] = useState(true);
+
+  // Live Camera WebRTC State & Viewfinder Modal
+  const [showCameraModal, setShowCameraModal] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
 
   // Post to Threads State & Modal
   const [showPostModal, setShowPostModal] = useState(false);
@@ -397,6 +404,70 @@ export function TelemetryStudioPage() {
 
   const handleRemoveImage = (index: number) => {
     setLoadedImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // ─── WebRTC Live Camera Controls ──────────────────────────────────────────────
+
+  const stopCameraStream = useCallback(() => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((track) => track.stop());
+      setCameraStream(null);
+    }
+  }, [cameraStream]);
+
+  const handleStartLiveCamera = async (mode: 'environment' | 'user' = facingMode) => {
+    if (loadedImages.length >= 3) {
+      setError('Maksimal 3 foto untuk kolase vertikal');
+      return;
+    }
+    setError('');
+    setShowCameraModal(true);
+
+    try {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach((track) => track.stop());
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: mode, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        audio: false,
+      });
+      setCameraStream(stream);
+      if (liveVideoRef.current) {
+        liveVideoRef.current.srcObject = stream;
+        liveVideoRef.current.play();
+      }
+    } catch {
+      // Fallback to HTML5 file capture input if permission is blocked
+      cameraInputRef.current?.click();
+      setShowCameraModal(false);
+    }
+  };
+
+  const handleCaptureLivePhoto = () => {
+    const video = liveVideoRef.current;
+    if (!video) return;
+
+    const snapCanvas = document.createElement('canvas');
+    snapCanvas.width = video.videoWidth || 1280;
+    snapCanvas.height = video.videoHeight || 720;
+    const ctx = snapCanvas.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(video, 0, 0, snapCanvas.width, snapCanvas.height);
+      const dataUrl = snapCanvas.toDataURL('image/png');
+      const img = new window.Image();
+      img.onload = () => {
+        setLoadedImages((prev) => [...prev, img].slice(0, 3));
+      };
+      img.src = dataUrl;
+    }
+
+    stopCameraStream();
+    setShowCameraModal(false);
+  };
+
+  const handleCloseCameraModal = () => {
+    stopCameraStream();
+    setShowCameraModal(false);
   };
 
   const handleDownload = () => {
@@ -659,7 +730,7 @@ export function TelemetryStudioPage() {
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <button
                   type="button"
-                  onClick={() => cameraInputRef.current?.click()}
+                  onClick={() => handleStartLiveCamera('environment')}
                   className="py-3 px-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-md cursor-pointer transition-transform active:scale-95"
                 >
                   <Camera size={16} />
@@ -814,6 +885,67 @@ export function TelemetryStudioPage() {
           </div>
         </div>
       </div>
+
+      {/* 📸 Live WebRTC Camera Viewfinder Modal */}
+      {showCameraModal && (
+        <Modal
+          isOpen={showCameraModal}
+          onClose={handleCloseCameraModal}
+          title="📷 Live Camera Viewfinder"
+          size="md"
+        >
+          <div className="space-y-4">
+            <div className="relative bg-black rounded-2xl overflow-hidden aspect-[4/3] flex items-center justify-center border border-slate-800 shadow-2xl">
+              <video
+                ref={liveVideoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-cover"
+              />
+
+              {/* Viewfinder Target Reticle */}
+              <div className="absolute inset-0 pointer-events-none border-2 border-white/20 m-6 rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 border-2 border-purple-500/80 rounded-full animate-ping opacity-50" />
+              </div>
+
+              {/* Camera Switcher Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  const newMode = facingMode === 'environment' ? 'user' : 'environment';
+                  setFacingMode(newMode);
+                  handleStartLiveCamera(newMode);
+                }}
+                className="absolute top-3 right-3 p-2.5 bg-slate-900/80 hover:bg-slate-900 text-white rounded-full backdrop-blur-md border border-slate-700 transition-transform active:scale-90 cursor-pointer shadow-md"
+                title="Ganti Kamera Depan/Belakang"
+              >
+                <RefreshCw size={16} />
+              </button>
+            </div>
+
+            {/* Camera Actions */}
+            <div className="flex items-center justify-between gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleCloseCameraModal}
+                className="py-3 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCaptureLivePhoto}
+                className="flex-1 py-3 px-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-2xl text-xs font-black shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-transform active:scale-95"
+              >
+                <Camera size={18} />
+                <span>📸 Ambil Foto Snapshot</span>
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {/* 🚀 Direct Post to Odo Threads Modal */}
       {showPostModal && (
