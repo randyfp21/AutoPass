@@ -31,10 +31,12 @@ export function ImageLightboxModal({
 
     document.addEventListener('keydown', handleKeyDown);
     document.body.style.overflow = 'hidden';
+    document.body.classList.add('modal-open');
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
+      document.body.classList.remove('modal-open');
     };
   }, [isOpen, currentIndex, images.length]);
 

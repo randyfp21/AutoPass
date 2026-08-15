@@ -36,7 +36,7 @@ export function Modal({
   const dialogRef = useRef<HTMLDivElement>(null);
   const firstFocusableRef = useRef<HTMLButtonElement>(null);
 
-  // Focus trap + escape key
+  // Focus trap + escape key + modal-open body class for hiding bottom nav
   useEffect(() => {
     if (!isOpen) return;
 
@@ -70,10 +70,12 @@ export function Modal({
 
     document.addEventListener('keydown', handleKeyDown);
     document.body.style.overflow = 'hidden';
+    document.body.classList.add('modal-open');
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
+      document.body.classList.remove('modal-open');
       previouslyFocused?.focus();
     };
   }, [isOpen, onClose]);

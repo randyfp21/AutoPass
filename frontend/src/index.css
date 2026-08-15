@@ -38,196 +38,127 @@ body {
   font-family: var(--font-sans);
   background-color: var(--color-automotive-light);
   color: var(--color-automotive-dark);
-  min-height: 100vh;
 }
 
-#root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ============================================
-   TAILWIND THEME EXTENSIONS (v4 style)
-   ============================================ */
-@theme {
-  --color-automotive-red: #DC2626;
-  --color-automotive-blue: #2563EB;
-  --color-automotive-dark: #0F172A;
-  --color-automotive-light: #F8FAFC;
-  --color-automotive-card: #FFFFFF;
-  --color-automotive-border: #E2E8F0;
-
-  --font-family-sans: 'Inter', sans-serif;
-  --font-family-tech: 'Rajdhani', sans-serif;
-}
-
-/* ============================================
-   UTILITY CLASSES
-   ============================================ */
-
-/* Glass morphism card */
-.glass-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-}
-
-/* Premium card */
-.card {
-  background: var(--color-automotive-card);
-  border: 1px solid var(--color-automotive-border);
-  border-radius: 0.75rem;
-  box-shadow: var(--shadow-card);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
-}
-
-.card:hover {
-  box-shadow: var(--shadow-card-hover);
-}
-
-/* Automotive gradient backgrounds */
-.bg-automotive-hero {
-  background: linear-gradient(135deg, #0F172A 0%, #1E3A5F 50%, #2563EB 100%);
-}
-
-.bg-automotive-accent {
-  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
-}
-
-/* License plate style */
-.license-plate {
-  font-family: var(--font-tech);
-  font-weight: 700;
-  background: #FFDD00;
-  color: #000000;
-  border: 2px solid #000000;
-  border-radius: 4px;
-  padding: 2px 8px;
-  letter-spacing: 0.1em;
-  display: inline-block;
-}
-
-/* Animated gradient border */
-.gradient-border {
-  position: relative;
-  background: white;
-  border-radius: 0.75rem;
-}
-
-.gradient-border::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: calc(0.75rem + 1px);
-  background: linear-gradient(135deg, #2563EB, #DC2626);
-  z-index: -1;
-}
-
-/* Scrollbar styling */
+/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
   background: #F1F5F9;
-  border-radius: 3px;
 }
-
 ::-webkit-scrollbar-thumb {
   background: #CBD5E1;
   border-radius: 3px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
 
-/* Input focus ring */
-.input-field {
-  width: 100%;
-  padding: 0.625rem 0.875rem;
-  border: 1.5px solid var(--color-automotive-border);
+/* ============================================
+   UTILITY & COMPONENT CLASSES
+   ============================================ */
+
+/* Primary action button styling */
+.btn-primary {
+  background-color: var(--color-automotive-blue);
+  color: #FFFFFF;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
   border-radius: 0.5rem;
-  font-family: var(--font-sans);
-  font-size: 0.9375rem;
-  color: var(--color-automotive-dark);
-  background: white;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  outline: none;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background-color: #1D4ED8;
+  transform: translateY(-1px);
 }
 
-.input-field:focus {
-  border-color: var(--color-automotive-blue);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+/* Danger button styling */
+.btn-danger {
+  background-color: var(--color-automotive-red);
+  color: #FFFFFF;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+}
+.btn-danger:hover {
+  background-color: #B91C1C;
+  transform: translateY(-1px);
 }
 
-.input-field::placeholder {
-  color: #94A3B8;
+/* Glassmorphism card container */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
-.input-field.error {
-  border-color: var(--color-automotive-red);
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-}
-
-/* Tag / Badge */
-.badge {
+/* License plate badge (Indonesian automotive plate style) */
+.license-plate-badge {
+  font-family: var(--font-tech);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background-color: #FACC15;
+  color: #0F172A;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.375rem;
+  border: 2px solid #0F172A;
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.2rem 0.6rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-size: 0.875rem;
+  text-transform: uppercase;
 }
 
-.badge-blue {
-  background: rgba(37, 99, 235, 0.1);
-  color: #2563EB;
+/* Tech heading styling */
+.font-tech {
+  font-family: var(--font-tech);
 }
 
-.badge-red {
-  background: rgba(220, 38, 38, 0.1);
-  color: #DC2626;
-}
-
-.badge-green {
-  background: rgba(22, 163, 74, 0.1);
-  color: #16A34A;
-}
-
-.badge-orange {
-  background: rgba(234, 88, 12, 0.1);
-  color: #EA580C;
-}
-
-.badge-gray {
-  background: rgba(71, 85, 105, 0.1);
-  color: #475569;
-}
-
-/* Skeleton loading */
-@keyframes skeleton-pulse {
+/* Skeleton loader animation */
+@keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #E2E8F0 25%, #F1F5F9 50%, #E2E8F0 75%);
-  background-size: 200% 100%;
-  animation: skeleton-pulse 1.5s ease-in-out infinite;
-  border-radius: 0.5rem;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: #E2E8F0;
+  border-radius: 0.375rem;
 }
 
-/* Slide-in animation for modals */
+/* Form input standard styling */
+.input-field {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-automotive-border);
+  background-color: #FFFFFF;
+  color: var(--color-automotive-dark);
+  font-size: 0.875rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: var(--color-automotive-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.input-field:disabled {
+  background-color: #F1F5F9;
+  cursor: not-allowed;
+}
+
+/* Custom modal animations */
 @keyframes slide-up {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.97);
+    transform: translateY(20px) scale(0.95);
   }
   to {
     opacity: 1;
@@ -275,4 +206,14 @@ body {
 .hover-lift:hover {
   transform: translateY(-4px);
   box-shadow: 0 20px 40px -10px rgb(0 0 0 / 0.2);
+}
+
+/* ============================================
+   AUTOMATICALLY HIDE FLOATING BOTTOM NAV WHEN ANY MODAL IS OPEN
+   ============================================ */
+body.modal-open .floating-bottom-nav,
+body.has-open-modal .floating-bottom-nav,
+body:has([role="dialog"]) .floating-bottom-nav,
+body:has(.fixed.inset-0) .floating-bottom-nav {
+  display: none !important;
 }
