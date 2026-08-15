@@ -10,6 +10,7 @@ import {
   ChevronDown,
   Camera,
   Upload,
+  Car,
 } from 'lucide-react';
 import type {
   CreateServiceRecordData,
@@ -104,12 +105,16 @@ export function AddServiceModal({
   onVehicleChange,
   initialPlanData,
 }: AddServiceModalProps) {
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string>(
+    vehicles && vehicles.length > 0 ? vehicles[0].id : ''
+  );
+
   const [workshopType, setWorkshopType] = useState<'official' | 'diy'>('diy');
   const [workshopName, setWorkshopName] = useState('');
   const [serviceDate, setServiceDate] = useState(
     new Date().toISOString().slice(0, 10)
   );
-  const [mileage, setMileage] = useState(String(currentMileage));
+  const [mileage, setMileage] = useState(String(currentMileage || (vehicles && vehicles.length > 0 ? vehicles[0].current_mileage : 0)));
   const [complaints, setComplaints] = useState('');
   const [notes, setNotes] = useState('');
   const [receiptPhotoUrl, setReceiptPhotoUrl] = useState<string>('');
@@ -123,13 +128,36 @@ export function AddServiceModal({
   const [globalError, setGlobalError] = useState('');
   const receiptFileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (isOpen && vehicles && vehicles.length > 0) {
+      if (!selectedVehicleId || !vehicles.some((v) => v.id === selectedVehicleId)) {
+        const defaultVehicle = vehicles[0];
+        setSelectedVehicleId(defaultVehicle.id);
+        setMileage(String(defaultVehicle.current_mileage));
+        if (onVehicleChange) onVehicleChange(defaultVehicle);
+      }
+    }
+  }, [isOpen, vehicles]);
+
+  const handleVehicleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const id = e.target.value;
+    setSelectedVehicleId(id);
+    const found = vehicles?.find((v) => v.id === id);
+    if (found) {
+      setMileage(String(found.current_mileage));
+      if (onVehicleChange) onVehicleChange(found);
+      getMasterItems(found.category).then((data) => setMasterItems(data)).catch(() => {});
+    }
+  };
+
   // Fetch master items when modal opens
   useEffect(() => {
     if (!isOpen) return;
+    const currentCategory = vehicleCategory || (vehicles && vehicles.length > 0 ? (vehicles.find((v) => v.id === selectedVehicleId)?.category || vehicles[0].category) : 'mobil');
     const fetch = async () => {
       setIsFetchingMaster(true);
       try {
-        const data = await getMasterItems(vehicleCategory);
+        const data = await getMasterItems(currentCategory);
         setMasterItems(data);
       } catch {
         // Silently fail
@@ -138,7 +166,7 @@ export function AddServiceModal({
       }
     };
     fetch();
-  }, [isOpen, vehicleCategory]);
+  }, [isOpen, vehicleCategory, selectedVehicleId]);
 
   // Sync form state when modal opens with initialPlanData or resets
   useEffect(() => {
@@ -268,6 +296,7 @@ export function AddServiceModal({
     setIsLoading(true);
     try {
       const data: CreateServiceRecordData = {
+        vehicle_id: selectedVehicleId || undefined,
         is_official_workshop: workshopType === 'official',
         workshop_name_manual: workshopName.trim() || undefined,
         service_date: serviceDate,
@@ -318,21 +347,20 @@ export function AddServiceModal({
     >
       <form id="add-service-form" onSubmit={handleSubmit} className="space-y-6">
         {/* ── Vehicle Selector (if vehicles provided) ── */}
-        {vehicles && vehicles.length > 0 && onVehicleChange && (
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-              Pilih Kendaraan Yang Diservis
+        {vehicles && vehicles.length > 0 && (
+          <div className="bg-purple-50/70 border border-purple-200/80 p-4 rounded-2xl space-y-2">
+            <label className="block text-xs font-extrabold text-purple-900 flex items-center gap-1.5">
+              <Car size={16} className="text-purple-600 shrink-0" />
+              Pilih Kendaraan Yang Diservis:
             </label>
             <select
-              onChange={(e) => {
-                const found = vehicles.find((v) => v.id === e.target.value);
-                if (found) onVehicleChange(found);
-              }}
-              className="input-field text-xs font-semibold bg-white"
+              value={selectedVehicleId}
+              onChange={handleVehicleSelectChange}
+              className="input-field text-xs font-bold bg-white border-purple-200 focus:border-purple-500 py-2.5 shadow-2xs"
             >
               {vehicles.map((v) => (
                 <option key={v.id} value={v.id}>
-                  {v.brand} {v.model} — {v.license_plate} ({v.current_mileage.toLocaleString('id-ID')} km)
+                  {v.category === 'mobil' ? '🚗 Mobil' : '🏍️ Motor'} · {v.brand} {v.model} ({v.manufacture_year}) — No. Pol: {v.license_plate} [{v.current_mileage.toLocaleString('id-ID')} km]
                 </option>
               ))}
             </select>

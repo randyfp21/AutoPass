@@ -149,8 +149,9 @@ export function App() {
   };
 
   const handleGlobalCreateInstantService = async (data: CreateServiceRecordData) => {
-    if (!selectedInstantVehicle) return;
-    await maintenanceService.createServiceRecord(selectedInstantVehicle.id, data);
+    const targetVehicleId = data.vehicle_id || (selectedInstantVehicle ? selectedInstantVehicle.id : (vehicles[0] ? vehicles[0].id : ''));
+    if (!targetVehicleId) return;
+    await maintenanceService.createServiceRecord(targetVehicleId, data);
     setShowAddInstantServiceModal(false);
     window.location.reload();
   };

@@ -140,6 +140,7 @@ export interface ServiceRecord {
 }
 
 export interface CreateServiceRecordData {
+  vehicle_id?: string;
   workshop_id?: string;
   is_official_workshop: boolean;
   workshop_name_manual?: string;
