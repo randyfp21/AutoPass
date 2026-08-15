@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MessageSquare, Send, Heart, CornerDownRight, X, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Home, MessageSquare, Send, Heart, CornerDownRight, X, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { threadsService } from '../services/threadsService';
 import { ThreadCard } from '../components/threads/ThreadCard';
@@ -115,14 +115,25 @@ export function ThreadDetailPage() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Top Bar Navigation */}
         <div className="flex items-center justify-between">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer bg-white px-3.5 py-2 rounded-full border border-slate-200 shadow-2xs"
-          >
-            <ArrowLeft size={16} /> Kembali
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-slate-900 transition-all cursor-pointer bg-white hover:bg-slate-100 px-3.5 py-2 rounded-full border border-slate-200 shadow-2xs active:scale-95"
+            >
+              <ArrowLeft size={16} />
+              <span>Kembali</span>
+            </button>
 
-          <span className="text-xs font-mono font-extrabold text-purple-700 bg-purple-100 px-3 py-1 rounded-full border border-purple-200">
+            <button
+              onClick={() => navigate('/threads')}
+              className="flex items-center gap-1.5 text-xs font-bold text-purple-700 hover:text-purple-900 transition-all cursor-pointer bg-purple-50 hover:bg-purple-100 px-3.5 py-2 rounded-full border border-purple-200 shadow-2xs active:scale-95"
+            >
+              <Home size={15} />
+              <span>Beranda Threads</span>
+            </button>
+          </div>
+
+          <span className="text-[11px] font-mono font-extrabold text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200 hidden sm:inline-block">
             Detail Discussion
           </span>
         </div>
