@@ -104,20 +104,23 @@ export function Navbar() {
               )}
             </div>
 
-            {/* ── Right Controls: Language Selector, Mode Switcher & User Profile Dropdown ── */}
+            {/* ── Right Controls: Language Selector, Animated Mode Switcher & User Profile Dropdown ── */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Dual Mode Switch Button */}
+              {/* Top Bar Dual Mode Switcher Button with Animation */}
               {isAuthenticated && (
                 <button
+                  type="button"
                   onClick={() => navigate(isThreadsMode ? '/dashboard' : '/threads')}
                   className={[
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shadow-2xs',
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all duration-300 transform active:scale-90 hover:scale-105 border shadow-sm cursor-pointer relative overflow-hidden group',
                     isThreadsMode
-                      ? 'bg-slate-900 text-white border-slate-800 hover:bg-slate-800'
-                      : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white border-purple-500',
+                      ? 'bg-slate-900 text-white border-slate-800 hover:bg-slate-800 shadow-purple-500/20'
+                      : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-purple-500 shadow-purple-500/30',
                   ].join(' ')}
                 >
-                  <MessageSquare size={14} />
+                  <div className="transition-transform duration-300 transform group-hover:rotate-12">
+                    {isThreadsMode ? <Gauge size={14} className="text-blue-400" /> : <MessageSquare size={14} />}
+                  </div>
                   <span>{isThreadsMode ? '🚗 Core Tracker' : '💬 Odo Threads'}</span>
                 </button>
               )}
@@ -216,23 +219,6 @@ export function Navbar() {
                       </div>
 
                       <div className="py-1 border-b border-slate-100">
-                        {/* Switch to Odo Threads Option */}
-                        <button
-                          onClick={() => {
-                            setDropdownOpen(false);
-                            navigate('/threads');
-                          }}
-                          className="w-full flex items-center justify-between px-4 py-2.5 text-xs text-purple-700 hover:bg-purple-50 transition-colors font-bold group"
-                        >
-                          <span className="flex items-center gap-2.5">
-                            <MessageSquare size={15} className="text-purple-600" />
-                            Switch to Odo Threads
-                          </span>
-                          <span className="bg-purple-100 text-purple-800 text-[10px] px-2 py-0.5 rounded-full border border-purple-200">
-                            Community
-                          </span>
-                        </button>
-
                         <button
                           onClick={() => {
                             setDropdownOpen(false);
