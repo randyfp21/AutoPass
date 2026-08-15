@@ -381,11 +381,7 @@ export function ThreadCard({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                if (onCommentClick) {
-                  onCommentClick(thread);
-                } else {
-                  navigate(`/threads/${thread.id}`);
-                }
+                navigate(`/threads/${thread.id}`);
               }}
               className="flex items-center gap-1.5 py-1 px-2.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900 rounded-xl transition-all cursor-pointer"
             >

@@ -1,20 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Bookmark, MessageSquare, AlertCircle } from 'lucide-react';
+import { Bookmark } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { threadsService } from '../services/threadsService';
 import { ThreadCard } from '../components/threads/ThreadCard';
 import { ThreadComposerModal } from '../components/threads/ThreadComposerModal';
-import { CommentSheet } from '../components/threads/CommentSheet';
 import type { Thread } from '../types';
 
 export function ThreadsBookmarkPage() {
   const { user } = useAuth();
   const [threads, setThreads] = useState<Thread[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
 
   const [showComposerModal, setShowComposerModal] = useState(false);
-  const [selectedThreadForComment, setSelectedThreadForComment] = useState<Thread | null>(null);
 
   const fetchBookmarks = async () => {
     setIsLoading(true);
@@ -22,7 +19,7 @@ export function ThreadsBookmarkPage() {
       const list = await threadsService.getBookmarkedThreads();
       setThreads(list);
     } catch {
-      setError('Gagal memuat bookmark');
+      // Fail silently
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +63,6 @@ export function ThreadsBookmarkPage() {
                 key={t.id}
                 thread={t}
                 currentUserId={user?.id}
-                onCommentClick={(targetThread) => setSelectedThreadForComment(targetThread)}
                 onThreadDeleted={(deletedId) => setThreads((prev) => prev.filter((item) => item.id !== deletedId))}
               />
             ))}
@@ -79,12 +75,6 @@ export function ThreadsBookmarkPage() {
         onClose={() => setShowComposerModal(false)}
         vehicles={[]}
         onThreadCreated={fetchBookmarks}
-      />
-
-      <CommentSheet
-        isOpen={!!selectedThreadForComment}
-        onClose={() => setSelectedThreadForComment(null)}
-        thread={selectedThreadForComment}
       />
     </div>
   );
