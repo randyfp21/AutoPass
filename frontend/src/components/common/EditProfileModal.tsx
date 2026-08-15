@@ -165,8 +165,8 @@ export function EditProfileModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="👤 Edit Profil Saya" size="md">
-      <form onSubmit={handleSubmit} className="space-y-4 pb-4">
+    <Modal isOpen={isOpen} onClose={onClose} title="👤 Edit Profil Saya" size="lg">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
             <AlertCircle size={15} className="shrink-0" />
@@ -174,176 +174,185 @@ export function EditProfileModal({
           </div>
         )}
 
-        {/* Avatar Upload Area */}
-        <div className="flex flex-col items-center justify-center pt-2 pb-4 border-b border-slate-100">
-          <div className="relative group">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={fullName}
-                className="w-24 h-24 rounded-full object-cover border-4 border-blue-100 shadow-md"
-              />
-            ) : (
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-extrabold text-2xl flex items-center justify-center border-4 border-blue-100 shadow-md">
-                {getInitials(fullName || 'User')}
-              </div>
-            )}
+        {/* 2-Column Grid Layout (Kiri: Foto & Bio, Kanan: Identity Inputs) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Kolom Kiri: Avatar Upload & Bio */}
+          <div className="space-y-4 flex flex-col justify-between">
+            {/* Avatar Upload Area */}
+            <div className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
+              <div className="relative group">
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={fullName}
+                    className="w-24 h-24 rounded-full object-cover border-4 border-blue-100 shadow-md"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-extrabold text-2xl flex items-center justify-center border-4 border-blue-100 shadow-md">
+                    {getInitials(fullName || 'User')}
+                  </div>
+                )}
 
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="absolute bottom-0 right-0 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition-transform hover:scale-105 cursor-pointer"
-              title="Upload / Ubah Foto Profil"
-            >
-              <Camera size={16} />
-            </button>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleAvatarFileChange}
-            />
-          </div>
-
-          <div className="flex items-center gap-2 mt-3 text-xs">
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="font-semibold text-blue-600 hover:underline cursor-pointer"
-            >
-              📷 Upload Foto
-            </button>
-            {avatarUrl && (
-              <>
-                <span className="text-slate-300">•</span>
                 <button
                   type="button"
-                  onClick={handleRemoveAvatar}
-                  className="font-semibold text-red-600 hover:underline flex items-center gap-1 cursor-pointer"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute bottom-0 right-0 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition-transform hover:scale-105 cursor-pointer"
+                  title="Upload / Ubah Foto Profil"
                 >
-                  <Trash2 size={12} /> Hapus
+                  <Camera size={16} />
                 </button>
-              </>
-            )}
-          </div>
-        </div>
 
-        {/* Username Input (@handle) */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Username (@handle)
-          </label>
-          <div className="relative">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-extrabold text-xs select-none">
-              @
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarFileChange}
+                />
+              </div>
+
+              <div className="flex items-center gap-2 mt-3 text-xs">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="font-semibold text-blue-600 hover:underline cursor-pointer"
+                >
+                  📷 Upload Foto
+                </button>
+                {avatarUrl && (
+                  <>
+                    <span className="text-slate-300">•</span>
+                    <button
+                      type="button"
+                      onClick={handleRemoveAvatar}
+                      className="font-semibold text-red-600 hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Trash2 size={12} /> Hapus
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g, ''))}
-              className="input-field pl-7 text-xs font-mono font-extrabold text-purple-700"
-              placeholder="dnazrl"
-            />
-          </div>
-          <p className="mt-1 text-[11px] text-slate-400">
-            Username unik untuk profil Anda di Odo Threads (contoh: @dnazrl)
-          </p>
-        </div>
 
-        {/* Bio Textarea Input */}
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <label className="block text-xs font-semibold text-slate-700 flex items-center gap-1">
-              <FileText size={13} className="text-purple-600" />
-              Bio / Deskripsi Profil
-            </label>
-            <span className="text-[10px] text-slate-400 font-medium">
-              {bio.length}/160
-            </span>
-          </div>
-          <textarea
-            rows={2}
-            value={bio}
-            onChange={(e) => setBio(e.target.value.slice(0, 160))}
-            className="w-full p-2.5 text-xs text-slate-800 bg-slate-50 border border-slate-300 focus:border-blue-500 rounded-xl outline-none resize-none placeholder:text-slate-400"
-            placeholder="Tulis deskripsi singkat tentang hobi otomotif, kendaraan impian, atau moto Anda..."
-            maxLength={160}
-          />
-        </div>
-
-        {/* Full Name Input */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Nama Lengkap
-          </label>
-          <div className="relative">
-            <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="input-field pl-10 text-xs font-medium"
-              placeholder="Nama lengkap Anda"
-            />
-          </div>
-        </div>
-
-        {/* Email Input (Read-only) */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Email (Terverifikasi)
-          </label>
-          <div className="relative">
-            <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="email"
-              value={user.email}
-              disabled
-              className="input-field pl-10 text-xs font-medium bg-slate-100 text-slate-500 cursor-not-allowed"
-            />
-          </div>
-        </div>
-
-        {/* Phone Number Input with Country Code Selector */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Nomor Telepon / WhatsApp
-          </label>
-          <div className="flex items-center border border-slate-300 rounded-xl overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 bg-white">
-            <div className="bg-slate-100 border-r border-slate-200 text-slate-700 font-extrabold text-xs px-2.5 py-2.5 flex items-center shrink-0">
-              <select
-                value={countryCode}
-                onChange={(e) => setCountryCode(e.target.value)}
-                className="bg-transparent font-bold text-slate-800 cursor-pointer outline-none text-xs"
-              >
-                {COUNTRY_CODES.map((c) => (
-                  <option key={c.code} value={c.code}>
-                    {c.flag} {c.code}
-                  </option>
-                ))}
-              </select>
+            {/* Bio Textarea Input */}
+            <div className="flex-1 flex flex-col">
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-slate-700 flex items-center gap-1">
+                  <FileText size={13} className="text-purple-600" />
+                  Bio / Deskripsi Profil
+                </label>
+                <span className="text-[10px] text-slate-400 font-medium">
+                  {bio.length}/160
+                </span>
+              </div>
+              <textarea
+                rows={3}
+                value={bio}
+                onChange={(e) => setBio(e.target.value.slice(0, 160))}
+                className="w-full flex-1 p-3 text-xs text-slate-800 bg-slate-50 border border-slate-300 focus:border-blue-500 rounded-xl outline-none resize-none placeholder:text-slate-400 min-h-[90px]"
+                placeholder="Tulis deskripsi singkat tentang hobi otomotif, kendaraan impian, atau motto Anda..."
+                maxLength={160}
+              />
             </div>
-            <input
-              type="tel"
-              value={phoneDigits}
-              onChange={(e) => {
-                let val = e.target.value.replace(/[^0-9]/g, '');
-                if (val.startsWith('0')) val = val.slice(1);
-                setPhoneDigits(val);
-              }}
-              className="flex-1 py-2 px-3 text-xs font-medium border-0 focus:outline-none text-slate-900 placeholder:text-slate-400 font-mono"
-              placeholder="85780336399"
-            />
           </div>
-          <p className="mt-1 text-[11px] text-slate-400">
-            Ketik nomor tanpa angka 0 di depan (contoh: 85780336399)
-          </p>
+
+          {/* Kolom Kanan: Username, Nama Lengkap, Email, Phone */}
+          <div className="space-y-3.5">
+            {/* Username Input (@handle) */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Username (@handle)
+              </label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-extrabold text-xs select-none">
+                  @
+                </div>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g, ''))}
+                  className="input-field pl-7 text-xs font-mono font-extrabold text-purple-700 py-2"
+                  placeholder="dnazrl"
+                />
+              </div>
+              <p className="mt-0.5 text-[11px] text-slate-400">
+                Username unik profil Odo Threads
+              </p>
+            </div>
+
+            {/* Full Name Input */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Nama Lengkap
+              </label>
+              <div className="relative">
+                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="input-field pl-10 text-xs font-medium py-2"
+                  placeholder="Nama lengkap Anda"
+                />
+              </div>
+            </div>
+
+            {/* Email Input (Read-only) */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Email (Terverifikasi)
+              </label>
+              <div className="relative">
+                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="email"
+                  value={user.email}
+                  disabled
+                  className="input-field pl-10 text-xs font-medium bg-slate-100 text-slate-500 cursor-not-allowed py-2"
+                />
+              </div>
+            </div>
+
+            {/* Phone Number Input with Country Code Selector */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Nomor Telepon / WhatsApp
+              </label>
+              <div className="flex items-center border border-slate-300 rounded-xl overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 bg-white">
+                <div className="bg-slate-100 border-r border-slate-200 text-slate-700 font-extrabold text-xs px-2.5 py-2 flex items-center shrink-0">
+                  <select
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                    className="bg-transparent font-bold text-slate-800 cursor-pointer outline-none text-xs"
+                  >
+                    {COUNTRY_CODES.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.flag} {c.code}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <input
+                  type="tel"
+                  value={phoneDigits}
+                  onChange={(e) => {
+                    let val = e.target.value.replace(/[^0-9]/g, '');
+                    if (val.startsWith('0')) val = val.slice(1);
+                    setPhoneDigits(val);
+                  }}
+                  className="flex-1 py-2 px-3 text-xs font-medium border-0 focus:outline-none text-slate-900 placeholder:text-slate-400 font-mono"
+                  placeholder="85780336399"
+                />
+              </div>
+              <p className="mt-0.5 text-[11px] text-slate-400">
+                Ketik tanpa angka 0 (contoh: 85780336399)
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Sticky Actions Footer with Buffer Padding */}
-        <div className="sticky bottom-0 bg-white pt-3 pb-2 border-t border-slate-100 flex items-center justify-end gap-2 z-10">
+        {/* Actions Footer */}
+        <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
           <Button type="button" variant="ghost" size="md" onClick={onClose}>
             Batal
           </Button>
