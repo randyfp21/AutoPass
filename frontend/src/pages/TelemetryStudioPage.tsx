@@ -174,7 +174,7 @@ function renderTelemetryCanvas(
   const nicknameText = vehicle.nickname ? vehicle.nickname : vehicle.model;
   ctx.fillText(`Wah Perjalanan ${nicknameText} sudah`, padLeft, topLeftY);
 
-  // 2. Line 2 (NGE-POP DISPLAY): [VALUE ODOMETER]km
+  // 2. Line 2 (NGE-POP DISPLAY): [VALUE ODOMETER]KM
   if (options.showMileage) {
     topLeftY += 45;
     const mileageText = formatMileage(record.mileage_at_service);
@@ -185,13 +185,13 @@ function renderTelemetryCanvas(
     const mileageWidth = ctx.measureText(mileageText).width;
     ctx.font = `bold 46px 'Rajdhani', sans-serif`;
     ctx.fillStyle = primaryColor;
-    ctx.fillText('km', padLeft + mileageWidth + 16, topLeftY + (options.ratio === '16:9' ? 24 : 48));
+    ctx.fillText('KM', padLeft + mileageWidth + 16, topLeftY + (options.ratio === '16:9' ? 24 : 48));
 
-    // 3. Line 3 (Font mengecil): waktunya service rutin !
+    // 3. Line 3 (Font mengecil): Waktunya service rutin !
     topLeftY += options.ratio === '16:9' ? 85 : 124;
     ctx.font = `italic 500 28px ${fontMain}`;
     ctx.fillStyle = primaryColor;
-    ctx.fillText('waktunya service rutin !', padLeft, topLeftY);
+    ctx.fillText('Waktunya service rutin !', padLeft, topLeftY);
   }
   ctx.restore();
 
@@ -234,24 +234,24 @@ function renderTelemetryCanvas(
     });
   }
 
-  // 2. Line 3 & 4: [Nickname kendaran] Jajannya segini nih & (size heboh) [Biaya Service]
+  // 2. Line 3 & 4: [Nickname kendaran] Jajan & (font sedikit membesar) [Biaya Service]
   if (options.showCost) {
-    // Line 4: Biaya Service (Meng-heboh sedikit / bold price tag 56px!)
+    // Line 4: Biaya Service (Font sedikit membesar / bold price tag 58px!)
     botLeftY -= 48;
     ctx.font = `bold 58px 'Rajdhani', sans-serif`;
     ctx.fillStyle = primaryColor;
     ctx.textBaseline = 'bottom';
     ctx.fillText(formatRupiah(record.total_cost), padLeft, botLeftY);
 
-    // Line 3: Nickname Jajannya segini nih
+    // Line 3: Nickname Jajan
     botLeftY -= 54;
     ctx.font = `bold 32px ${fontMain}`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
     const nickOrModel = vehicle.nickname ? vehicle.nickname : vehicle.model;
-    ctx.fillText(`${nickOrModel} Jajannya segini nih`, padLeft, botLeftY);
+    ctx.fillText(`${nickOrModel} Jajan`, padLeft, botLeftY);
   }
 
-  // 3. Line 2: Nama Bengkel
+  // 3. Line 2: (Icon location) [Nama Bengkel]
   botLeftY -= 44;
   const wName = record.workshop_name_manual || (record.is_official_workshop ? 'Bengkel Resmi Partner' : 'DIY Maintenance');
   ctx.font = `600 30px ${fontMain}`;
@@ -259,12 +259,12 @@ function renderTelemetryCanvas(
   ctx.textBaseline = 'bottom';
   ctx.fillText(`📍 ${wName}`, padLeft, botLeftY);
 
-  // 4. Line 1: Merek dan Model motor/mobil
+  // 4. Line 1: Merek dan Model motor - Tahun motor
   botLeftY -= 52;
   ctx.font = `bold 48px 'Rajdhani', sans-serif`;
   ctx.fillStyle = '#FFFFFF';
   ctx.textBaseline = 'bottom';
-  ctx.fillText(`${vehicle.brand} ${vehicle.model}`, padLeft, botLeftY);
+  ctx.fillText(`${vehicle.brand} ${vehicle.model} - ${vehicle.manufacture_year}`, padLeft, botLeftY);
 
   // Optional: License Plate Badge right above brand & model if showPlate is true
   if (options.showPlate) {
