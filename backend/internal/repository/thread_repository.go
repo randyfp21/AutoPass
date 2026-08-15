@@ -14,7 +14,7 @@ import (
 
 type ThreadRepository interface {
 	CreateThread(ctx context.Context, t *domain.Thread) error
-	GetThreads(ctx context.Context, currentUserID string, category string) ([]*domain.ThreadResponse, error)
+	GetThreads(ctx context.Context, currentUserID string, category string, limit, offset int) ([]*domain.ThreadResponse, error)
 	GetThreadByID(ctx context.Context, threadID string, currentUserID string) (*domain.ThreadResponse, error)
 	DeleteThread(ctx context.Context, threadID string, userID string) error
 	ToggleLikeThread(ctx context.Context, threadID string, userID string) (bool, error)
@@ -56,7 +56,13 @@ func (r *threadRepository) CreateThread(ctx context.Context, t *domain.Thread) e
 		Scan(&t.CreatedAt, &t.UpdatedAt)
 }
 
-func (r *threadRepository) GetThreads(ctx context.Context, currentUserID string, category string) ([]*domain.ThreadResponse, error) {
+func (r *threadRepository) GetThreads(ctx context.Context, currentUserID string, category string, limit, offset int) ([]*domain.ThreadResponse, error) {
+	if limit <= 0 {
+		limit = 10
+	}
+	if offset < 0 {
+		offset = 0
+	}
 	query := `
 		SELECT 
 			t.id, t.user_id, u.full_name, u.username, u.avatar_url, u.role::text,
@@ -72,9 +78,9 @@ func (r *threadRepository) GetThreads(ctx context.Context, currentUserID string,
 		LEFT JOIN vehicles v ON t.vehicle_id = v.id
 		WHERE ($2 = '' OR ($2 != 'subscribed' AND t.category = $2) OR ($2 = 'subscribed' AND t.user_id IN (SELECT target_user_id FROM user_subscriptions WHERE subscriber_id = CASE WHEN $1 = '' THEN NULL ELSE $1::uuid END)))
 		ORDER BY t.created_at DESC
-		LIMIT 50
+		LIMIT $3 OFFSET $4
 	`
-	rows, err := r.db.Query(ctx, query, currentUserID, category)
+	rows, err := r.db.Query(ctx, query, currentUserID, category, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("GetThreads query: %w", err)
 	}

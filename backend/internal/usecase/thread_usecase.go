@@ -12,7 +12,7 @@ import (
 
 type ThreadUsecase interface {
 	CreateThread(ctx context.Context, userID string, req domain.CreateThreadRequest) (*domain.ThreadResponse, error)
-	GetThreads(ctx context.Context, currentUserID string, category string) ([]*domain.ThreadResponse, error)
+	GetThreads(ctx context.Context, currentUserID string, category string, limit, offset int) ([]*domain.ThreadResponse, error)
 	GetThreadByID(ctx context.Context, threadID string, currentUserID string) (*domain.ThreadResponse, error)
 	DeleteThread(ctx context.Context, threadID string, userID string) error
 	ToggleLikeThread(ctx context.Context, threadID string, userID string) (bool, error)
@@ -70,8 +70,8 @@ func (u *threadUsecase) CreateThread(ctx context.Context, userID string, req dom
 	return u.threadRepo.GetThreadByID(ctx, t.ID, userID)
 }
 
-func (u *threadUsecase) GetThreads(ctx context.Context, currentUserID string, category string) ([]*domain.ThreadResponse, error) {
-	return u.threadRepo.GetThreads(ctx, currentUserID, category)
+func (u *threadUsecase) GetThreads(ctx context.Context, currentUserID string, category string, limit, offset int) ([]*domain.ThreadResponse, error) {
+	return u.threadRepo.GetThreads(ctx, currentUserID, category, limit, offset)
 }
 
 func (u *threadUsecase) GetThreadByID(ctx context.Context, threadID string, currentUserID string) (*domain.ThreadResponse, error) {

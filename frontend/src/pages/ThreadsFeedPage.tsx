@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, Sparkles, Plus, AlertCircle, Users } from 'lucide-react';
+import { MessageSquare, Sparkles, Plus, AlertCircle, Users, Loader2, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { vehicleService } from '../services/vehicleService';
 import { threadsService } from '../services/threadsService';
@@ -12,6 +12,8 @@ export function ThreadsFeedPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const PAGE_SIZE = 5;
+
   const [threads, setThreads] = useState<Thread[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
@@ -20,13 +22,18 @@ export function ThreadsFeedPage() {
   const [topicFilter, setTopicFilter] = useState<string>('all');
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState('');
 
   const [showComposerModal, setShowComposerModal] = useState(false);
 
-  const fetchData = async () => {
+  // Initial Fetch (Batch 1: First 5 Threads)
+  const fetchInitialData = async () => {
     setIsLoading(true);
     setError('');
+    setHasMore(true);
+
     try {
       const activeCategory =
         feedTab === 'subscribed'
@@ -36,12 +43,13 @@ export function ThreadsFeedPage() {
           : topicFilter;
 
       const [threadList, vehicleList] = await Promise.all([
-        threadsService.getThreads(activeCategory),
+        threadsService.getThreads(activeCategory, PAGE_SIZE, 0),
         vehicleService.getVehicles(),
       ]);
 
       setThreads(threadList);
       setVehicles(vehicleList);
+      setHasMore(threadList.length === PAGE_SIZE);
     } catch {
       setError('Gagal memuat postingan threads. Silakan coba lagi.');
     } finally {
@@ -49,9 +57,51 @@ export function ThreadsFeedPage() {
     }
   };
 
+  // Infinite Scroll Batch Fetch (Next 5 Threads)
+  const loadMoreThreads = async () => {
+    if (isLoadingMore || !hasMore || isLoading) return;
+    setIsLoadingMore(true);
+
+    try {
+      const activeCategory =
+        feedTab === 'subscribed'
+          ? 'subscribed'
+          : topicFilter === 'all'
+          ? undefined
+          : topicFilter;
+
+      const nextBatch = await threadsService.getThreads(activeCategory, PAGE_SIZE, threads.length);
+      if (nextBatch.length > 0) {
+        setThreads((prev) => [...prev, ...nextBatch]);
+      }
+      setHasMore(nextBatch.length === PAGE_SIZE);
+    } catch {
+      // Fail silently on pagination
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
   useEffect(() => {
-    fetchData();
+    fetchInitialData();
   }, [feedTab, topicFilter]);
+
+  // Window Scroll Listener for Infinite Scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 350 &&
+        hasMore &&
+        !isLoading &&
+        !isLoadingMore
+      ) {
+        loadMoreThreads();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [threads.length, hasMore, isLoading, isLoadingMore, feedTab, topicFilter]);
 
   const handleThreadDeleted = (threadId: string) => {
     setThreads((prev) => prev.filter((t) => t.id !== threadId));
@@ -195,6 +245,23 @@ export function ThreadsFeedPage() {
                 onThreadDeleted={handleThreadDeleted}
               />
             ))}
+
+            {/* Bottom Infinite Scroll Loader / End of Feed Badge */}
+            {isLoadingMore && (
+              <div className="py-6 flex items-center justify-center gap-2 text-xs font-extrabold text-purple-700 bg-white/80 backdrop-blur-xs rounded-2xl border border-purple-100 shadow-2xs animate-pulse">
+                <Loader2 size={16} className="animate-spin text-purple-600" />
+                <span>Memuat postingan threads lainnya...</span>
+              </div>
+            )}
+
+            {!hasMore && threads.length >= 5 && (
+              <div className="py-6 text-center space-y-1">
+                <div className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-200/60 px-4 py-1.5 rounded-full border border-slate-300/60">
+                  <CheckCircle2 size={14} className="text-purple-600" />
+                  <span>Anda telah melihat semua postingan</span>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -203,7 +270,7 @@ export function ThreadsFeedPage() {
         isOpen={showComposerModal}
         onClose={() => setShowComposerModal(false)}
         vehicles={vehicles}
-        onThreadCreated={fetchData}
+        onThreadCreated={fetchInitialData}
       />
     </div>
   );

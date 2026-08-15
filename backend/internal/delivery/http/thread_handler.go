@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/autopass/backend/internal/domain"
 	"github.com/autopass/backend/internal/usecase"
@@ -19,8 +20,13 @@ func NewThreadHandler(threadUC usecase.ThreadUsecase) *ThreadHandler {
 func (h *ThreadHandler) GetThreads(c *gin.Context) {
 	userID := c.GetString("userID")
 	category := c.Query("category")
+	limitStr := c.DefaultQuery("limit", "10")
+	offsetStr := c.DefaultQuery("offset", "0")
 
-	threads, err := h.threadUC.GetThreads(c.Request.Context(), userID, category)
+	limit, _ := strconv.Atoi(limitStr)
+	offset, _ := strconv.Atoi(offsetStr)
+
+	threads, err := h.threadUC.GetThreads(c.Request.Context(), userID, category, limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
