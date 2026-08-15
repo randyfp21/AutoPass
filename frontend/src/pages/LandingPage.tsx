@@ -51,8 +51,9 @@ export function LandingPage() {
               <Sparkles size={12} className="text-purple-600" />
               Odo Threads
             </a>
-            <a href="#telemetry" className="hover:text-blue-600 transition-colors">
-              Odo Telemetry
+            <a href="#privasi" className="hover:text-blue-600 transition-colors flex items-center gap-1">
+              <Lock size={12} className="text-blue-600" />
+              Privasi & Enkripsi
             </a>
           </div>
 
@@ -387,21 +388,62 @@ export function LandingPage() {
                 </p>
               </div>
             </div>
+          </div>
 
-            {/* Feature 7: End-to-End Encrypted Data & Privasi */}
-            <div className="bg-gradient-to-r from-slate-900 to-blue-950 text-white border border-slate-800 rounded-3xl p-6 space-y-3 shadow-lg md:col-span-2 lg:col-span-3">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/30 shadow-xs">
-                  <Lock size={24} />
+          {/* 🛡️ Big Standalone Container Banner for Security & Privacy */}
+          <div id="privasi" className="pt-8">
+            <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 rounded-3xl p-8 sm:p-12 border border-slate-800 shadow-2xl text-white relative overflow-hidden space-y-8">
+              {/* Ambient Glow */}
+              <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-b border-slate-800 pb-8">
+                <div className="space-y-3 max-w-2xl">
+                  <div className="inline-flex items-center gap-2 bg-blue-950 text-blue-300 border border-blue-800 px-3.5 py-1 rounded-full text-xs font-black">
+                    <Lock size={14} className="text-blue-400" />
+                    <span>DATA ANDA, PRIVASI ANDA — END-TO-END ENCRYPTED DATA</span>
+                  </div>
+                  <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white leading-tight">
+                    Privasi & Keamanan Data Kendaraan Anda Adalah Prioritas Utama Kami
+                  </h2>
+                  <p className="text-slate-300 text-xs sm:text-sm leading-relaxed font-normal">
+                    Seluruh informasi riwayat kendaraan, dokumen struk fisik, dan data profil pribadi Anda dilindungi secara penuh menggunakan enkripsi tingkat tinggi (<span className="text-blue-400 font-bold font-mono">End-to-End Encrypted Data</span>). Anda memiliki kendali 100% atas visibilitas karakter plat nomor dan data pribadi Anda.
+                  </p>
                 </div>
-                <div>
-                  <h3 className="font-black text-white text-lg">7. Data Anda, Privasi Anda (End-to-End Encrypted Data)</h3>
-                  <p className="text-xs font-mono font-bold text-blue-400">100% Encrypted Personal & Vehicle Data Protection</p>
+
+                <div className="w-16 h-16 rounded-2xl bg-blue-600/20 text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/30 shadow-lg hidden md:flex">
+                  <Lock size={36} />
                 </div>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed font-normal pt-1">
-                Seluruh informasi kendaraan, dokumen struk servis, dan data profil pribadi Anda dilindungi secara maksimal dengan teknologi enkripsi canggih (End-to-End Encrypted). Karakter plat nomor secara default disembunyikan untuk privasi penuh Anda saat berbagi ke media sosial.
-              </p>
+
+              {/* 3 Privacy Pillars Inside Container */}
+              <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                <div className="bg-white/5 backdrop-blur-md p-5 rounded-2xl border border-white/10 space-y-2">
+                  <div className="text-xs font-mono font-black text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <ShieldCheck size={16} /> End-to-End Encrypted
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                    Data riwayat servis dan dokumen Anda terenkripsi penuh dari perangkat Anda tanpa dapat diakses pihak yang tidak berwenang.
+                  </p>
+                </div>
+
+                <div className="bg-white/5 backdrop-blur-md p-5 rounded-2xl border border-white/10 space-y-2">
+                  <div className="text-xs font-mono font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Zap size={16} /> Sensor Plat Nomor
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                    Karakter plat nomor kendaraan secara default disembunyikan untuk menjaga privasi saat Anda berbagi story telemetri ke medsos.
+                  </p>
+                </div>
+
+                <div className="bg-white/5 backdrop-blur-md p-5 rounded-2xl border border-white/10 space-y-2">
+                  <div className="text-xs font-mono font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <CheckCircle2 size={16} /> Kendali Akses 100%
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                    Anda bebas memilih postingan mana yang ingin dibagikan secara publik ke Odo Threads atau disimpan secara privat.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
