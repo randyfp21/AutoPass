@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Send, Heart, MessageSquare, AlertCircle } from 'lucide-react';
+import { X, Send, Heart, MessageSquare } from 'lucide-react';
 import type { Thread, ThreadComment } from '../../types';
 import { threadsService } from '../../services/threadsService';
 import { timeAgo } from '../../utils/formatters';
@@ -84,14 +84,14 @@ export function CommentSheet({ isOpen, onClose, thread, onCommentAdded }: Commen
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto flex min-h-full items-center justify-center p-3 sm:p-6 text-center select-none">
       {/* Backdrop */}
-      <div className="absolute inset-0" onClick={onClose} />
+      <div className="fixed inset-0 bg-slate-900/65 backdrop-blur-sm animate-fade-in z-0" onClick={onClose} />
 
       {/* Sheet Container */}
-      <div className="relative w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[80vh] overflow-hidden z-10 animate-in slide-in-from-bottom duration-300">
+      <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col my-auto max-h-[84vh] sm:max-h-[88vh] overflow-hidden z-10 animate-slide-up text-left select-text">
         {/* Header */}
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/50">
+        <div className="p-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
           <div className="flex items-center gap-2">
             <MessageSquare size={18} className="text-purple-600" />
             <h3 className="font-extrabold text-sm text-slate-900">
@@ -102,14 +102,14 @@ export function CommentSheet({ isOpen, onClose, thread, onCommentAdded }: Commen
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-200 transition-colors"
+            className="p-1.5 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Original Thread Preview Snippet */}
-        <div className="p-3.5 bg-purple-50/50 border-b border-purple-100 shrink-0 text-xs">
+        <div className="p-3.5 bg-purple-50/60 border-b border-purple-100 shrink-0 text-xs">
           <span className="font-extrabold text-purple-900">@{thread.user_username || 'user'}:</span>{' '}
           <span className="text-slate-700 line-clamp-2">{thread.content}</span>
         </div>
@@ -177,20 +177,20 @@ export function CommentSheet({ isOpen, onClose, thread, onCommentAdded }: Commen
         </div>
 
         {/* Bottom Input Area */}
-        <form onSubmit={handleSubmitComment} className="p-3 border-t border-slate-100 bg-white shrink-0">
+        <form onSubmit={handleSubmitComment} className="p-3.5 border-t border-slate-100 bg-slate-50/80 shrink-0">
           <div className="flex items-center gap-2">
             <input
               type="text"
               value={newCommentText}
               onChange={(e) => setNewCommentText(e.target.value)}
               placeholder="Tulis balasan komentar..."
-              className="flex-1 py-2.5 px-4 text-xs bg-slate-50 border border-slate-200 rounded-full focus:border-purple-500 outline-none"
+              className="flex-1 py-2.5 px-4 text-xs bg-white border border-slate-200 rounded-full focus:border-purple-500 outline-none shadow-xs"
             />
 
             <button
               type="submit"
               disabled={isSubmitting || !newCommentText.trim()}
-              className="p-2.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-full transition-all shrink-0 cursor-pointer"
+              className="p-2.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-full transition-all shrink-0 cursor-pointer shadow-xs"
             >
               <Send size={15} />
             </button>

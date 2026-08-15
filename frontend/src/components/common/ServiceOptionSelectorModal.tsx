@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Wrench, X, Sparkles, Upload } from 'lucide-react';
+import { Calendar, X, Sparkles, Upload } from 'lucide-react';
 
 interface ServiceOptionSelectorModalProps {
   isOpen: boolean;
@@ -17,8 +17,8 @@ export function ServiceOptionSelectorModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto flex min-h-full items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 select-none">
+      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200 my-auto text-left select-text">
         {/* Header */}
         <div className="p-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
           <div className="flex items-center gap-2">
