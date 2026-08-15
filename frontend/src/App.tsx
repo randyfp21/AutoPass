@@ -90,7 +90,12 @@ function AppLayout({ children, onOpenAddPlanner }: AppLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-900 antialiased selection:bg-purple-500 selection:text-white">
       <Navbar />
-      <main className="flex-1 flex flex-col">{children}</main>
+      <main
+        key={location.pathname}
+        className="flex-1 flex flex-col transition-all duration-300 animate-in fade-in slide-in-from-bottom-2"
+      >
+        {children}
+      </main>
       {!isThreadsMode && <BottomNav onOpenAddPlanner={onOpenAddPlanner} />}
     </div>
   );

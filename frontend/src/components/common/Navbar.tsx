@@ -104,25 +104,45 @@ export function Navbar() {
               )}
             </div>
 
-            {/* ── Right Controls: Language Selector, Animated Mode Switcher & User Profile Dropdown ── */}
+            {/* ── Right Controls: Language Selector, Segmented ON/OFF Switcher & User Profile Dropdown ── */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Top Bar Dual Mode Switcher Button with Animation */}
+              {/* Segmented ON/OFF Mode Switcher Pill with Smooth Animation */}
               {isAuthenticated && (
-                <button
-                  type="button"
-                  onClick={() => navigate(isThreadsMode ? '/dashboard' : '/threads')}
-                  className={[
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all duration-300 transform active:scale-90 hover:scale-105 border shadow-sm cursor-pointer relative overflow-hidden group',
-                    isThreadsMode
-                      ? 'bg-slate-900 text-white border-slate-800 hover:bg-slate-800 shadow-purple-500/20'
-                      : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-purple-500 shadow-purple-500/30',
-                  ].join(' ')}
-                >
-                  <div className="transition-transform duration-300 transform group-hover:rotate-12">
-                    {isThreadsMode ? <Gauge size={14} className="text-blue-400" /> : <MessageSquare size={14} />}
-                  </div>
-                  <span>{isThreadsMode ? '🚗 Core Tracker' : '💬 Odo Threads'}</span>
-                </button>
+                <div className="bg-slate-100/90 p-1 rounded-full border border-slate-200/80 flex items-center shadow-inner relative transition-all duration-300">
+                  {/* Segment 1: Core Tracker */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (isThreadsMode) navigate('/dashboard');
+                    }}
+                    className={[
+                      'flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold transition-all duration-300 cursor-pointer select-none',
+                      !isThreadsMode
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25 scale-100'
+                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 scale-95 opacity-75',
+                    ].join(' ')}
+                  >
+                    <Gauge size={13} className={!isThreadsMode ? 'text-white' : 'text-slate-400'} />
+                    <span className="hidden sm:inline">Core Tracker</span>
+                  </button>
+
+                  {/* Segment 2: Odo Threads */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isThreadsMode) navigate('/threads');
+                    }}
+                    className={[
+                      'flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold transition-all duration-300 cursor-pointer select-none',
+                      isThreadsMode
+                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/25 scale-100'
+                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 scale-95 opacity-75',
+                    ].join(' ')}
+                  >
+                    <Sparkles size={13} className={isThreadsMode ? 'text-yellow-300' : 'text-slate-400'} />
+                    <span>Odo Threads</span>
+                  </button>
+                </div>
               )}
 
               {/* Language Selector Dropdown */}
