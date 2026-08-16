@@ -312,6 +312,11 @@ export function ActivityPage() {
             setShareModalData(selectedReceipt);
           }
         }}
+        onDeleteActivity={async (record) => {
+          await maintenanceService.deleteServiceRecord(record.vehicle_id, record.id);
+          setSelectedReceipt(null);
+          await fetchData();
+        }}
       />
 
       {/* Complete Plan Modal with Receipt Upload */}

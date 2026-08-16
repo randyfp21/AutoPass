@@ -17,6 +17,7 @@ type ServiceRepository interface {
 	GetServiceRecordByID(ctx context.Context, id string) (*domain.ServiceRecord, error)
 	GetServiceDetailsByRecordID(ctx context.Context, recordID string) ([]*domain.ServiceDetail, error)
 	GetMasterItems(ctx context.Context) ([]*domain.MasterItem, error)
+	DeleteServiceRecord(ctx context.Context, id string) error
 }
 
 type serviceRepository struct {
@@ -205,4 +206,14 @@ func (r *serviceRepository) GetMasterItems(ctx context.Context) ([]*domain.Maste
 		return nil, fmt.Errorf("serviceRepository.GetMasterItems rows: %w", err)
 	}
 	return items, nil
+}
+
+// DeleteServiceRecord removes a service record by its UUID.
+func (r *serviceRepository) DeleteServiceRecord(ctx context.Context, id string) error {
+	query := `DELETE FROM service_records WHERE id = $1`
+	_, err := r.db.Exec(ctx, query, id)
+	if err != nil {
+		return fmt.Errorf("serviceRepository.DeleteServiceRecord: %w", err)
+	}
+	return nil
 }

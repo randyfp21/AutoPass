@@ -417,6 +417,11 @@ export function SpentPage() {
             setSelectedRecordForShare(selectedRecordForReceipt);
           }
         }}
+        onDeleteActivity={async (record) => {
+          await maintenanceService.deleteServiceRecord(record.vehicle_id, record.id);
+          setSelectedRecordForReceipt(null);
+          await fetchData();
+        }}
       />
 
       {/* Gen Z Social Share Modal */}

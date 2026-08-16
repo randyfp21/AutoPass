@@ -107,3 +107,26 @@ func (h *ServiceHandler) GetServiceRecordDetail(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": record})
 }
+
+// DeleteServiceRecord godoc
+// DELETE /api/v1/vehicles/:vehicleId/services/:serviceId
+func (h *ServiceHandler) DeleteServiceRecord(c *gin.Context) {
+	userID := c.GetString(middleware.ContextUserID)
+	serviceID := c.Param("serviceId")
+
+	if err := h.serviceUC.DeleteServiceRecord(c.Request.Context(), serviceID, userID); err != nil {
+		msg := err.Error()
+		if msg == "service record not found" {
+			c.JSON(http.StatusNotFound, gin.H{"error": msg})
+			return
+		}
+		if strings.Contains(msg, "forbidden") {
+			c.JSON(http.StatusForbidden, gin.H{"error": msg})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete service record"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "service record deleted successfully"})
+}

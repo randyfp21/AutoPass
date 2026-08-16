@@ -119,6 +119,7 @@ func main() {
 		vehicles.GET("/:id/services", serviceHandler.GetServiceHistory)
 		vehicles.POST("/:id/services", serviceHandler.CreateServiceRecord)
 		vehicles.GET("/:id/services/:serviceId", serviceHandler.GetServiceRecordDetail)
+		vehicles.DELETE("/:id/services/:serviceId", serviceHandler.DeleteServiceRecord)
 	}
 
 	// Service Planner routes (protected).

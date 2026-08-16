@@ -22,6 +22,7 @@ type ServiceUsecase interface {
 	GetServiceHistory(ctx context.Context, vehicleID, userID string) ([]*domain.ServiceRecordResponse, error)
 	GetServiceRecordDetail(ctx context.Context, recordID, userID string) (*domain.ServiceRecordResponse, error)
 	GetMasterItems(ctx context.Context, vehicleCategory string) ([]*domain.MasterItemResponse, error)
+	DeleteServiceRecord(ctx context.Context, recordID, userID string) error
 }
 
 type serviceUsecase struct {
@@ -206,6 +207,33 @@ func (u *serviceUsecase) GetServiceRecordDetail(ctx context.Context, recordID, u
 	}
 
 	return toServiceRecordResponse(record, details), nil
+}
+
+// DeleteServiceRecord removes a service record after verifying ownership.
+func (u *serviceUsecase) DeleteServiceRecord(ctx context.Context, recordID, userID string) error {
+	record, err := u.serviceRepo.GetServiceRecordByID(ctx, recordID)
+	if err != nil {
+		return fmt.Errorf("serviceUsecase.DeleteServiceRecord get record: %w", err)
+	}
+	if record == nil {
+		return errors.New("service record not found")
+	}
+
+	vehicle, err := u.vehicleRepo.GetVehicleByID(ctx, record.VehicleID)
+	if err != nil {
+		return fmt.Errorf("serviceUsecase.DeleteServiceRecord get vehicle: %w", err)
+	}
+	if vehicle == nil || vehicle.UserID != userID {
+		return errors.New("forbidden: service record does not belong to this user")
+	}
+
+	if err := u.serviceRepo.DeleteServiceRecord(ctx, recordID); err != nil {
+		return fmt.Errorf("serviceUsecase.DeleteServiceRecord delete: %w", err)
+	}
+
+	// Invalidate vehicle cache.
+	u.redis.Del(ctx, vehicleCacheKeyPrefix+userID)
+	return nil
 }
 
 // GetMasterItems returns master items, filtered by vehicle category, with 24h Redis caching.
