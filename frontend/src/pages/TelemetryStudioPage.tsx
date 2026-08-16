@@ -349,11 +349,11 @@ export function TelemetryStudioPage() {
         if (s.vehicle_id) {
           const v = await vehicleService.getVehicleById(s.vehicle_id);
           setVehicle(v);
-          if (s.receipt_photo_url) {
+          if (v && v.photo_url) {
             const img = new window.Image();
             img.crossOrigin = 'anonymous';
             img.onload = () => setLoadedImages([img]);
-            img.src = s.receipt_photo_url;
+            img.src = v.photo_url;
           }
         }
       } catch {
