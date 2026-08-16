@@ -217,17 +217,15 @@ export function DigitalReceiptModal({
           <div className="flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-slate-200">
             <div className="flex items-center gap-2">
               {onOpenSocialShare && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="md"
-                  className="text-purple-600 bg-purple-50 hover:bg-purple-100 border border-purple-200 font-bold"
-                  leftIcon={<Flame size={15} />}
-                  onClick={onOpenSocialShare}
-                >
-                  ✨ Share Activity
-                </Button>
-              )}
+              <button
+                type="button"
+                onClick={onOpenSocialShare}
+                className="py-2.5 px-4 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs rounded-xl shadow-md shadow-orange-500/25 transition-all active:scale-95 cursor-pointer flex items-center gap-2 border border-orange-400/50 group"
+              >
+                <Flame size={16} className="text-amber-200 animate-pulse group-hover:scale-110 transition-transform" />
+                <span>✨ Share Activity</span>
+              </button>
+            )}
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
