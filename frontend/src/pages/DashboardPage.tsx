@@ -298,91 +298,101 @@ export function DashboardPage() {
           ))}
         </div>
 
-        {/* ── Unified Fleet Control & Telemetry Center (Bright Light Mode) ── */}
-        <div className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-xs space-y-6 mb-8">
-          {/* 1. Radar Pajak & STNK Kendaraan Section (If alerts exist) */}
-          {stnkAlertVehicles.length > 0 && (
-            <div className="bg-rose-50/70 border border-rose-200/90 rounded-2xl p-4 sm:p-5 space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 bg-rose-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
-                    <ShieldAlert size={18} />
-                  </div>
-                  <div>
-                    <h3 className="font-extrabold text-sm sm:text-base text-rose-950 flex items-center gap-2">
-                      <span>Radar Pajak & STNK Kendaraan</span>
-                      <span className="bg-rose-200 text-rose-900 text-[10px] font-mono font-black px-2 py-0.5 rounded-full">
-                        {stnkAlertVehicles.length} Warning
-                      </span>
-                    </h3>
-                    <p className="text-xs text-rose-800 font-medium">
-                      Pantau jatuh tempo pajak & legalitas kendaraan Anda agar selalu aman & bebas denda.
-                    </p>
-                  </div>
-                </div>
-              </div>
+        {/* ── Unified Fleet Control & Telemetry Center (Modern Automotive Bright Theme) ── */}
+        <div className="bg-white border border-slate-200/90 rounded-3xl shadow-md overflow-hidden space-y-6 mb-8">
+          {/* Top Racing Accent Bar */}
+          <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600" />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-                {stnkAlertVehicles.map(({ vehicle: v, status: s }) => (
-                  <div
-                    key={v.id}
-                    className="bg-white border border-rose-200/90 rounded-xl p-3.5 flex items-center justify-between gap-3 shadow-2xs hover:border-rose-300 transition-all"
-                  >
-                    <div className="min-w-0 space-y-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="bg-amber-300 text-slate-950 font-mono font-black text-xs px-2.5 py-0.5 rounded border border-amber-400 shadow-2xs">
-                          {v.license_plate}
-                        </span>
-                        <span className="font-extrabold text-sm text-slate-900 truncate">
-                          {v.brand} {v.model}
+          <div className="p-5 sm:p-6 space-y-6">
+            {/* 1. Radar Pajak & STNK Kendaraan Section (If alerts exist) */}
+            {stnkAlertVehicles.length > 0 && (
+              <div className="bg-gradient-to-r from-rose-50/90 via-red-50/70 to-orange-50/90 border border-rose-200/90 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-2xs">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-rose-600 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-md shadow-rose-500/20">
+                      <ShieldAlert size={20} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3
+                          className="font-black text-base text-rose-950 uppercase tracking-wide"
+                          style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                        >
+                          Radar Pajak & STNK Kendaraan
+                        </h3>
+                        <span className="bg-rose-600 text-white text-[10px] font-mono font-black px-2.5 py-0.5 rounded-full shadow-2xs">
+                          {stnkAlertVehicles.length} Warning
                         </span>
                       </div>
+                      <p className="text-xs text-rose-800 font-medium mt-0.5">
+                        Pantau jatuh tempo pajak & legalitas kendaraan Anda agar selalu aman & bebas denda
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-                      <div>
-                        {s.isExpired ? (
-                          <span className="bg-red-100 text-red-700 text-[11px] font-black px-2 py-0.5 rounded-md inline-block">
-                            ⛔ PAJAK LEWAT {Math.abs(s.diffDays)} HARI!
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                  {stnkAlertVehicles.map(({ vehicle: v, status: s }) => (
+                    <div
+                      key={v.id}
+                      className="bg-white border border-rose-200/90 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-2xs hover:border-rose-400 transition-all group"
+                    >
+                      <div className="min-w-0 space-y-1.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="bg-amber-300 text-slate-950 font-mono font-black text-xs px-2.5 py-0.5 rounded border border-amber-400 shadow-2xs">
+                            {v.license_plate}
                           </span>
-                        ) : s.isUrgent ? (
-                          <span className="bg-rose-100 text-rose-700 text-[11px] font-black px-2 py-0.5 rounded-md inline-block">
-                            🚨 TINGGAL {s.diffDays} HARI LAGI ({s.expDateFormatted})
+                          <span className="font-extrabold text-sm text-slate-900 truncate">
+                            {v.brand} {v.model}
                           </span>
-                        ) : (
-                          <span className="bg-amber-100 text-amber-900 text-[11px] font-bold px-2 py-0.5 rounded-md inline-block">
-                            ⚠️ Jatuh Tempo {s.diffDays} Hari ({s.expDateFormatted})
-                          </span>
+                        </div>
+
+                        <div>
+                          {s.isExpired ? (
+                            <span className="bg-red-100 text-red-700 border border-red-200 text-xs font-black px-2.5 py-1 rounded-xl inline-block">
+                              ⛔ PAJAK LEWAT {Math.abs(s.diffDays)} HARI!
+                            </span>
+                          ) : s.isUrgent ? (
+                            <span className="bg-rose-100 text-rose-700 border border-rose-200 text-xs font-black px-2.5 py-1 rounded-xl inline-block">
+                              🚨 TINGGAL {s.diffDays} HARI LAGI ({s.expDateFormatted})
+                            </span>
+                          ) : (
+                            <span className="bg-amber-100 text-amber-900 border border-amber-200 text-xs font-bold px-2.5 py-1 rounded-xl inline-block">
+                              ⚠️ Jatuh Tempo {s.diffDays} Hari ({s.expDateFormatted})
+                            </span>
+                          )}
+                        </div>
+
+                        {v.stnk_number && (
+                          <p className="text-[11px] text-slate-500 font-mono">
+                            STNK: {v.stnk_number}
+                          </p>
                         )}
                       </div>
 
-                      {v.stnk_number && (
-                        <p className="text-[11px] text-slate-500 font-mono">
-                          STNK: {v.stnk_number}
-                        </p>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingVehicle(v);
+                          setShowAddVehicle(true);
+                        }}
+                        className="py-2 px-3.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl shadow-md shadow-rose-500/20 transition-all cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95"
+                      >
+                        <Edit size={14} />
+                        <span>Perbarui</span>
+                      </button>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingVehicle(v);
-                        setShowAddVehicle(true);
-                      }}
-                      className="py-1.5 px-3 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0 active:scale-95"
-                    >
-                      <Edit size={13} />
-                      <span>Perbarui</span>
-                    </button>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* 2. Odometer Summary Widget Component */}
-          <OdometerSummaryWidget
-            vehicles={vehicles}
-            onVehicleUpdated={fetchData}
-          />
+            {/* 2. Odometer Summary Widget Component */}
+            <OdometerSummaryWidget
+              vehicles={vehicles}
+              onVehicleUpdated={fetchData}
+            />
+          </div>
         </div>
 
         {/* ── Error Banner ── */}
