@@ -298,87 +298,84 @@ export function DashboardPage() {
           ))}
         </div>
 
-        {/* ── Unified Fleet Control & Telemetry Center (Modern Automotive Bright Theme) ── */}
-        <div className="bg-white border border-slate-200/90 rounded-3xl shadow-md overflow-hidden space-y-6 mb-8">
-          {/* Top Racing Accent Bar */}
-          <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600" />
-
-          <div className="p-5 sm:p-6 space-y-6">
-            {/* 1. Status Masa Berlaku Pajak & STNK Kendaraan (Compact Sleek Design) */}
-            {stnkAlertVehicles.length > 0 && (
-              <div className="bg-amber-50/60 border border-amber-200/80 rounded-2xl p-3.5 space-y-3 shadow-2xs">
-                {/* Compact Header */}
-                <div className="flex items-center justify-between gap-2 border-b border-amber-200/50 pb-2">
-                  <div className="flex items-center gap-2">
-                    <ShieldAlert size={16} className="text-amber-600 shrink-0" />
-                    <h3 className="font-extrabold text-xs sm:text-sm text-slate-900">
-                      Masa Berlaku Pajak & STNK
-                    </h3>
-                  </div>
-                  <span className="bg-amber-100 text-amber-900 border border-amber-300/80 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full shrink-0">
-                    {stnkAlertVehicles.length} Kendaraan
-                  </span>
-                </div>
-
-                {/* Sleek Cards / Rows */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                  {stnkAlertVehicles.map(({ vehicle: v, status: s }) => (
-                    <div
-                      key={v.id}
-                      className="bg-white border border-slate-200/90 rounded-xl p-3 flex items-center justify-between gap-2.5 shadow-2xs hover:border-amber-400 transition-all"
-                    >
-                      <div className="min-w-0 space-y-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="bg-amber-300 text-slate-950 font-mono font-black text-[10px] px-2 py-0.5 rounded border border-amber-400 shrink-0">
-                            {v.license_plate}
-                          </span>
-                          <span className="font-extrabold text-xs text-slate-900 truncate">
-                            {v.brand} {v.model}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2 flex-wrap text-[11px]">
-                          <span className="text-slate-500 font-medium">Jatuh Tempo: <strong className="font-mono text-slate-800">{s.expDateFormatted}</strong></span>
-                          {s.isExpired ? (
-                            <span className="bg-gradient-to-r from-red-600 to-rose-600 text-white font-extrabold text-[10px] px-2 py-0.5 rounded-md shrink-0">
-                              ⛔ Kadaluarsa ({Math.abs(s.diffDays)} hr)
-                            </span>
-                          ) : s.isUrgent ? (
-                            <span className="bg-gradient-to-r from-rose-500 to-amber-500 text-white font-extrabold text-[10px] px-2 py-0.5 rounded-md shrink-0">
-                              🚨 Sisa {s.diffDays} hr
-                            </span>
-                          ) : (
-                            <span className="bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-extrabold text-[10px] px-2 py-0.5 rounded-md shrink-0">
-                              ⚠️ Sisa {s.diffDays} hr
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingVehicle(v);
-                          setShowAddVehicle(true);
-                        }}
-                        className="py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0 active:scale-95"
-                      >
-                        <Calendar size={12} />
-                        <span>Perbarui</span>
-                      </button>
-                    </div>
-                  ))}
+        {/* ── 1. Standalone STNK & Tax Expiry Alert Container ── */}
+        {stnkAlertVehicles.length > 0 && (
+          <div className="mb-6 bg-amber-50/70 border border-amber-200/90 rounded-2xl p-4 sm:p-5 space-y-3 shadow-2xs">
+            {/* Header */}
+            <div className="flex items-center justify-between gap-2 border-b border-amber-200/60 pb-2.5">
+              <div className="flex items-center gap-2.5">
+                <ShieldAlert size={18} className="text-amber-600 shrink-0" />
+                <div>
+                  <h3 className="font-extrabold text-sm sm:text-base text-slate-900">
+                    Masa Berlaku Pajak & STNK
+                  </h3>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    Pantau jatuh tempo pajak & legalitas dokumen kendaraan Anda
+                  </p>
                 </div>
               </div>
-            )}
+              <span className="bg-amber-100 text-amber-900 border border-amber-300/80 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full shrink-0">
+                {stnkAlertVehicles.length} Kendaraan
+              </span>
+            </div>
 
-            {/* 2. Odometer Summary Widget Component */}
-            <OdometerSummaryWidget
-              vehicles={vehicles}
-              onVehicleUpdated={fetchData}
-            />
+            {/* Sleek Cards / Rows Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+              {stnkAlertVehicles.map(({ vehicle: v, status: s }) => (
+                <div
+                  key={v.id}
+                  className="bg-white border border-slate-200/90 rounded-xl p-3 flex items-center justify-between gap-2.5 shadow-2xs hover:border-amber-400 transition-all"
+                >
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="bg-amber-300 text-slate-950 font-mono font-black text-[10px] px-2 py-0.5 rounded border border-amber-400 shrink-0">
+                        {v.license_plate}
+                      </span>
+                      <span className="font-extrabold text-xs text-slate-900 truncate">
+                        {v.brand} {v.model}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-wrap text-[11px]">
+                      <span className="text-slate-500 font-medium">Jatuh Tempo: <strong className="font-mono text-slate-800">{s.expDateFormatted}</strong></span>
+                      {s.isExpired ? (
+                        <span className="bg-gradient-to-r from-red-600 to-rose-600 text-white font-extrabold text-[10px] px-2 py-0.5 rounded-md shrink-0">
+                          ⛔ Kadaluarsa ({Math.abs(s.diffDays)} hr)
+                        </span>
+                      ) : s.isUrgent ? (
+                        <span className="bg-gradient-to-r from-rose-500 to-amber-500 text-white font-extrabold text-[10px] px-2 py-0.5 rounded-md shrink-0">
+                          🚨 Sisa {s.diffDays} hr
+                        </span>
+                      ) : (
+                        <span className="bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-extrabold text-[10px] px-2 py-0.5 rounded-md shrink-0">
+                          ⚠️ Sisa {s.diffDays} hr
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingVehicle(v);
+                      setShowAddVehicle(true);
+                    }}
+                    className="py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0 active:scale-95"
+                  >
+                    <Calendar size={12} />
+                    <span>Perbarui</span>
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* ── 2. Standalone Odometer Summary & Quick Update Widget ── */}
+        <OdometerSummaryWidget
+          vehicles={vehicles}
+          onVehicleUpdated={fetchData}
+        />
 
         {/* ── Error Banner ── */}
         {error && (
