@@ -149,8 +149,8 @@ export function VehicleCard({ vehicle, serviceCount, lastServiceDate }: VehicleC
               <Gauge size={16} />
             </div>
             <div>
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Odometer</p>
-              <AnalogOdometer value={vehicle.current_mileage} size="sm" />
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Odometer</p>
+              <AnalogOdometer value={vehicle.current_mileage} size="sm" variant="badge" />
             </div>
           </div>
 
