@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Shield, Wrench, Printer, CheckCircle, Car, Calendar, Gauge, Camera, Flame, Trash2, AlertTriangle, FileText, Eye, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Shield, Wrench, Printer, CheckCircle, Car, Calendar, Gauge, Camera, Flame, Trash2, AlertTriangle, FileText, Eye } from 'lucide-react';
 import { Modal } from '../common/Modal';
 import { AnalogOdometer } from '../common/AnalogOdometer';
 import type { ServiceRecord, Vehicle } from '../../types';
@@ -23,9 +24,9 @@ export function DigitalReceiptModal({
   onOpenSocialShare,
   onDeleteActivity,
 }: DigitalReceiptModalProps) {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const [showPhotoLightbox, setShowPhotoLightbox] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   if (!record) return null;
@@ -149,7 +150,10 @@ export function DigitalReceiptModal({
               <div className="flex items-center gap-3 min-w-0">
                 <div
                   className="w-12 h-12 rounded-xl border border-slate-200 overflow-hidden bg-white shrink-0 shadow-2xs relative group cursor-pointer"
-                  onClick={() => setShowPhotoLightbox(true)}
+                  onClick={() => {
+                    onClose();
+                    navigate(`/services/${record.id}/receipt-photo`);
+                  }}
                 >
                   <img
                     src={record.receipt_photo_url}
@@ -169,7 +173,10 @@ export function DigitalReceiptModal({
 
               <button
                 type="button"
-                onClick={() => setShowPhotoLightbox(true)}
+                onClick={() => {
+                  onClose();
+                  navigate(`/services/${record.id}/receipt-photo`);
+                }}
                 className="py-2 px-3.5 bg-white hover:bg-slate-100 text-blue-700 font-extrabold text-xs rounded-xl border border-slate-200 shadow-2xs transition-all cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95"
               >
                 <Eye size={14} />
@@ -294,33 +301,7 @@ export function DigitalReceiptModal({
         </div>
       </Modal>
 
-      {/* ── 8. Lightbox Modal for Full Receipt Image ── */}
-      {showPhotoLightbox && record?.receipt_photo_url && (
-        <div className="fixed inset-0 z-50 overflow-y-auto flex min-h-full items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200 select-none">
-          <div className="relative bg-slate-900 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden border border-slate-800 animate-in zoom-in-95 duration-200 p-4 space-y-4 my-auto">
-            <div className="flex items-center justify-between text-white border-b border-slate-800 pb-3 px-2">
-              <span className="font-bold text-sm flex items-center gap-2">
-                <Camera size={16} className="text-blue-400" />
-                Foto Struk / Nota Fisik Bengkel
-              </span>
-              <button
-                type="button"
-                onClick={() => setShowPhotoLightbox(false)}
-                className="p-1.5 text-slate-400 hover:text-white rounded-full bg-slate-800 hover:bg-slate-700 transition-colors cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <div className="max-h-[75vh] overflow-auto flex items-center justify-center bg-slate-950 rounded-2xl p-2">
-              <img
-                src={record.receipt_photo_url}
-                alt="Foto Struk Fisik Asli"
-                className="w-full h-auto max-h-[70vh] object-contain mx-auto rounded-xl"
-              />
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* ── 9. Delete Confirmation Modal ── */}
       {showConfirmDelete && (

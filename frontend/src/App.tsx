@@ -20,6 +20,7 @@ import UserProfilePage from './pages/UserProfilePage';
 import ThreadDetailPage from './pages/ThreadDetailPage';
 import ThreadPhotoViewerPage from './pages/ThreadPhotoViewerPage';
 import TelemetryStudioPage from './pages/TelemetryStudioPage';
+import ReceiptPhotoViewerPage from './pages/ReceiptPhotoViewerPage';
 import { AddPlannerModal } from './components/planner/AddPlannerModal';
 import { AddServiceModal } from './components/service/AddServiceModal';
 import { ThreadComposerModal } from './components/threads/ThreadComposerModal';
@@ -363,6 +364,16 @@ export function App() {
           element={
             <ProtectedRoute>
               <ThreadPhotoViewerPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Dedicated Service Receipt Photo Viewer Page Route */}
+        <Route
+          path="/services/:serviceId/receipt-photo"
+          element={
+            <ProtectedRoute>
+              <ReceiptPhotoViewerPage />
             </ProtectedRoute>
           }
         />
