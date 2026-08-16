@@ -367,18 +367,20 @@ export function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* Bottom of card (Paling bawah card): Button Perbarui Data */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingVehicle(v);
-                      setShowAddVehicle(true);
-                    }}
-                    className="w-full py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 mt-1"
-                  >
-                    <Calendar size={13} />
-                    <span>Perbarui Data</span>
-                  </button>
+                  {/* Bottom of card (Paling bawah card): Button Perbarui Data (Kecil) */}
+                  <div className="pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingVehicle(v);
+                        setShowAddVehicle(true);
+                      }}
+                      className="py-1 px-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 w-fit"
+                    >
+                      <Calendar size={12} />
+                      <span>Perbarui Data</span>
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
