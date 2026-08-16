@@ -190,7 +190,7 @@ export function ThreadsFeedPage() {
                 className={[
                   'px-3.5 py-1.5 rounded-full text-xs font-extrabold shrink-0 border transition-all cursor-pointer',
                   topicFilter === cat.id
-                    ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                    ? 'bg-purple-600 text-white border-purple-600 shadow-xs'
                     : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-100',
                 ].join(' ')}
               >
