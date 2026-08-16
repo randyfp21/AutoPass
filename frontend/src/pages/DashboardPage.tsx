@@ -298,58 +298,73 @@ export function DashboardPage() {
           ))}
         </div>
 
-        {/* ── STNK Expiry Reminder Banner (Alerts <= 90 days or Expired) ── */}
+        {/* ── STNK & Tax Expiry Radar Widget ── */}
         {stnkAlertVehicles.length > 0 && (
-          <div className="mb-8 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300/80 rounded-2xl p-5 shadow-sm space-y-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 bg-amber-500 text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs animate-bounce">
-                <ShieldAlert size={20} />
-              </div>
-              <div>
-                <h3 className="text-base font-extrabold text-amber-950">
-                  📜 Pengingat Masa Berlaku STNK & Pajak Kendaraan ({stnkAlertVehicles.length})
-                </h3>
-                <p className="text-xs text-amber-800 mt-0.5">
-                  Segera perpanjang STNK kendaraan Anda sebelum tanggal jatuh tempo pajak
-                </p>
+          <div className="mb-8 bg-gradient-to-r from-slate-950 via-slate-900 to-rose-950 text-white rounded-3xl p-5 sm:p-6 shadow-xl border border-rose-900/50 relative overflow-hidden space-y-4">
+            {/* Ambient Red Glow Spotlight */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Header Title & Subtitle */}
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-rose-600/30 border border-rose-500/40 text-rose-400 rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
+                  <ShieldAlert size={20} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3
+                      className="text-base sm:text-lg font-black tracking-tight text-white"
+                      style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                    >
+                      Radar Pajak & STNK Kendaraan
+                    </h3>
+                    <span className="bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-mono font-black px-2 py-0.5 rounded-full">
+                      {stnkAlertVehicles.length} Warning
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-300 mt-0.5 font-medium">
+                    Pantau jatuh tempo pajak & legalitas kendaraan Anda agar selalu aman & bebas denda di jalan raya.
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            {/* Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 relative z-10">
               {stnkAlertVehicles.map(({ vehicle: v, status: s }) => (
                 <div
                   key={v.id}
-                  className="bg-white border border-amber-200 rounded-xl p-3.5 flex items-center justify-between gap-3 shadow-2xs hover:border-amber-400 transition-all"
+                  className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-md hover:border-white/30 transition-all group"
                 >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-xs text-slate-900 truncate">
-                        {v.brand} {v.model}
-                      </span>
-                      <span className="text-[10px] font-mono font-bold bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded border border-amber-200 shrink-0">
+                  <div className="min-w-0 space-y-1.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="bg-amber-300 text-slate-950 font-mono font-black text-xs px-2.5 py-0.5 rounded border border-amber-400 shadow-2xs">
                         {v.license_plate}
+                      </span>
+                      <span className="font-extrabold text-sm text-white truncate">
+                        {v.brand} {v.model}
                       </span>
                     </div>
 
-                    <div className="mt-1.5">
+                    <div>
                       {s.isExpired ? (
-                        <span className="bg-red-100 text-red-700 text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 w-fit">
-                          ⛔ SUDAH EXPIRED! ({Math.abs(s.diffDays)} hari lalu)
-                        </span>
+                        <div className="inline-flex items-center gap-1.5 bg-red-500/30 text-red-200 border border-red-500/50 text-xs font-black px-2.5 py-1 rounded-xl">
+                          <span>⛔ PAJAK LEWAT {Math.abs(s.diffDays)} HARI!</span>
+                        </div>
                       ) : s.isUrgent ? (
-                        <span className="bg-rose-100 text-rose-700 text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 w-fit">
-                          🚨 Expired dalam {s.diffDays} hari! ({s.expDateFormatted})
-                        </span>
+                        <div className="inline-flex items-center gap-1.5 bg-rose-500/30 text-rose-200 border border-rose-500/50 text-xs font-black px-2.5 py-1 rounded-xl">
+                          <span>🚨 TINGGAL {s.diffDays} HARI LAGI ({s.expDateFormatted})</span>
+                        </div>
                       ) : (
-                        <span className="bg-amber-100 text-amber-800 text-[11px] font-semibold px-2 py-0.5 rounded-md flex items-center gap-1 w-fit">
-                          ⚠️ Expired dalam {s.diffDays} hari ({s.expDateFormatted})
-                        </span>
+                        <div className="inline-flex items-center gap-1.5 bg-amber-500/30 text-amber-200 border border-amber-500/50 text-xs font-bold px-2.5 py-1 rounded-xl">
+                          <span>⚠️ Jatuh Tempo {s.diffDays} Hari ({s.expDateFormatted})</span>
+                        </div>
                       )}
                     </div>
 
                     {v.stnk_number && (
-                      <p className="text-[11px] text-slate-500 font-mono mt-1 truncate">
-                        No. STNK: {v.stnk_number}
+                      <p className="text-[11px] text-slate-400 font-mono">
+                        STNK: {v.stnk_number}
                       </p>
                     )}
                   </div>
@@ -360,10 +375,10 @@ export function DashboardPage() {
                       setEditingVehicle(v);
                       setShowAddVehicle(true);
                     }}
-                    className="p-2 text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg border border-amber-200 transition-colors shrink-0"
-                    title="Update Masa Berlaku STNK"
+                    className="py-2 px-3 bg-white/10 hover:bg-white/20 text-white font-extrabold text-xs rounded-xl border border-white/20 transition-all cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95 group-hover:bg-white group-hover:text-slate-900 shadow-2xs"
                   >
                     <Edit size={14} />
+                    <span>Perbarui</span>
                   </button>
                 </div>
               ))}
