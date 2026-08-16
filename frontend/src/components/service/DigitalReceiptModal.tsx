@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, Wrench, Printer, CheckCircle, Car, Calendar, Gauge, Camera, Flame, Trash2, AlertTriangle, FileText } from 'lucide-react';
 import { Modal } from '../common/Modal';
+import { AnalogOdometer } from '../common/AnalogOdometer';
 import type { ServiceRecord, Vehicle } from '../../types';
 import { formatRupiah, formatDate, formatMileage } from '../../utils/formatters';
 import { useTranslation } from '../../context/LanguageContext';
@@ -130,15 +131,12 @@ export function DigitalReceiptModal({
                     {vehicle ? `${vehicle.brand} ${vehicle.model}` : ''}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 text-slate-600 pt-0.5">
+                <div className="flex items-center gap-3 text-slate-600 pt-0.5 flex-wrap">
                   <span className="flex items-center gap-1 font-medium">
                     <Calendar size={13} className="text-slate-400" />
                     {formatDate(record.service_date, 'full')}
                   </span>
-                  <span className="flex items-center gap-1 font-bold text-slate-800">
-                    <Gauge size={13} className="text-purple-600" />
-                    {formatMileage(record.mileage_at_service)} km
-                  </span>
+                  <AnalogOdometer value={record.mileage_at_service} size="sm" />
                 </div>
               </div>
             </div>
