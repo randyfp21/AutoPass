@@ -309,7 +309,7 @@ export function ActivityPage() {
         vehicle={selectedReceipt?.vehicle || null}
         onOpenSocialShare={() => {
           if (selectedReceipt) {
-            setShareModalData(selectedReceipt);
+            navigate(`/services/${selectedReceipt.record.id}/story`);
           }
         }}
         onDeleteActivity={async (record) => {

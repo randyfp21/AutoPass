@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Wallet, TrendingUp, Receipt, Filter, Eye, Shield, Wrench, ChevronRight, Calendar, RotateCcw, Download, FileText } from 'lucide-react';
 import { vehicleService } from '../services/vehicleService';
 import { maintenanceService } from '../services/maintenanceService';
@@ -12,6 +13,7 @@ import { useAuth } from '../context/AuthContext';
 import { generateSpentPDF } from '../utils/pdfGenerator';
 
 export function SpentPage() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useTranslation();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -414,7 +416,7 @@ export function SpentPage() {
         vehicle={selectedRecordForReceipt?.vehicle || null}
         onOpenSocialShare={() => {
           if (selectedRecordForReceipt) {
-            setSelectedRecordForShare(selectedRecordForReceipt);
+            navigate(`/services/${selectedRecordForReceipt.record.id}/story`);
           }
         }}
         onDeleteActivity={async (record) => {
