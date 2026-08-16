@@ -418,9 +418,9 @@ export function DashboardPage() {
                               setEditingVehicle(v);
                               setShowAddVehicle(true);
                             }}
-                            className="py-1.5 px-3.5 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95"
+                            className="py-1.5 px-3.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95"
                           >
-                            <Calendar size={13} className="text-amber-400" />
+                            <Calendar size={13} />
                             <span>Perbarui Tanggal</span>
                           </button>
                         </div>
