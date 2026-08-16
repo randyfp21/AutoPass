@@ -12,7 +12,7 @@ import (
 
 type ThreadUsecase interface {
 	CreateThread(ctx context.Context, userID string, req domain.CreateThreadRequest) (*domain.ThreadResponse, error)
-	GetThreads(ctx context.Context, currentUserID string, category string, limit, offset int) ([]*domain.ThreadResponse, error)
+	GetThreads(ctx context.Context, currentUserID string, category string, search string, limit, offset int) ([]*domain.ThreadResponse, error)
 	GetThreadByID(ctx context.Context, threadID string, currentUserID string) (*domain.ThreadResponse, error)
 	DeleteThread(ctx context.Context, threadID string, userID string) error
 	ToggleLikeThread(ctx context.Context, threadID string, userID string) (bool, error)
@@ -49,29 +49,25 @@ func (u *threadUsecase) CreateThread(ctx context.Context, userID string, req dom
 		category = "general"
 	}
 
-	var vehicleID *string
-	if req.VehicleID != nil && *req.VehicleID != "" {
-		vehicleID = req.VehicleID
-	}
-
-	t := &domain.Thread{
-		ID:        uuid.New().String(),
+	threadID := uuid.New().String()
+	thread := &domain.Thread{
+		ID:        threadID,
 		UserID:    userID,
-		VehicleID: vehicleID,
+		VehicleID: req.VehicleID,
 		Content:   req.Content,
 		PhotoURLs: req.PhotoURLs,
 		Category:  category,
 	}
 
-	if err := u.threadRepo.CreateThread(ctx, t); err != nil {
+	if err := u.threadRepo.CreateThread(ctx, thread); err != nil {
 		return nil, fmt.Errorf("CreateThread: %w", err)
 	}
 
-	return u.threadRepo.GetThreadByID(ctx, t.ID, userID)
+	return u.threadRepo.GetThreadByID(ctx, threadID, userID)
 }
 
-func (u *threadUsecase) GetThreads(ctx context.Context, currentUserID string, category string, limit, offset int) ([]*domain.ThreadResponse, error) {
-	return u.threadRepo.GetThreads(ctx, currentUserID, category, limit, offset)
+func (u *threadUsecase) GetThreads(ctx context.Context, currentUserID string, category string, search string, limit, offset int) ([]*domain.ThreadResponse, error) {
+	return u.threadRepo.GetThreads(ctx, currentUserID, category, search, limit, offset)
 }
 
 func (u *threadUsecase) GetThreadByID(ctx context.Context, threadID string, currentUserID string) (*domain.ThreadResponse, error) {

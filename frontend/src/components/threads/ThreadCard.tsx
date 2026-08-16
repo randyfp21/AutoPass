@@ -11,6 +11,35 @@ interface ThreadCardProps {
   currentUserId?: string;
   onCommentClick?: (thread: Thread) => void;
   onThreadDeleted?: (threadId: string) => void;
+  onHashtagClick?: (tag: string) => void;
+}
+
+function renderContentWithHashtags(
+  content: string,
+  onHashtagClick?: (tag: string) => void
+) {
+  const parts = content.split(/(#[\w\d_\-]+)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith('#') && part.length > 1) {
+      const tag = part.slice(1);
+      return (
+        <span
+          key={index}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onHashtagClick) {
+              onHashtagClick(tag);
+            }
+          }}
+          className="text-purple-600 font-extrabold hover:underline hover:text-purple-700 cursor-pointer bg-purple-50 hover:bg-purple-100 px-1.5 py-0.5 rounded-md border border-purple-200/80 inline-flex items-center gap-0.5 mx-0.5 transition-colors no-card-click"
+        >
+          {part}
+        </span>
+      );
+    }
+    return part;
+  });
 }
 
 export function ThreadCard({
@@ -18,6 +47,7 @@ export function ThreadCard({
   currentUserId,
   onCommentClick,
   onThreadDeleted,
+  onHashtagClick,
 }: ThreadCardProps) {
   const navigate = useNavigate();
   const [thread, setThread] = useState<Thread>(initialThread);
@@ -212,9 +242,9 @@ export function ThreadCard({
           </div>
         )}
 
-        {/* Content Text */}
+        {/* Content Text with Interactive Hashtags */}
         <p className="text-xs sm:text-sm text-slate-800 leading-relaxed font-normal whitespace-pre-line group-hover/card:text-slate-900">
-          {thread.content}
+          {renderContentWithHashtags(thread.content, onHashtagClick)}
         </p>
 
         {/* In-Card Interactive Single-Image Photo Carousel / Slider */}

@@ -2,10 +2,11 @@ import api from './api';
 import type { Thread, CreateThreadData, ThreadComment, NotificationItem } from '../types';
 
 export const threadsService = {
-  getThreads: async (category?: string, limit: number = 5, offset: number = 0): Promise<Thread[]> => {
+  getThreads: async (category?: string, limit: number = 5, offset: number = 0, search?: string): Promise<Thread[]> => {
     const res = await api.get<Thread[]>('/threads', {
       params: {
         ...(category ? { category } : {}),
+        ...(search ? { search } : {}),
         limit,
         offset,
       },

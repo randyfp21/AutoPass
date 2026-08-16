@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { MessageSquare, Sparkles, Plus, AlertCircle, Users, Loader2, CheckCircle2 } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  MessageSquare,
+  Sparkles,
+  Plus,
+  AlertCircle,
+  Users,
+  Loader2,
+  CheckCircle2,
+  Search,
+  Hash,
+  X,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { vehicleService } from '../services/vehicleService';
 import { threadsService } from '../services/threadsService';
@@ -10,9 +21,18 @@ import type { Thread, Vehicle } from '../types';
 
 export function ThreadsFeedPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
 
   const PAGE_SIZE = 5;
+
+  const hashtagQuery = searchParams.get('hashtag') || searchParams.get('search') || '';
+  const [searchInput, setSearchInput] = useState(hashtagQuery);
+
+  // Sync searchInput when URL searchParams changes
+  useEffect(() => {
+    setSearchInput(hashtagQuery);
+  }, [hashtagQuery]);
 
   const [threads, setThreads] = useState<Thread[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -43,7 +63,7 @@ export function ThreadsFeedPage() {
           : topicFilter;
 
       const [threadList, vehicleList] = await Promise.all([
-        threadsService.getThreads(activeCategory, PAGE_SIZE, 0),
+        threadsService.getThreads(activeCategory, PAGE_SIZE, 0, hashtagQuery),
         vehicleService.getVehicles(),
       ]);
 
@@ -70,7 +90,12 @@ export function ThreadsFeedPage() {
           ? undefined
           : topicFilter;
 
-      const nextBatch = await threadsService.getThreads(activeCategory, PAGE_SIZE, threads.length);
+      const nextBatch = await threadsService.getThreads(
+        activeCategory,
+        PAGE_SIZE,
+        threads.length,
+        hashtagQuery
+      );
       if (nextBatch.length > 0) {
         setThreads((prev) => [...prev, ...nextBatch]);
       }
@@ -84,7 +109,7 @@ export function ThreadsFeedPage() {
 
   useEffect(() => {
     fetchInitialData();
-  }, [feedTab, topicFilter]);
+  }, [feedTab, topicFilter, hashtagQuery]);
 
   // Window Scroll Listener for Infinite Scroll
   useEffect(() => {
@@ -101,18 +126,24 @@ export function ThreadsFeedPage() {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [threads.length, hasMore, isLoading, isLoadingMore, feedTab, topicFilter]);
+  }, [threads.length, hasMore, isLoading, isLoadingMore, feedTab, topicFilter, hashtagQuery]);
 
   const handleThreadDeleted = (threadId: string) => {
     setThreads((prev) => prev.filter((t) => t.id !== threadId));
   };
 
+  const handleHashtagClick = (tag: string) => {
+    const cleanTag = tag.replace(/^#/, '');
+    setSearchInput(cleanTag);
+    setSearchParams({ hashtag: cleanTag });
+  };
+
   const topicCategories = [
     { id: 'all', label: '🌟 Semua Topik' },
     { id: 'ban', label: '🛞 Ban & Roda' },
-    { id: 'ev', label: '⚡ Electric Vehicle (EV)' },
-    { id: 'audio', label: '🔊 Audio Mobil' },
-    { id: 'biled', label: '💡 Lampu & Biled' },
+    { id: 'ev', label: '⚡ EV' },
+    { id: 'audio', label: '🔊 Audio' },
+    { id: 'biled', label: '💡 Biled' },
     { id: 'aksesoris', label: '🎀 Aksesoris' },
     { id: 'modifikasi', label: '🛠️ Modifikasi' },
     { id: 'kendala', label: '🚨 Kendala' },
@@ -145,6 +176,66 @@ export function ThreadsFeedPage() {
             <span>Posting</span>
           </button>
         </div>
+
+        {/* 🔍 Interactive Hashtag & Search Input Bar */}
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <Search size={16} />
+          </div>
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const val = searchInput.trim().replace(/^#/, '');
+                if (val) setSearchParams({ hashtag: val });
+                else setSearchParams({});
+              }
+            }}
+            placeholder="Cari #hashtag (contoh: #biled, #modifikasi, #ban) atau kata kunci..."
+            className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 shadow-2xs transition-all"
+          />
+          {searchInput && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchInput('');
+                setSearchParams({});
+              }}
+              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-700 cursor-pointer"
+            >
+              <X size={15} />
+            </button>
+          )}
+        </div>
+
+        {/* Active Hashtag Filter Banner */}
+        {hashtagQuery && (
+          <div className="bg-purple-50 border border-purple-200/90 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-2xs">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="bg-purple-600 text-white font-extrabold text-xs px-2.5 py-0.5 rounded-lg flex items-center gap-1 shrink-0 shadow-2xs">
+                <Hash size={13} />
+                {hashtagQuery.replace(/^#/, '')}
+              </span>
+              <p className="text-xs text-purple-950 font-extrabold truncate">
+                Postingan dengan hashtag #{hashtagQuery.replace(/^#/, '')}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSearchInput('');
+                setSearchParams({});
+              }}
+              className="text-xs font-extrabold text-purple-700 hover:text-purple-950 hover:bg-purple-100 px-2.5 py-1 rounded-xl transition-all flex items-center gap-1 cursor-pointer shrink-0"
+            >
+              <X size={14} />
+              <span>Hapus Filter</span>
+            </button>
+          </div>
+        )}
 
         {/* Primary Feed Switcher (Segmented Glass Tabs) */}
         <div className="bg-slate-200/70 p-1 rounded-2xl flex items-center gap-1 shadow-2xs backdrop-blur-md border border-slate-300/60">
@@ -217,7 +308,27 @@ export function ThreadsFeedPage() {
           </div>
         ) : threads.length === 0 ? (
           <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center space-y-2">
-            {feedTab === 'subscribed' ? (
+            {hashtagQuery ? (
+              <>
+                <Hash size={40} className="mx-auto text-purple-400 mb-2" />
+                <h3 className="font-extrabold text-slate-800 text-base">
+                  Tidak Ada Thread dengan Hashtag #{hashtagQuery.replace(/^#/, '')}
+                </h3>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed font-medium">
+                  Belum ada postingan thread yang menyebutkan #{hashtagQuery.replace(/^#/, '')}. Jadilah pengguna pertama yang membuat postingan dengan hashtag ini!
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchInput('');
+                    setSearchParams({});
+                  }}
+                  className="mt-2 text-xs font-extrabold text-purple-600 hover:underline cursor-pointer"
+                >
+                  Tampilkan Semua Thread
+                </button>
+              </>
+            ) : feedTab === 'subscribed' ? (
               <>
                 <Users size={40} className="mx-auto text-amber-500 mb-2" />
                 <h3 className="font-extrabold text-slate-800 text-base">Belum Ada Postingan Subscribed</h3>
@@ -243,6 +354,7 @@ export function ThreadsFeedPage() {
                 thread={t}
                 currentUserId={user?.id}
                 onThreadDeleted={handleThreadDeleted}
+                onHashtagClick={handleHashtagClick}
               />
             ))}
 
