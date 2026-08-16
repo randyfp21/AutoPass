@@ -62,33 +62,28 @@ export function OdometerSummaryWidget({
   if (vehicles.length === 0) return null;
 
   return (
-    <div className="space-y-4 mb-8">
-      {/* ── Header Banner ── */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white rounded-3xl p-5 shadow-lg border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-600/30 border border-blue-500/40 text-blue-400 rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
-            <Gauge size={20} />
+    <div className="space-y-4">
+      {/* ── Sub-header: Odometer Fleet ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 bg-blue-50 border border-blue-100 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
+            <Gauge size={18} />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h3
-                className="text-base sm:text-lg font-black tracking-tight text-white"
-                style={{ fontFamily: 'Rajdhani, sans-serif' }}
-              >
-                Monitor Odometer Real-time
-              </h3>
-              <span className="bg-blue-500/20 text-blue-300 border border-blue-500/40 text-[10px] font-mono font-black px-2 py-0.5 rounded-full">
+            <h4 className="font-extrabold text-sm sm:text-base text-slate-900 flex items-center gap-2">
+              <span>Monitor Odometer Real-time</span>
+              <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
                 {vehicles.length} Kendaraan
               </span>
-            </div>
-            <p className="text-xs text-slate-300 mt-0.5 font-medium">
-              Catat kilometer terkini kendaraan Anda secara presisi untuk akurasi rekomendasi perawatan berkala.
+            </h4>
+            <p className="text-xs text-slate-500 font-medium">
+              Catat kilometer terkini kendaraan Anda secara presisi
             </p>
           </div>
         </div>
 
         {successMessage && (
-          <span className="text-xs font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-500/50 px-3 py-1.5 rounded-full shrink-0 shadow-sm">
+          <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full shrink-0 shadow-2xs">
             ✓ {successMessage}
           </span>
         )}
@@ -102,7 +97,7 @@ export function OdometerSummaryWidget({
           return (
             <div
               key={v.id}
-              className="bg-white border border-slate-200/90 hover:border-blue-400/80 rounded-2xl p-4 transition-all shadow-2xs hover:shadow-md flex flex-col justify-between gap-3 group"
+              className="bg-slate-50/80 border border-slate-200/90 hover:border-blue-400/80 rounded-2xl p-4 transition-all shadow-2xs hover:shadow-md flex flex-col justify-between gap-3 group"
             >
               {/* Top row: Category, Plate & Nickname */}
               <div className="space-y-1.5">
@@ -116,7 +111,7 @@ export function OdometerSummaryWidget({
                     </span>
                   </div>
 
-                  <span className="text-[10px] font-extrabold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200 shrink-0 flex items-center gap-1">
+                  <span className="text-[10px] font-extrabold text-slate-600 bg-white px-2 py-0.5 rounded-full border border-slate-200 shrink-0 flex items-center gap-1">
                     {v.category === 'mobil' ? <Car size={11} className="text-blue-600" /> : <Bike size={11} className="text-purple-600" />}
                     {v.category === 'mobil' ? 'Mobil' : 'Motor'}
                   </span>
@@ -130,14 +125,14 @@ export function OdometerSummaryWidget({
               </div>
 
               {/* Bottom row: Odometer Display & Quick Action Buttons */}
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+              <div className="pt-3 border-t border-slate-200/80 flex items-center justify-between gap-2">
                 {isEditing ? (
                   <div className="flex items-center gap-2 w-full">
                     <input
                       type="number"
                       value={inputKm}
                       onChange={(e) => setInputKm(e.target.value)}
-                      className="text-xs py-1.5 px-3 font-mono font-black bg-slate-950 text-white border border-blue-500 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="text-xs py-1.5 px-3 font-mono font-black bg-white text-slate-900 border border-blue-500 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-2xs"
                       placeholder="KM Baru..."
                       autoFocus
                     />
@@ -163,7 +158,7 @@ export function OdometerSummaryWidget({
                 ) : (
                   <>
                     <div className="space-y-0.5">
-                      <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Odometer Terbaru</p>
+                      <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Odometer</p>
                       <AnalogOdometer value={v.current_mileage} size="sm" variant="badge" />
                     </div>
 
@@ -172,7 +167,7 @@ export function OdometerSummaryWidget({
                       <button
                         type="button"
                         onClick={() => navigate(`/vehicles/${v.id}`)}
-                        className="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs rounded-xl border border-slate-200 transition-all cursor-pointer flex items-center gap-1 active:scale-95 shadow-2xs"
+                        className="py-1.5 px-3 bg-white hover:bg-slate-100 text-slate-800 font-extrabold text-xs rounded-xl border border-slate-200 transition-all cursor-pointer flex items-center gap-1 active:scale-95 shadow-2xs"
                         title="Lihat Detail Kendaraan"
                       >
                         <Eye size={13} className="text-slate-500" />
@@ -183,7 +178,7 @@ export function OdometerSummaryWidget({
                       <button
                         type="button"
                         onClick={() => handleStartEdit(v)}
-                        className="py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1 active:scale-95"
+                        className="py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all cursor-pointer flex items-center gap-1 active:scale-95"
                       >
                         <Edit3 size={13} />
                         <span>Update KM</span>
