@@ -1,6 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Car, Wrench, Calendar, TrendingUp, AlertCircle, Wallet, ChevronRight, ShieldAlert, Edit } from 'lucide-react';
+import {
+  Plus,
+  Car,
+  Wrench,
+  Calendar,
+  TrendingUp,
+  AlertCircle,
+  Wallet,
+  ChevronRight,
+  ShieldAlert,
+  Edit,
+  ArrowUpRight,
+  Eye,
+  FileText,
+  Clock,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ServiceCalendarWidget } from '../components/planner/ServiceCalendarWidget';
 import { AddPlannerModal } from '../components/planner/AddPlannerModal';
@@ -10,9 +25,17 @@ import { Button } from '../components/common/Button';
 import { vehicleService } from '../services/vehicleService';
 import { maintenanceService } from '../services/maintenanceService';
 import { plannerService } from '../services/plannerService';
-import type { Vehicle, ServiceRecord, ServicePlanner, CreatePlannerData, PlannerStatus, Workshop } from '../types';
-import { getGreeting, formatDate, timeAgo, formatRupiah } from '../utils/formatters';
+import type {
+  Vehicle,
+  ServiceRecord,
+  ServicePlanner,
+  CreatePlannerData,
+  PlannerStatus,
+  Workshop,
+} from '../types';
+import { getGreeting, formatDate, timeAgo, formatRupiah, formatMileage } from '../utils/formatters';
 import { useTranslation } from '../context/LanguageContext';
+import { AnalogOdometer } from '../components/common/AnalogOdometer';
 
 // ─── STNK Days Calculation Helper ──────────────────────────────────────────────
 
@@ -49,22 +72,27 @@ function RecentActivityItem({
   vehicleName: string;
 }) {
   return (
-    <div className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0">
+    <div className="flex items-center justify-between py-3.5 border-b border-slate-100 last:border-0 hover:bg-slate-50/50 px-2 rounded-xl transition-colors">
       <div className="flex items-center gap-3 min-w-0">
-        <div className="w-9 h-9 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
-          <Wrench size={16} />
+        <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0 border border-blue-100/80 shadow-2xs">
+          <Wrench size={18} />
         </div>
         <div className="min-w-0">
-          <p className="font-semibold text-xs text-slate-900 truncate">{vehicleName}</p>
-          <p className="text-[11px] text-slate-500 truncate">
-            {record.workshop_name_manual || (record.is_official_workshop ? 'Bengkel Resmi' : 'DIY')}
+          <p className="font-extrabold text-xs text-slate-900 truncate">{vehicleName}</p>
+          <p className="text-[11px] text-slate-500 font-medium truncate mt-0.5">
+            <span className="font-semibold text-slate-700">
+              {record.workshop_name_manual || (record.is_official_workshop ? 'Bengkel Resmi' : 'DIY')}
+            </span>
             {' · '}
-            {timeAgo(record.service_date)}
+            <span className="text-slate-400">{timeAgo(record.service_date)}</span>
           </p>
         </div>
       </div>
       <div className="text-right shrink-0">
-        <p className="text-xs font-bold text-slate-900">{formatRupiah(record.total_cost)}</p>
+        <p className="text-xs font-black text-slate-900 font-mono">{formatRupiah(record.total_cost)}</p>
+        <span className="text-[10px] font-bold text-blue-600 hover:underline inline-flex items-center gap-0.5 mt-0.5">
+          Detail <ChevronRight size={10} />
+        </span>
       </div>
     </div>
   );
@@ -238,59 +266,69 @@ export function DashboardPage() {
 
   return (
     <div className="flex-1 bg-slate-50 pb-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* ── Header ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <p className="text-sm font-medium text-slate-500 mb-1">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* ── 1. Executive Welcome Hero Banner ── */}
+        <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          {/* Ambient Glow */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 space-y-2">
+            <div className="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs font-mono font-extrabold px-3 py-1 rounded-full">
+              <span>Passport Digital Kendaraan</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               {t('dash_greeting')},{' '}
-              <span className="text-blue-600">
+              <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-amber-300 bg-clip-text text-transparent">
                 {user?.full_name?.split(' ')[0] ?? 'User'} 👋
               </span>
-            </p>
-            <h1 className="text-3xl font-bold text-slate-900">{t('nav_dashboard')}</h1>
-            <p className="text-slate-500 mt-1">
-              Ringkasan statistik perawatan & kalender rencana servis kendaraan Anda
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-300 font-medium max-w-xl">
+              Ringkasan telemetri, monitor Odometer, legalitas pajak STNK, dan kalender perawatan armada Anda
             </p>
           </div>
-          <div className="flex gap-3">
-            <Button
-              variant="ghost"
-              leftIcon={<Calendar size={16} />}
+
+          <div className="relative z-10 flex flex-wrap items-center gap-3 shrink-0">
+            <button
+              type="button"
               onClick={() => setShowAddPlanner(true)}
+              className="py-2.5 px-4 bg-white/10 hover:bg-white/20 text-white font-extrabold text-xs rounded-xl border border-white/20 transition-all cursor-pointer flex items-center gap-2 active:scale-95 shadow-sm"
             >
-              {t('planner_add_button')}
-            </Button>
-            <Button
-              leftIcon={<Plus size={16} />}
+              <Calendar size={16} className="text-blue-400" />
+              <span>Buat Rencana Servis</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => {
                 setEditingVehicle(null);
                 setShowAddVehicle(true);
               }}
+              className="py-2.5 px-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-xl shadow-lg shadow-blue-500/25 transition-all cursor-pointer flex items-center gap-2 active:scale-95 border border-blue-400/40"
             >
-              {t('dash_add_vehicle')}
-            </Button>
+              <Plus size={16} />
+              <span>Tambah Kendaraan</span>
+            </button>
           </div>
         </div>
 
-        {/* ── Summary Statistics Row (4 Cards) ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* ── 2. Summary Statistics Row (4 Cards) ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat, i) => (
             <div
               key={i}
               className={[
-                'border rounded-2xl p-4 sm:p-5 flex items-center gap-4 transition-all shadow-xs',
+                'border rounded-2xl p-4 sm:p-5 flex items-center gap-4 transition-all shadow-2xs hover:shadow-md hover:-translate-y-0.5',
                 stat.isHighlight
-                  ? 'bg-gradient-to-br from-emerald-50 to-white border-emerald-200'
-                  : 'bg-white border-slate-200',
+                  ? 'bg-gradient-to-br from-emerald-50/80 to-white border-emerald-200'
+                  : 'bg-white border-slate-200/90',
               ].join(' ')}
             >
-              <div className={`w-11 h-11 ${stat.bg} rounded-xl flex items-center justify-center shrink-0`}>
+              <div className={`w-11 h-11 ${stat.bg} rounded-xl flex items-center justify-center shrink-0 border border-slate-100 shadow-2xs`}>
                 {stat.icon}
               </div>
               <div className="min-w-0">
-                <p className="text-xs text-slate-500 font-semibold truncate">{stat.label}</p>
-                <p className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight truncate mt-0.5">
+                <p className="text-xs text-slate-500 font-extrabold truncate">{stat.label}</p>
+                <p className="text-lg sm:text-2xl font-black text-slate-900 leading-tight truncate mt-0.5">
                   {stat.value}
                 </p>
               </div>
@@ -298,11 +336,11 @@ export function DashboardPage() {
           ))}
         </div>
 
-        {/* ── 1. Standalone STNK & Tax Expiry Alert Container ── */}
+        {/* ── 3. Standalone STNK & Tax Expiry Alert Container ── */}
         {stnkAlertVehicles.length > 0 && (
-          <div className="mb-6 bg-amber-50/70 border border-amber-200/90 rounded-2xl p-4 sm:p-5 space-y-3 shadow-2xs">
+          <div className="bg-amber-50/70 border border-amber-200/90 rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xs">
             {/* Header */}
-            <div className="flex items-center justify-between gap-2 border-b border-amber-200/60 pb-2.5">
+            <div className="flex items-center justify-between gap-2 border-b border-amber-200/60 pb-3">
               <div className="flex items-center gap-2.5">
                 <ShieldAlert size={18} className="text-amber-600 shrink-0" />
                 <div>
@@ -319,7 +357,7 @@ export function DashboardPage() {
               </span>
             </div>
 
-            {/* Cards Grid */}
+            {/* Sleek Cards Grid (Exact Layout Per User Request) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
               {stnkAlertVehicles.map(({ vehicle: v, status: s }) => (
                 <div
@@ -387,7 +425,7 @@ export function DashboardPage() {
           </div>
         )}
 
-        {/* ── 2. Standalone Odometer Summary & Quick Update Widget ── */}
+        {/* ── 4. Standalone Odometer Summary & Quick Update Widget ── */}
         <OdometerSummaryWidget
           vehicles={vehicles}
           onVehicleUpdated={fetchData}
@@ -407,8 +445,8 @@ export function DashboardPage() {
           </div>
         )}
 
-        {/* ── Service Calendar & Scheduler Widget ── */}
-        <div className="mb-8">
+        {/* ── 5. Service Calendar & Scheduler Widget ── */}
+        <div>
           <ServiceCalendarWidget
             planners={planners}
             vehicles={vehicles}
@@ -418,16 +456,16 @@ export function DashboardPage() {
           />
         </div>
 
-        {/* ── Recent Activity Section ── */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-          <div className="flex items-center justify-between mb-4">
+        {/* ── 6. Recent Activity Feed ── */}
+        <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-2xs space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
               <TrendingUp size={18} className="text-blue-600" />
-              <h3 className="font-bold text-slate-900 text-base">Aktivitas Servis Terakhir</h3>
+              <h3 className="font-extrabold text-slate-900 text-base">Aktivitas Servis Terakhir</h3>
             </div>
             <Link
               to="/spent"
-              className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1"
+              className="text-xs font-extrabold text-blue-600 hover:underline flex items-center gap-1"
             >
               Lihat Rekap Lengkap & Struk
               <ChevronRight size={14} />
@@ -441,9 +479,9 @@ export function DashboardPage() {
               ))}
             </div>
           ) : recentServices.length === 0 ? (
-            <div className="py-8 text-center border border-dashed border-slate-200 rounded-xl">
+            <div className="py-8 text-center border border-dashed border-slate-200 rounded-2xl">
               <Wrench size={32} className="text-slate-300 mx-auto mb-2" />
-              <p className="text-sm font-semibold text-slate-700">Belum ada riwayat servis</p>
+              <p className="text-sm font-bold text-slate-700">Belum ada riwayat servis</p>
               <p className="text-xs text-slate-400 mt-1">
                 Catatan servis yang selesai akan muncul di sini
               </p>
@@ -481,13 +519,15 @@ export function DashboardPage() {
       />
 
       {/* ── Add Planner Modal ── */}
-      <AddPlannerModal
-        isOpen={showAddPlanner}
-        onClose={() => setShowAddPlanner(false)}
-        vehicles={vehicles}
-        workshops={workshops}
-        onSubmit={handleCreatePlanner}
-      />
+      {showAddPlanner && (
+        <AddPlannerModal
+          isOpen={showAddPlanner}
+          onClose={() => setShowAddPlanner(false)}
+          vehicles={vehicles}
+          workshops={workshops}
+          onSubmit={handleCreatePlanner}
+        />
+      )}
     </div>
   );
 }
