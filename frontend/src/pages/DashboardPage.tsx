@@ -304,127 +304,70 @@ export function DashboardPage() {
           <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600" />
 
           <div className="p-5 sm:p-6 space-y-6">
-            {/* 1. Status Masa Berlaku Pajak & STNK Kendaraan (Refined Gradient Urgency Design) */}
+            {/* 1. Status Masa Berlaku Pajak & STNK Kendaraan (Compact Sleek Design) */}
             {stnkAlertVehicles.length > 0 && (
-              <div className="bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-rose-500/10 border border-amber-200/90 rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xs">
-                {/* Header Row */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-200/60 pb-3.5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-amber-500/15 border border-amber-500/30 text-amber-600 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs">
-                      <ShieldAlert size={20} />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-extrabold text-base text-slate-900">
-                          Masa Berlaku Pajak & STNK
-                        </h3>
-                        <span className="bg-amber-100 text-amber-900 border border-amber-300/80 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full">
-                          {stnkAlertVehicles.length} Kendaraan Butuh Perhatian
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-600 font-medium mt-0.5">
-                        Pantau tanggal jatuh tempo pajak & legalitas dokumen kendaraan Anda agar bebas denda
-                      </p>
-                    </div>
+              <div className="bg-amber-50/60 border border-amber-200/80 rounded-2xl p-3.5 space-y-3 shadow-2xs">
+                {/* Compact Header */}
+                <div className="flex items-center justify-between gap-2 border-b border-amber-200/50 pb-2">
+                  <div className="flex items-center gap-2">
+                    <ShieldAlert size={16} className="text-amber-600 shrink-0" />
+                    <h3 className="font-extrabold text-xs sm:text-sm text-slate-900">
+                      Masa Berlaku Pajak & STNK
+                    </h3>
                   </div>
+                  <span className="bg-amber-100 text-amber-900 border border-amber-300/80 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full shrink-0">
+                    {stnkAlertVehicles.length} Kendaraan
+                  </span>
                 </div>
 
-                {/* Grid Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                  {stnkAlertVehicles.map(({ vehicle: v, status: s }) => {
-                    const daysRemaining = Math.max(0, s.diffDays);
-                    const progressPercent = s.isExpired ? 100 : Math.max(10, Math.min(100, Math.round(((90 - daysRemaining) / 90) * 100)));
-
-                    return (
-                      <div
-                        key={v.id}
-                        className="bg-white border border-slate-200/90 rounded-2xl p-4 space-y-3.5 shadow-2xs hover:border-amber-400/80 transition-all group"
-                      >
-                        {/* Top: License Plate & Vehicle Name */}
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="bg-amber-300 text-slate-950 font-mono font-black text-xs px-2.5 py-0.5 rounded border border-amber-400 shadow-2xs shrink-0">
-                              {v.license_plate}
-                            </span>
-                            <span className="font-extrabold text-sm text-slate-900 truncate">
-                              {v.brand} {v.model}
-                            </span>
-                          </div>
-
-                          <span className="text-[10px] font-extrabold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200 shrink-0 capitalize">
-                            {v.category}
+                {/* Sleek Cards / Rows */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                  {stnkAlertVehicles.map(({ vehicle: v, status: s }) => (
+                    <div
+                      key={v.id}
+                      className="bg-white border border-slate-200/90 rounded-xl p-3 flex items-center justify-between gap-2.5 shadow-2xs hover:border-amber-400 transition-all"
+                    >
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="bg-amber-300 text-slate-950 font-mono font-black text-[10px] px-2 py-0.5 rounded border border-amber-400 shrink-0">
+                            {v.license_plate}
+                          </span>
+                          <span className="font-extrabold text-xs text-slate-900 truncate">
+                            {v.brand} {v.model}
                           </span>
                         </div>
 
-                        {/* Middle: Expiry Date & Urgency Gradient Badge */}
-                        <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-2.5">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-500 font-medium">Jatuh Tempo Pajak:</span>
-                            <span className="font-mono font-extrabold text-slate-900">{s.expDateFormatted}</span>
-                          </div>
-
-                          {/* Gradient Urgency Status Pill */}
-                          <div>
-                            {s.isExpired ? (
-                              <div className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-xl shadow-xs flex items-center justify-center gap-1.5">
-                                ⛔ Kadaluarsa ({Math.abs(s.diffDays)} Hari Lalu)
-                              </div>
-                            ) : s.isUrgent ? (
-                              <div className="w-full bg-gradient-to-r from-rose-500 to-amber-500 text-white font-extrabold text-xs px-3 py-1.5 rounded-xl shadow-xs flex items-center justify-center gap-1.5">
-                                🚨 Sisa {s.diffDays} Hari Lagi
-                              </div>
-                            ) : (
-                              <div className="w-full bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-extrabold text-xs px-3 py-1.5 rounded-xl shadow-2xs flex items-center justify-center gap-1.5">
-                                ⚠️ Sisa {s.diffDays} Hari Jatuh Tempo
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Visual Progress Bar */}
-                          <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                            <div
-                              className={[
-                                'h-full transition-all duration-500 rounded-full',
-                                s.isExpired
-                                  ? 'bg-gradient-to-r from-red-600 to-rose-600'
-                                  : s.isUrgent
-                                  ? 'bg-gradient-to-r from-rose-500 to-amber-500'
-                                  : 'bg-gradient-to-r from-amber-400 to-amber-500',
-                              ].join(' ')}
-                              style={{ width: `${progressPercent}%` }}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Bottom: STNK Info & Action Button */}
-                        <div className="flex items-center justify-between gap-3 pt-0.5">
-                          <div className="min-w-0">
-                            {v.stnk_number ? (
-                              <p className="text-[11px] text-slate-500 font-mono font-bold truncate">
-                                No. STNK: {v.stnk_number}
-                              </p>
-                            ) : (
-                              <p className="text-[11px] text-slate-400 italic">
-                                Belum ada No. STNK
-                              </p>
-                            )}
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingVehicle(v);
-                              setShowAddVehicle(true);
-                            }}
-                            className="py-1.5 px-3.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95"
-                          >
-                            <Calendar size={13} />
-                            <span>Perbarui Tanggal</span>
-                          </button>
+                        <div className="flex items-center gap-2 flex-wrap text-[11px]">
+                          <span className="text-slate-500 font-medium">Jatuh Tempo: <strong className="font-mono text-slate-800">{s.expDateFormatted}</strong></span>
+                          {s.isExpired ? (
+                            <span className="bg-gradient-to-r from-red-600 to-rose-600 text-white font-extrabold text-[10px] px-2 py-0.5 rounded-md shrink-0">
+                              ⛔ Kadaluarsa ({Math.abs(s.diffDays)} hr)
+                            </span>
+                          ) : s.isUrgent ? (
+                            <span className="bg-gradient-to-r from-rose-500 to-amber-500 text-white font-extrabold text-[10px] px-2 py-0.5 rounded-md shrink-0">
+                              🚨 Sisa {s.diffDays} hr
+                            </span>
+                          ) : (
+                            <span className="bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-extrabold text-[10px] px-2 py-0.5 rounded-md shrink-0">
+                              ⚠️ Sisa {s.diffDays} hr
+                            </span>
+                          )}
                         </div>
                       </div>
-                    );
-                  })}
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingVehicle(v);
+                          setShowAddVehicle(true);
+                        }}
+                        className="py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0 active:scale-95"
+                      >
+                        <Calendar size={12} />
+                        <span>Perbarui</span>
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
