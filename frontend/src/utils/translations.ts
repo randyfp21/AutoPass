@@ -83,7 +83,7 @@ export const translations = {
     spent_title: 'Rekap Pengeluaran Servis',
     spent_subtitle: 'Ringkasan biaya perawatan kendaraan berdasarkan struk servis yang telah selesai',
     spent_total_spent: 'Total Biaya Servis',
-    spent_this_month: 'Bulan Ini',
+    spent_this_month: 'Pengeluaran Bulan Ini',
     spent_average: 'Rata-Rata / Servis',
     spent_monthly_recap: 'Rekap Per Bulan',
     spent_service_list: 'Daftar Transaksi Servis',
