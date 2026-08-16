@@ -1,10 +1,27 @@
 import axios from 'axios';
+import { Capacitor } from '@capacitor/core';
 
-// Dynamically construct API Base URL so it works seamlessly on localhost AND any device on the network (e.g. 10.179.88.78:5173 -> 10.179.88.78:8080)
+// Dynamically construct API Base URL for Web, Mobile Emulator, Real Devices, and Production VPS
 const getBaseURL = (): string => {
+  // 1. Explicit Environment Variable (Production VPS / Vercel / Netlify / .env)
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
+
+  // 2. Running inside Native Mobile App (Android / iOS via Capacitor)
+  if (Capacitor.isNativePlatform()) {
+    if (import.meta.env.VITE_MOBILE_API_URL) {
+      return import.meta.env.VITE_MOBILE_API_URL;
+    }
+    // Android Emulator loopback to host PC
+    if (Capacitor.getPlatform() === 'android') {
+      return 'http://10.0.2.2:8080/api/v1';
+    }
+    // iOS Simulator default loopback to Mac
+    return 'http://localhost:8080/api/v1';
+  }
+
+  // 3. Web Browser on Local Network / Localhost
   const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
   return `http://${hostname}:8080/api/v1`;
 };
