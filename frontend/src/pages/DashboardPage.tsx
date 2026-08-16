@@ -304,26 +304,26 @@ export function DashboardPage() {
           <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600" />
 
           <div className="p-5 sm:p-6 space-y-6">
-            {/* 1. Status Masa Berlaku Pajak & STNK Kendaraan (High Urgency Alert Design) */}
+            {/* 1. Status Masa Berlaku Pajak & STNK Kendaraan (Refined Gradient Urgency Design) */}
             {stnkAlertVehicles.length > 0 && (
-              <div className="bg-red-50/50 border border-red-200/90 rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xs">
+              <div className="bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-rose-500/10 border border-amber-200/90 rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xs">
                 {/* Header Row */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-red-200/60 pb-3.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-200/60 pb-3.5">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-red-600 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-md shadow-red-500/20">
-                      <ShieldAlert size={22} className="animate-pulse" />
+                    <div className="w-10 h-10 bg-amber-500/15 border border-amber-500/30 text-amber-600 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs">
+                      <ShieldAlert size={20} />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="font-black text-base text-red-950">
-                          🚨 Peringatan Jatuh Tempo Pajak & STNK
+                        <h3 className="font-extrabold text-base text-slate-900">
+                          Masa Berlaku Pajak & STNK
                         </h3>
-                        <span className="bg-red-600 text-white text-[10px] font-mono font-black px-2.5 py-0.5 rounded-full shadow-2xs">
-                          {stnkAlertVehicles.length} MENDESAK
+                        <span className="bg-amber-100 text-amber-900 border border-amber-300/80 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full">
+                          {stnkAlertVehicles.length} Kendaraan Butuh Perhatian
                         </span>
                       </div>
-                      <p className="text-xs text-red-800 font-bold mt-0.5">
-                        Segera perbarui tanggal jatuh tempo agar kendaraan Anda bebas denda & aman di jalan raya
+                      <p className="text-xs text-slate-600 font-medium mt-0.5">
+                        Pantau tanggal jatuh tempo pajak & legalitas dokumen kendaraan Anda agar bebas denda
                       </p>
                     </div>
                   </div>
@@ -335,16 +335,10 @@ export function DashboardPage() {
                     const daysRemaining = Math.max(0, s.diffDays);
                     const progressPercent = s.isExpired ? 100 : Math.max(10, Math.min(100, Math.round(((90 - daysRemaining) / 90) * 100)));
 
-                    const cardBorderClass = s.isExpired
-                      ? 'border-l-4 border-l-red-600 border-red-200 bg-red-50/30'
-                      : s.isUrgent
-                      ? 'border-l-4 border-l-rose-500 border-rose-200 bg-rose-50/20'
-                      : 'border-l-4 border-l-amber-400 border-amber-200 bg-amber-50/20';
-
                     return (
                       <div
                         key={v.id}
-                        className={`bg-white rounded-2xl p-4 space-y-3.5 shadow-2xs hover:shadow-md transition-all ${cardBorderClass}`}
+                        className="bg-white border border-slate-200/90 rounded-2xl p-4 space-y-3.5 shadow-2xs hover:border-amber-400/80 transition-all group"
                       >
                         {/* Top: License Plate & Vehicle Name */}
                         <div className="flex items-center justify-between gap-2">
@@ -362,45 +356,43 @@ export function DashboardPage() {
                           </span>
                         </div>
 
-                        {/* Middle: Urgent Status & Progress Bar */}
-                        <div className="bg-white border border-slate-200/80 rounded-xl p-3 space-y-2.5 shadow-2xs">
+                        {/* Middle: Expiry Date & Urgency Gradient Badge */}
+                        <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-2.5">
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-500 font-extrabold">Jatuh Tempo Pajak:</span>
-                            <span className="font-mono font-black text-slate-900 text-sm">{s.expDateFormatted}</span>
+                            <span className="text-slate-500 font-medium">Jatuh Tempo Pajak:</span>
+                            <span className="font-mono font-extrabold text-slate-900">{s.expDateFormatted}</span>
                           </div>
 
-                          {/* High Contrast Urgent Badge */}
+                          {/* Gradient Urgency Status Pill */}
                           <div>
                             {s.isExpired ? (
-                              <div className="w-full bg-red-600 text-white font-black text-xs px-3 py-1.5 rounded-xl shadow-xs flex items-center justify-center gap-1.5 animate-pulse">
-                                ⛔ PAJAK KADALUARSA ({Math.abs(s.diffDays)} HARI LALU)
+                              <div className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-xl shadow-xs flex items-center justify-center gap-1.5">
+                                ⛔ Kadaluarsa ({Math.abs(s.diffDays)} Hari Lalu)
                               </div>
                             ) : s.isUrgent ? (
-                              <div className="w-full bg-rose-600 text-white font-black text-xs px-3 py-1.5 rounded-xl shadow-xs flex items-center justify-center gap-1.5">
-                                🚨 TINGGAL {s.diffDays} HARI LAGI!
+                              <div className="w-full bg-gradient-to-r from-rose-500 to-amber-500 text-white font-extrabold text-xs px-3 py-1.5 rounded-xl shadow-xs flex items-center justify-center gap-1.5">
+                                🚨 Sisa {s.diffDays} Hari Lagi
                               </div>
                             ) : (
-                              <div className="w-full bg-amber-500 text-white font-black text-xs px-3 py-1.5 rounded-xl shadow-2xs flex items-center justify-center gap-1.5">
-                                ⚠️ SISA {s.diffDays} HARI JATUH TEMPO
+                              <div className="w-full bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-extrabold text-xs px-3 py-1.5 rounded-xl shadow-2xs flex items-center justify-center gap-1.5">
+                                ⚠️ Sisa {s.diffDays} Hari Jatuh Tempo
                               </div>
                             )}
                           </div>
 
-                          {/* Progress Bar Visualizer */}
-                          <div className="space-y-1 pt-0.5">
-                            <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200/60">
-                              <div
-                                className={[
-                                  'h-full transition-all duration-500 rounded-full',
-                                  s.isExpired
-                                    ? 'bg-red-600'
-                                    : s.isUrgent
-                                    ? 'bg-rose-500'
-                                    : 'bg-amber-500',
-                                ].join(' ')}
-                                style={{ width: `${progressPercent}%` }}
-                              />
-                            </div>
+                          {/* Visual Progress Bar */}
+                          <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                            <div
+                              className={[
+                                'h-full transition-all duration-500 rounded-full',
+                                s.isExpired
+                                  ? 'bg-gradient-to-r from-red-600 to-rose-600'
+                                  : s.isUrgent
+                                  ? 'bg-gradient-to-r from-rose-500 to-amber-500'
+                                  : 'bg-gradient-to-r from-amber-400 to-amber-500',
+                              ].join(' ')}
+                              style={{ width: `${progressPercent}%` }}
+                            />
                           </div>
                         </div>
 
@@ -424,12 +416,7 @@ export function DashboardPage() {
                               setEditingVehicle(v);
                               setShowAddVehicle(true);
                             }}
-                            className={[
-                              'py-1.5 px-3.5 font-extrabold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95 text-white',
-                              s.isExpired || s.isUrgent
-                                ? 'bg-red-600 hover:bg-red-700 shadow-red-500/20'
-                                : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20',
-                            ].join(' ')}
+                            className="py-1.5 px-3.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95"
                           >
                             <Calendar size={13} />
                             <span>Perbarui Tanggal</span>
