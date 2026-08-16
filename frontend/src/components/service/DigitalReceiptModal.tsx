@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Shield, Wrench, Printer, CheckCircle, Car, Calendar, Gauge, Camera, Flame, Trash2, AlertTriangle } from 'lucide-react';
+import { Shield, Wrench, Printer, CheckCircle, Car, Calendar, Gauge, Camera, Flame, Trash2, AlertTriangle, FileText } from 'lucide-react';
 import { Modal } from '../common/Modal';
-import { Button } from '../common/Button';
 import type { ServiceRecord, Vehicle } from '../../types';
 import { formatRupiah, formatDate, formatMileage } from '../../utils/formatters';
 import { useTranslation } from '../../context/LanguageContext';
@@ -53,32 +52,40 @@ export function DigitalReceiptModal({
         title={`🧾 ${t('spent_digital_receipt')} #${record.id.slice(0, 8)}`}
         size="lg"
       >
-        <div className="printable-receipt space-y-5 p-1">
-          {/* Header Badge */}
-          <div className="bg-slate-900 text-white rounded-2xl p-5 sm:p-6 relative overflow-hidden shadow-md">
+        <div className="printable-receipt space-y-6 p-1">
+          {/* ── 1. Hero Header Banner (Glassmorphism Specification) ── */}
+          <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-5 sm:p-6 relative overflow-hidden shadow-xl border border-slate-800">
+            {/* Specular Ambient Glow */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
+
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Gauge size={22} className="text-blue-400" />
-                  <span className="font-bold text-lg tracking-tight font-[family-name:var(--font-family-tech)]">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-blue-600/30 border border-blue-500/40 rounded-xl flex items-center justify-center text-blue-400 shrink-0">
+                    <Gauge size={18} />
+                  </div>
+                  <span
+                    className="font-bold text-lg sm:text-xl tracking-tight text-white"
+                    style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                  >
                     Odomtr Digital Receipt #{record.id.slice(0, 8)}
                   </span>
                 </div>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-400 font-medium pl-1">
                   Dokumen Resmi Catatan Maintenance Passport Kendaraan
                 </p>
               </div>
 
-              <div className="text-right">
+              <div className="shrink-0">
                 <span
                   className={[
-                    'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider',
+                    'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-sm',
                     record.is_official_workshop
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-amber-400 text-slate-900',
+                      ? 'bg-blue-600 text-white border border-blue-400/40'
+                      : 'bg-amber-400 text-slate-900 border border-amber-300',
                   ].join(' ')}
                 >
-                  {record.is_official_workshop ? <Shield size={13} /> : <Wrench size={13} />}
+                  {record.is_official_workshop ? <Shield size={14} /> : <Wrench size={14} />}
                   {record.is_official_workshop
                     ? t('receipt_official_badge')
                     : t('receipt_manual_badge')}
@@ -87,114 +94,131 @@ export function DigitalReceiptModal({
             </div>
           </div>
 
-          {/* Workshop & Vehicle Info Metadata Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
-            {/* Workshop Info */}
-            <div>
-              <p className="font-bold text-slate-500 uppercase tracking-wide mb-1">Penyedia Jasa / Bengkel</p>
-              <p className="font-bold text-sm text-slate-900">
-                {record.workshop_name_manual || (record.is_official_workshop ? 'Bengkel Resmi Terdaftar' : 'DIY Maintenance')}
-              </p>
-              <p className="text-slate-500 mt-0.5">
-                Role Input: <span className="font-semibold capitalize text-slate-700">{record.created_by_role}</span>
-              </p>
+          {/* ── 2. Workshop & Vehicle Info Metadata Grid ── */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Workshop Info Card */}
+            <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 sm:p-5 space-y-2 text-xs">
+              <div className="flex items-center gap-2 text-slate-500 font-extrabold uppercase tracking-wider text-[11px]">
+                <Wrench size={14} className="text-blue-600" />
+                <span>Penyedia Jasa / Bengkel</span>
+              </div>
+              <div>
+                <p className="font-extrabold text-sm text-slate-900">
+                  {record.workshop_name_manual || (record.is_official_workshop ? 'Bengkel Resmi Terdaftar' : 'DIY Maintenance')}
+                </p>
+                <p className="text-slate-500 mt-1 font-medium">
+                  Role Input:{' '}
+                  <span className="font-bold text-slate-700 bg-slate-200/70 px-2 py-0.5 rounded text-[11px] capitalize">
+                    {record.created_by_role}
+                  </span>
+                </p>
+              </div>
             </div>
 
-            {/* Vehicle Info */}
-            <div>
-              <p className="font-bold text-slate-500 uppercase tracking-wide mb-1">Data Kendaraan</p>
-              <div className="flex items-center gap-2">
-                <span className="bg-amber-300 text-slate-900 font-bold px-2 py-0.5 rounded font-mono border border-amber-400">
-                  {vehicle?.license_plate || 'KENDARAAN'}
-                </span>
-                <span className="font-bold text-slate-800">
-                  {vehicle ? `${vehicle.brand} ${vehicle.model}` : ''}
-                </span>
+            {/* Vehicle Info Card */}
+            <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 sm:p-5 space-y-2 text-xs">
+              <div className="flex items-center gap-2 text-slate-500 font-extrabold uppercase tracking-wider text-[11px]">
+                <Car size={14} className="text-purple-600" />
+                <span>Data Kendaraan & Odometer</span>
               </div>
-              <div className="flex items-center gap-3 text-slate-600 mt-1">
-                <span className="flex items-center gap-1">
-                  <Calendar size={12} className="text-slate-400" />
-                  {formatDate(record.service_date, 'full')}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Car size={12} className="text-slate-400" />
-                  {formatMileage(record.mileage_at_service)} km
-                </span>
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="bg-amber-300 text-slate-900 font-mono font-black px-2.5 py-0.5 rounded border border-amber-400 text-xs shadow-2xs">
+                    {vehicle?.license_plate || 'KENDARAAN'}
+                  </span>
+                  <span className="font-extrabold text-slate-900 text-sm">
+                    {vehicle ? `${vehicle.brand} ${vehicle.model}` : ''}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-slate-600 pt-0.5">
+                  <span className="flex items-center gap-1 font-medium">
+                    <Calendar size={13} className="text-slate-400" />
+                    {formatDate(record.service_date, 'full')}
+                  </span>
+                  <span className="flex items-center gap-1 font-bold text-slate-800">
+                    <Gauge size={13} className="text-purple-600" />
+                    {formatMileage(record.mileage_at_service)} km
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Physical Receipt Photo Preview */}
+          {/* ── 3. Physical Receipt Photo Preview (If uploaded) ── */}
           {record.receipt_photo_url && (
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
-              <p className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                <Camera size={15} className="text-blue-600" />
+            <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 space-y-2">
+              <p className="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">
+                <Camera size={16} className="text-blue-600" />
                 Foto Struk / Nota Fisik Asli Bengkel:
               </p>
-              <div className="max-h-96 overflow-hidden rounded-lg border border-slate-200 bg-white p-1">
+              <div className="max-h-96 overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-2xs">
                 <img
                   src={record.receipt_photo_url}
                   alt="Foto Struk Fisik"
-                  className="w-full h-full object-contain max-h-96 mx-auto rounded"
+                  className="w-full h-full object-contain max-h-96 mx-auto rounded-lg hover:scale-[1.01] transition-transform"
                 />
               </div>
             </div>
           )}
 
-          {/* Complaints / Notes */}
+          {/* ── 4. Complaints / Notes Card ── */}
           {(record.complaints || record.notes) && (
-            <div className="bg-amber-50/60 border border-amber-200 rounded-xl p-3.5 text-xs text-slate-700 space-y-1">
+            <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 text-xs text-slate-800 space-y-1.5 shadow-2xs">
               {record.complaints && (
-                <p>
-                  <strong>Keluhan:</strong> {record.complaints}
+                <p className="leading-relaxed">
+                  <strong className="font-extrabold text-amber-900">Keluhan Kendaraan:</strong> {record.complaints}
                 </p>
               )}
               {record.notes && (
-                <p>
-                  <strong>Catatan Bengkel:</strong> {record.notes}
+                <p className="leading-relaxed">
+                  <strong className="font-extrabold text-amber-900">Catatan Bengkel:</strong> {record.notes}
                 </p>
               )}
             </div>
           )}
 
-          {/* Itemized Table */}
+          {/* ── 5. Itemized Table (Maintenance Breakdown) ── */}
           {(() => {
             const lineItems = (record.items && record.items.length > 0) ? record.items : (record.details || []);
             return (
-              <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
+              <div className="border border-slate-200/90 rounded-2xl overflow-hidden text-xs shadow-2xs">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-slate-100 border-b border-slate-200 font-bold text-slate-700">
-                      <th className="py-2.5 px-4">{t('receipt_item_name')}</th>
-                      <th className="py-2.5 px-3 text-center">{t('receipt_qty')}</th>
-                      <th className="py-2.5 px-4 text-right">{t('receipt_price')}</th>
-                      <th className="py-2.5 px-4 text-right">{t('receipt_subtotal')}</th>
+                    <tr className="bg-slate-100/90 border-b border-slate-200 font-black text-slate-600 text-[11px] uppercase tracking-wider">
+                      <th className="py-3 px-4">{t('receipt_item_name')}</th>
+                      <th className="py-3 px-3 text-center">{t('receipt_qty')}</th>
+                      <th className="py-3 px-4 text-right">{t('receipt_price')}</th>
+                      <th className="py-3 px-4 text-right">{t('receipt_subtotal')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium text-slate-800">
                     {lineItems.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="py-4 px-4 text-center text-slate-400 italic">
+                        <td colSpan={4} className="py-5 px-4 text-center text-slate-400 italic">
                           Tidak ada rincian item (total akumulasi langsung)
                         </td>
                       </tr>
                     ) : (
                       lineItems.map((detail, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50">
-                          <td className="py-2.5 px-4 font-semibold">{detail.item_name}</td>
-                          <td className="py-2.5 px-3 text-center">{detail.quantity}</td>
-                          <td className="py-2.5 px-4 text-right">{formatRupiah(detail.unit_price)}</td>
-                          <td className="py-2.5 px-4 text-right font-bold">{formatRupiah(detail.subtotal)}</td>
+                        <tr key={idx} className="hover:bg-purple-50/30 transition-colors">
+                          <td className="py-3 px-4 font-bold text-slate-900">{detail.item_name}</td>
+                          <td className="py-3 px-3 text-center">
+                            <span className="bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded">
+                              {detail.quantity}x
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-right font-mono text-slate-600">{formatRupiah(detail.unit_price)}</td>
+                          <td className="py-3 px-4 text-right font-mono font-black text-slate-900">{formatRupiah(detail.subtotal)}</td>
                         </tr>
                       ))
                     )}
                   </tbody>
                   <tfoot>
-                    <tr className="bg-slate-900 text-white font-bold text-sm">
-                      <td colSpan={3} className="py-3 px-4 text-right uppercase tracking-wider">
+                    <tr className="bg-slate-950 text-white font-bold text-sm">
+                      <td colSpan={3} className="py-3.5 px-4 text-right uppercase tracking-wider font-extrabold">
                         {t('receipt_total')}
                       </td>
-                      <td className="py-3 px-4 text-right text-base text-amber-400">
+                      <td className="py-3.5 px-4 text-right text-base text-amber-400 font-mono font-black">
                         {formatRupiah(record.total_cost)}
                       </td>
                     </tr>
@@ -204,50 +228,56 @@ export function DigitalReceiptModal({
             );
           })()}
 
-          {/* Footer info */}
+          {/* ── 6. Footer Information & Verification Badge ── */}
           <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-100">
-            <span>Odomtr Digital Passport Token: {record.id}</span>
-            <span className="flex items-center gap-1 text-emerald-600 font-semibold">
+            <span className="font-mono text-slate-400">Token ID: {record.id}</span>
+            <span className="flex items-center gap-1.5 text-emerald-600 font-extrabold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
               <CheckCircle size={13} />
               Verified Digital Log
             </span>
           </div>
 
-          {/* Action buttons */}
-          <div className="flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-slate-200">
-            <div className="flex items-center gap-2">
+          {/* ── 7. Clean Action Buttons Footer ── */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200">
+            {/* Share Activity Button (Left Side) */}
+            <div>
               {onOpenSocialShare && (
-              <button
-                type="button"
-                onClick={onOpenSocialShare}
-                className="py-2.5 px-4 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs rounded-xl shadow-md shadow-orange-500/25 transition-all active:scale-95 cursor-pointer flex items-center gap-2 border border-orange-400/50 group"
-              >
-                <Flame size={16} className="text-amber-200 animate-pulse group-hover:scale-110 transition-transform" />
-                <span>✨ Share Activity</span>
-              </button>
-            )}
+                <button
+                  type="button"
+                  onClick={onOpenSocialShare}
+                  className="py-2.5 px-4 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs rounded-xl shadow-md shadow-orange-500/25 transition-all active:scale-95 cursor-pointer flex items-center gap-2 border border-orange-400/50 group"
+                >
+                  <Flame size={16} className="text-amber-200 animate-pulse group-hover:scale-110 transition-transform" />
+                  <span>✨ Share Activity</span>
+                </button>
+              )}
             </div>
 
+            {/* Delete & Print Buttons (Right Side) */}
             <div className="flex flex-wrap items-center gap-2">
-              <Button
+              <button
                 type="button"
-                variant="danger"
-                size="md"
-                leftIcon={<Trash2 size={15} />}
                 onClick={() => setShowConfirmDelete(true)}
+                className="py-2.5 px-4 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-extrabold text-xs rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 active:scale-95"
               >
-                Hapus Activity
-              </Button>
+                <Trash2 size={15} />
+                <span>Hapus Activity</span>
+              </button>
 
-              <Button type="button" variant="primary" size="md" leftIcon={<Printer size={15} />} onClick={handlePrint}>
-                {t('receipt_print')}
-              </Button>
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs rounded-xl shadow-md shadow-blue-500/20 transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
+              >
+                <Printer size={15} />
+                <span>{t('receipt_print')}</span>
+              </button>
             </div>
           </div>
         </div>
       </Modal>
 
-      {/* Confirmation Modal for Deleting Activity */}
+      {/* ── 8. Delete Confirmation Modal ── */}
       {showConfirmDelete && (
         <div className="fixed inset-0 z-50 overflow-y-auto flex min-h-full items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 select-none">
           <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200 p-6 space-y-4 text-center my-auto">
