@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Gauge, Edit3, Check, X, Car, Bike, Sparkles, Eye, ChevronRight } from 'lucide-react';
+import { Gauge, Edit3, Check, X, Car, Bike, Sparkles, Eye } from 'lucide-react';
 import type { Vehicle } from '../../types';
-import { formatMileage } from '../../utils/formatters';
 import { vehicleService } from '../../services/vehicleService';
+import { AnalogOdometer } from '../common/AnalogOdometer';
 
 interface OdometerSummaryWidgetProps {
   vehicles: Vehicle[];
@@ -49,7 +49,7 @@ export function OdometerSummaryWidget({
       });
 
       setEditingVehicleId(null);
-      setSuccessMessage(`KM ${vehicle.brand} ${vehicle.model} berhasil diperbarui!`);
+      setSuccessMessage(`KM ${vehicle.brand} ${vehicle.model} diperbarui!`);
       setTimeout(() => setSuccessMessage(''), 3000);
       onVehicleUpdated();
     } catch (err) {
@@ -62,27 +62,39 @@ export function OdometerSummaryWidget({
   if (vehicles.length === 0) return null;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs mb-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-            <Gauge size={18} />
+    <div className="space-y-4 mb-8">
+      {/* ── Header Banner ── */}
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white rounded-3xl p-5 shadow-lg border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-blue-600/30 border border-blue-500/40 text-blue-400 rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
+            <Gauge size={20} />
           </div>
           <div>
-            <h3 className="font-bold text-slate-900 text-sm">Odometer Kendaraan (Quick View & Update KM)</h3>
-            <p className="text-[11px] text-slate-500">Pantau, lihat detail & perbarui kilometer terkini kendaraan Anda</p>
+            <div className="flex items-center gap-2">
+              <h3
+                className="text-base sm:text-lg font-black tracking-tight text-white"
+                style={{ fontFamily: 'Rajdhani, sans-serif' }}
+              >
+                Monitor Odometer Real-time
+              </h3>
+              <span className="bg-blue-500/20 text-blue-300 border border-blue-500/40 text-[10px] font-mono font-black px-2 py-0.5 rounded-full">
+                {vehicles.length} Kendaraan
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 mt-0.5 font-medium">
+              Catat kilometer terkini kendaraan Anda secara presisi untuk akurasi rekomendasi perawatan berkala.
+            </p>
           </div>
         </div>
 
         {successMessage && (
-          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full animate-fade-in">
+          <span className="text-xs font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-500/50 px-3 py-1.5 rounded-full shrink-0 shadow-sm">
             ✓ {successMessage}
           </span>
         )}
       </div>
 
-      {/* Vehicles Grid */}
+      {/* ── Vehicles Grid ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {vehicles.map((v) => {
           const isEditing = editingVehicleId === v.id;
@@ -90,48 +102,50 @@ export function OdometerSummaryWidget({
           return (
             <div
               key={v.id}
-              className="bg-slate-50 border border-slate-200 hover:border-blue-300 rounded-xl p-3.5 transition-all flex flex-col justify-between gap-3 group"
+              className="bg-white border border-slate-200/90 hover:border-blue-400/80 rounded-2xl p-4 transition-all shadow-2xs hover:shadow-md flex flex-col justify-between gap-3 group"
             >
               {/* Top row: Category, Plate & Nickname */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="bg-amber-300 text-slate-900 font-bold px-2 py-0.5 rounded text-[10px] font-mono border border-amber-400">
-                    {v.license_plate}
-                  </span>
-                  <span className="text-xs font-bold text-slate-800 truncate">
-                    {v.brand} {v.model}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="bg-amber-300 text-slate-950 font-mono font-black text-xs px-2.5 py-0.5 rounded border border-amber-400 shadow-2xs shrink-0">
+                      {v.license_plate}
+                    </span>
+                    <span className="font-extrabold text-sm text-slate-900 truncate">
+                      {v.brand} {v.model}
+                    </span>
+                  </div>
+
+                  <span className="text-[10px] font-extrabold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200 shrink-0 flex items-center gap-1">
+                    {v.category === 'mobil' ? <Car size={11} className="text-blue-600" /> : <Bike size={11} className="text-purple-600" />}
+                    {v.category === 'mobil' ? 'Mobil' : 'Motor'}
                   </span>
                 </div>
 
-                <span className="text-[10px] font-semibold text-slate-500 bg-white px-2 py-0.5 rounded-full border border-slate-200 flex items-center gap-1">
-                  {v.category === 'mobil' ? <Car size={11} /> : <Bike size={11} />}
-                  {v.category === 'mobil' ? 'Mobil' : 'Motor'}
-                </span>
+                {v.nickname && (
+                  <div className="text-[11px] font-extrabold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-md border border-purple-200 w-fit flex items-center gap-1">
+                    <Sparkles size={11} className="text-purple-600" /> "{v.nickname}"
+                  </div>
+                )}
               </div>
 
-              {v.nickname && (
-                <div className="text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-150 w-fit flex items-center gap-1">
-                  <Sparkles size={10} /> "{v.nickname}"
-                </div>
-              )}
-
               {/* Bottom row: Odometer Display & Quick Action Buttons */}
-              <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between">
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                 {isEditing ? (
-                  <div className="flex items-center gap-1.5 w-full">
+                  <div className="flex items-center gap-2 w-full">
                     <input
                       type="number"
                       value={inputKm}
                       onChange={(e) => setInputKm(e.target.value)}
-                      className="input-field text-xs py-1 px-2 font-mono font-bold bg-white w-full border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      placeholder="KM Baru"
+                      className="text-xs py-1.5 px-3 font-mono font-black bg-slate-950 text-white border border-blue-500 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      placeholder="KM Baru..."
                       autoFocus
                     />
                     <button
                       type="button"
                       onClick={() => handleSave(v)}
                       disabled={isSubmitting}
-                      className="bg-blue-600 text-white p-1.5 rounded-lg hover:bg-blue-700 transition-colors shrink-0"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-xl transition-all shrink-0 cursor-pointer shadow-xs active:scale-95"
                       title="Simpan"
                     >
                       <Check size={14} />
@@ -140,7 +154,7 @@ export function OdometerSummaryWidget({
                       type="button"
                       onClick={handleCancel}
                       disabled={isSubmitting}
-                      className="bg-slate-200 text-slate-600 p-1.5 rounded-lg hover:bg-slate-300 transition-colors shrink-0"
+                      className="bg-slate-200 hover:bg-slate-300 text-slate-700 p-2 rounded-xl transition-all shrink-0 cursor-pointer active:scale-95"
                       title="Batal"
                     >
                       <X size={14} />
@@ -148,11 +162,9 @@ export function OdometerSummaryWidget({
                   </div>
                 ) : (
                   <>
-                    <div>
-                      <p className="text-[10px] text-slate-400 font-semibold uppercase">Odometer Saat Ini</p>
-                      <p className="text-base font-extrabold text-slate-900 tracking-tight" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                        {formatMileage(v.current_mileage)} <span className="text-xs font-semibold text-slate-500">KM</span>
-                      </p>
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Odometer Terbaru</p>
+                      <AnalogOdometer value={v.current_mileage} size="sm" variant="badge" />
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
@@ -160,21 +172,21 @@ export function OdometerSummaryWidget({
                       <button
                         type="button"
                         onClick={() => navigate(`/vehicles/${v.id}`)}
-                        className="flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-blue-600 bg-white hover:bg-blue-50 px-2.5 py-1.5 rounded-lg transition-colors border border-slate-200 hover:border-blue-200"
+                        className="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs rounded-xl border border-slate-200 transition-all cursor-pointer flex items-center gap-1 active:scale-95 shadow-2xs"
                         title="Lihat Detail Kendaraan"
                       >
-                        <Eye size={13} className="text-slate-500 hover:text-blue-600" />
-                        Detail
+                        <Eye size={13} className="text-slate-500" />
+                        <span>Detail</span>
                       </button>
 
                       {/* Update KM Button */}
                       <button
                         type="button"
                         onClick={() => handleStartEdit(v)}
-                        className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg transition-colors border border-blue-200"
+                        className="py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1 active:scale-95"
                       >
                         <Edit3 size={13} />
-                        Update KM
+                        <span>Update KM</span>
                       </button>
                     </div>
                   </>
