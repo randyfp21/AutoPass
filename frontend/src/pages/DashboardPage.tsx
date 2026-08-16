@@ -319,52 +319,66 @@ export function DashboardPage() {
               </span>
             </div>
 
-            {/* Sleek Cards / Rows Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+            {/* Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
               {stnkAlertVehicles.map(({ vehicle: v, status: s }) => (
                 <div
                   key={v.id}
-                  className="bg-white border border-slate-200/90 rounded-xl p-3 flex items-center justify-between gap-2.5 shadow-2xs hover:border-amber-400 transition-all"
+                  className="bg-white border border-slate-200/90 rounded-2xl p-4 flex flex-col justify-between gap-3 shadow-2xs hover:border-amber-400 transition-all"
                 >
-                  <div className="min-w-0 space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="bg-amber-300 text-slate-950 font-mono font-black text-[10px] px-2 py-0.5 rounded border border-amber-400 shrink-0">
+                  {/* Top: License Plate & Vehicle Name */}
+                  <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="bg-amber-300 text-slate-950 font-mono font-black text-xs px-2.5 py-0.5 rounded border border-amber-400 shadow-2xs shrink-0">
                         {v.license_plate}
                       </span>
-                      <span className="font-extrabold text-xs text-slate-900 truncate">
+                      <span className="font-extrabold text-sm text-slate-900 truncate">
                         {v.brand} {v.model}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 flex-wrap text-[11px]">
-                      <span className="text-slate-500 font-medium">Jatuh Tempo: <strong className="font-mono text-slate-800">{s.expDateFormatted}</strong></span>
+                    <span className="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200 shrink-0 capitalize">
+                      {v.category}
+                    </span>
+                  </div>
+
+                  {/* Middle Data Block */}
+                  <div className="space-y-2 py-1">
+                    {/* Line 1: Jatuh Tempo */}
+                    <p className="text-xs text-slate-600 font-medium">
+                      Jatuh Tempo: <strong className="font-mono font-extrabold text-slate-900">{s.expDateFormatted}</strong>
+                    </p>
+
+                    {/* Line 2 (Baris bawahnya): Urgency Badge */}
+                    <div>
                       {s.isExpired ? (
-                        <span className="bg-gradient-to-r from-red-600 to-rose-600 text-white font-extrabold text-[10px] px-2 py-0.5 rounded-md shrink-0">
-                          ⛔ Kadaluarsa ({Math.abs(s.diffDays)} hr)
+                        <span className="bg-gradient-to-r from-red-600 to-rose-600 text-white font-extrabold text-xs px-3 py-1 rounded-xl shadow-xs inline-flex items-center gap-1.5">
+                          ⛔ Kadaluarsa {Math.abs(s.diffDays)} hr lalu
                         </span>
                       ) : s.isUrgent ? (
-                        <span className="bg-gradient-to-r from-rose-500 to-amber-500 text-white font-extrabold text-[10px] px-2 py-0.5 rounded-md shrink-0">
+                        <span className="bg-gradient-to-r from-rose-500 to-amber-500 text-white font-extrabold text-xs px-3 py-1 rounded-xl shadow-xs inline-flex items-center gap-1.5">
                           🚨 Sisa {s.diffDays} hr
                         </span>
                       ) : (
-                        <span className="bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-extrabold text-[10px] px-2 py-0.5 rounded-md shrink-0">
+                        <span className="bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-extrabold text-xs px-3 py-1 rounded-xl shadow-2xs inline-flex items-center gap-1.5">
                           ⚠️ Sisa {s.diffDays} hr
                         </span>
                       )}
                     </div>
                   </div>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingVehicle(v);
-                        setShowAddVehicle(true);
-                      }}
-                      className="py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0 active:scale-95"
-                    >
-                      <Calendar size={12} />
-                      <span>Perbarui Data</span>
-                    </button>
+                  {/* Bottom of card (Paling bawah card): Button Perbarui Data */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingVehicle(v);
+                      setShowAddVehicle(true);
+                    }}
+                    className="w-full py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 mt-1"
+                  >
+                    <Calendar size={13} />
+                    <span>Perbarui Data</span>
+                  </button>
                 </div>
               ))}
             </div>
