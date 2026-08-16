@@ -12,6 +12,7 @@ import {
   Wrench,
   Gauge,
   AlertCircle,
+  ShieldCheck,
 } from 'lucide-react';
 import { maintenanceService } from '../services/maintenanceService';
 import { vehicleService } from '../services/vehicleService';
@@ -120,169 +121,183 @@ export function ReceiptPhotoViewerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col justify-between select-none">
-      {/* ── 1. Top Header Navigation Bar ── */}
-      <header className="px-4 py-3 sm:px-6 sm:py-4 bg-slate-900/90 border-b border-slate-800 backdrop-blur-md sticky top-0 z-40 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-xs font-extrabold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-3.5 py-2 rounded-xl border border-slate-700 transition-all cursor-pointer shadow-xs active:scale-95"
-          >
-            <ArrowLeft size={16} />
-            <span>Kembali</span>
-          </button>
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between select-none pb-24">
+      {/* ── 1. Consistent Header Navigation Bar ── */}
+      <header className="px-4 py-4 sm:px-6 bg-white border-b border-slate-200/90 sticky top-0 z-40 shadow-2xs">
+        <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 text-xs font-extrabold text-slate-700 hover:text-slate-900 bg-white border border-slate-200/80 px-3.5 py-2 rounded-xl shadow-2xs transition-all hover:bg-slate-100 cursor-pointer active:scale-95"
+            >
+              <ArrowLeft size={16} />
+              <span>Kembali</span>
+            </button>
 
-          <div>
-            <h1 className="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
-              <Camera size={18} className="text-blue-400" />
-              <span>Detail Foto Struk & Nota Fisik</span>
-            </h1>
-            {record && (
-              <p className="text-[11px] text-slate-400 font-medium hidden sm:block">
-                Token ID: <span className="font-mono text-slate-300">#{record.id.slice(0, 8)}</span>
-              </p>
-            )}
+            <div>
+              <h1 className="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-2">
+                <Camera size={18} className="text-blue-600" />
+                <span>Foto Struk & Nota Fisik Bengkel</span>
+              </h1>
+              {record && (
+                <p className="text-[11px] text-slate-500 font-medium hidden sm:block">
+                  Token Struk Digital: <span className="font-mono font-bold text-slate-700">#{record.id.slice(0, 8)}</span>
+                </p>
+              )}
+            </div>
           </div>
-        </div>
 
-        {record?.receipt_photo_url && (
-          <button
-            type="button"
-            onClick={handleDownload}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white border border-blue-400/30 transition-all cursor-pointer shadow-sm active:scale-95"
-          >
-            <Download size={15} />
-            <span className="hidden sm:inline">Simpan Foto</span>
-          </button>
-        )}
+          {record?.receipt_photo_url && (
+            <button
+              type="button"
+              onClick={handleDownload}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold bg-blue-600 hover:bg-blue-700 text-white transition-all cursor-pointer shadow-md shadow-blue-500/20 active:scale-95"
+            >
+              <Download size={15} />
+              <span className="hidden sm:inline">Simpan Foto</span>
+            </button>
+          )}
+        </div>
       </header>
 
       {/* ── 2. Main Photo Viewing Canvas Stage ── */}
-      <main className="flex-1 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      <main className="max-w-5xl w-full mx-auto p-4 sm:p-6 flex-1 flex flex-col justify-center space-y-4">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-20">
-            <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs text-slate-400 font-medium">Memuat Foto Struk Fisik...</p>
+          <div className="flex flex-col items-center justify-center gap-3 py-20 bg-white border border-slate-200 rounded-3xl">
+            <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            <p className="text-xs font-bold text-slate-600">Memuat Foto Struk Fisik...</p>
           </div>
         ) : error || !record?.receipt_photo_url ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-md text-center space-y-3">
-            <AlertCircle size={40} className="text-amber-400 mx-auto" />
-            <h3 className="font-extrabold text-base text-white">Foto Struk Tidak Ditemukan</h3>
-            <p className="text-xs text-slate-400">
+          <div className="bg-white border border-slate-200 rounded-3xl p-8 text-center space-y-3 shadow-xs max-w-md mx-auto">
+            <AlertCircle size={40} className="text-amber-500 mx-auto" />
+            <h3 className="font-extrabold text-base text-slate-900">Foto Struk Tidak Ditemukan</h3>
+            <p className="text-xs text-slate-500">
               Tidak ada lampiran foto struk fisik untuk catatan servis ini.
             </p>
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="py-2.5 px-5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl cursor-pointer transition-colors"
+              className="py-2.5 px-5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl cursor-pointer transition-colors shadow-xs"
             >
               Kembali ke Halaman Sebelumnya
             </button>
           </div>
         ) : (
-          <div
-            ref={containerRef}
-            className="w-full max-w-4xl h-[70vh] sm:h-[75vh] bg-slate-900/60 rounded-3xl border border-slate-800/80 shadow-2xl relative overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            onDoubleClick={handleDoubleClick}
-          >
-            <img
-              src={record.receipt_photo_url}
-              alt="Struk Fisik Details"
-              className="max-w-full max-h-full object-contain transition-transform duration-100 ease-out rounded-xl shadow-lg pointer-events-none"
-              style={{
-                transform: `translate(${position.x}px, ${position.y}px) scale(${scale}) rotate(${rotation}deg)`,
-              }}
-            />
+          <div className="space-y-4">
+            {/* Dark Viewing Stage for Maximum Contrast */}
+            <div
+              ref={containerRef}
+              className="w-full h-[65vh] sm:h-[70vh] bg-slate-950 rounded-3xl border border-slate-800 shadow-xl relative overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onDoubleClick={handleDoubleClick}
+            >
+              <img
+                src={record.receipt_photo_url}
+                alt="Struk Fisik Details"
+                className="max-w-full max-h-full object-contain transition-transform duration-100 ease-out rounded-xl shadow-2xl pointer-events-none"
+                style={{
+                  transform: `translate(${position.x}px, ${position.y}px) scale(${scale}) rotate(${rotation}deg)`,
+                }}
+              />
 
-            {/* Ambient Watermark Tag */}
-            <div className="absolute bottom-4 left-4 bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 text-[10px] text-slate-400 font-mono pointer-events-none">
-              Double Click untuk Zoom 2x • Drag untuk Geser
+              {/* Helper Watermark */}
+              <div className="absolute bottom-4 left-4 bg-slate-900/90 text-slate-300 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-slate-700 text-[11px] font-mono pointer-events-none shadow-md">
+                Double Click untuk Zoom 2x • Drag untuk Geser
+              </div>
             </div>
-          </div>
-        )}
 
-        {/* ── 3. Floating Interactive Zoom Controls Bar ── */}
-        {record?.receipt_photo_url && (
-          <div className="fixed bottom-20 sm:bottom-8 left-1/2 -translate-x-1/2 z-30 bg-slate-900/90 border border-slate-700/80 backdrop-blur-md px-4 py-2 rounded-full shadow-2xl flex items-center gap-3">
-            <button
-              type="button"
-              onClick={handleZoomOut}
-              disabled={scale <= 1}
-              className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-full transition-colors disabled:opacity-30 cursor-pointer"
-              title="Zoom Out"
-            >
-              <ZoomOut size={18} />
-            </button>
+            {/* ── 3. Interactive Floating Zoom Controls Bar ── */}
+            <div className="bg-white border border-slate-200/90 backdrop-blur-md px-5 py-2.5 rounded-2xl shadow-md flex items-center justify-center gap-4 max-w-sm mx-auto">
+              <button
+                type="button"
+                onClick={handleZoomOut}
+                disabled={scale <= 1}
+                className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors disabled:opacity-30 cursor-pointer"
+                title="Zoom Out"
+              >
+                <ZoomOut size={18} />
+              </button>
 
-            <span className="font-mono text-xs font-bold text-amber-400 min-w-[45px] text-center">
-              {Math.round(scale * 100)}%
-            </span>
+              <span className="font-mono text-xs font-black text-slate-900 min-w-[50px] text-center bg-slate-100 px-2 py-1 rounded-lg">
+                {Math.round(scale * 100)}%
+              </span>
 
-            <button
-              type="button"
-              onClick={handleZoomIn}
-              disabled={scale >= 4}
-              className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-full transition-colors disabled:opacity-30 cursor-pointer"
-              title="Zoom In"
-            >
-              <ZoomIn size={18} />
-            </button>
+              <button
+                type="button"
+                onClick={handleZoomIn}
+                disabled={scale >= 4}
+                className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors disabled:opacity-30 cursor-pointer"
+                title="Zoom In"
+              >
+                <ZoomIn size={18} />
+              </button>
 
-            <div className="w-[1px] h-5 bg-slate-700" />
+              <div className="w-[1px] h-6 bg-slate-200" />
 
-            <button
-              type="button"
-              onClick={handleRotate}
-              className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-full transition-colors cursor-pointer"
-              title="Putar 90 Derajat"
-            >
-              <RotateCw size={18} />
-            </button>
+              <button
+                type="button"
+                onClick={handleRotate}
+                className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                title="Putar 90 Derajat"
+              >
+                <RotateCw size={18} />
+              </button>
 
-            <button
-              type="button"
-              onClick={handleResetZoom}
-              className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-full transition-colors cursor-pointer"
-              title="Reset Zoom"
-            >
-              <RotateCcw size={18} />
-            </button>
+              <button
+                type="button"
+                onClick={handleResetZoom}
+                className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                title="Reset Zoom"
+              >
+                <RotateCcw size={18} />
+              </button>
+            </div>
           </div>
         )}
       </main>
 
-      {/* ── 4. Bottom Info Metadata Bar ── */}
+      {/* ── 4. Metadata Info Card (Matching Digital Receipt Modal & Vehicle Detail Cards) ── */}
       {record && (
-        <footer className="px-4 py-3 bg-slate-900/90 border-t border-slate-800 backdrop-blur-md text-xs text-slate-400">
-          <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3 flex-wrap">
+        <footer className="max-w-5xl w-full mx-auto px-4 sm:px-6">
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs text-xs space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+              {/* Vehicle & Plate */}
               {vehicle && (
-                <div className="flex items-center gap-2">
-                  <span className="bg-amber-300 text-slate-950 font-mono font-bold px-2 py-0.5 rounded text-[11px] border border-amber-400">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <span className="bg-amber-300 text-slate-900 font-mono font-black px-2.5 py-0.5 rounded border border-amber-400 text-xs shadow-2xs">
                     {vehicle.license_plate}
                   </span>
-                  <span className="font-extrabold text-white">
+                  <span className="font-extrabold text-slate-900 text-sm">
                     {vehicle.brand} {vehicle.model}
                   </span>
                 </div>
               )}
-              <span className="flex items-center gap-1 text-slate-300">
-                <Calendar size={13} className="text-slate-400" />
-                {formatDate(record.service_date, 'full')}
-              </span>
-              <span className="flex items-center gap-1 text-slate-300">
-                <Wrench size={13} className="text-blue-400" />
-                {record.workshop_name_manual || (record.is_official_workshop ? 'Bengkel Resmi' : 'DIY Maintenance')}
-              </span>
+
+              {/* Service Date & Odometer */}
+              <div className="flex items-center gap-3 text-slate-600 flex-wrap">
+                <span className="flex items-center gap-1 font-medium">
+                  <Calendar size={13} className="text-slate-400" />
+                  {formatDate(record.service_date, 'full')}
+                </span>
+                <span className="flex items-center gap-1 font-extrabold text-slate-800">
+                  <Gauge size={13} className="text-purple-600" />
+                  {formatMileage(record.mileage_at_service)} km
+                </span>
+              </div>
             </div>
 
-            <div className="font-mono font-black text-amber-400 text-sm">
-              Total: {formatRupiah(record.total_cost)}
+            <div className="flex items-center justify-between gap-3 text-slate-600">
+              <span className="flex items-center gap-1.5 font-semibold text-slate-700">
+                <Wrench size={14} className="text-blue-600" />
+                {record.workshop_name_manual || (record.is_official_workshop ? 'Bengkel Resmi Terdaftar' : 'DIY Maintenance')}
+              </span>
+              <span className="font-mono font-black text-slate-900 text-sm sm:text-base">
+                Total: {formatRupiah(record.total_cost)}
+              </span>
             </div>
           </div>
         </footer>
