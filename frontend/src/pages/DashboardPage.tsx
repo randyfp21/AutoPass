@@ -354,17 +354,17 @@ export function DashboardPage() {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingVehicle(v);
-                      setShowAddVehicle(true);
-                    }}
-                    className="py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0 active:scale-95"
-                  >
-                    <Calendar size={12} />
-                    <span>Perbarui</span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingVehicle(v);
+                        setShowAddVehicle(true);
+                      }}
+                      className="py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0 active:scale-95"
+                    >
+                      <Calendar size={12} />
+                      <span>Perbarui Data</span>
+                    </button>
                 </div>
               ))}
             </div>
