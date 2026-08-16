@@ -7,9 +7,17 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cap:build": "npm run build && npx cap sync",
+    "cap:open:android": "npx cap open android",
+    "cap:open:ios": "npx cap open ios",
+    "cap:run:android": "npx cap run android",
+    "cap:run:ios": "npx cap run ios"
   },
   "dependencies": {
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/keyboard": "^8.0.5",
+    "@capacitor/status-bar": "^8.0.3",
     "axios": "^1.7.9",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
@@ -19,6 +27,9 @@
     "react-router-dom": "^7.1.1"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/ios": "^8.5.0",
     "@tailwindcss/vite": "^4.0.0",
     "@types/node": "^22.10.5",
     "@types/react": "^18.3.18",
