@@ -8,6 +8,7 @@ import { AddServiceModal } from '../components/service/AddServiceModal';
 import { DigitalReceiptModal } from '../components/service/DigitalReceiptModal';
 import { GenZSocialShareModal } from '../components/service/GenZSocialShareModal';
 import { AddPlannerModal } from '../components/planner/AddPlannerModal';
+import { AnalogOdometer } from '../components/common/AnalogOdometer';
 import { Button } from '../components/common/Button';
 import type { Vehicle, ServiceRecord, ServicePlanner, CreateServiceRecordData, Workshop, CreatePlannerData } from '../types';
 import { formatRupiah, formatDate, formatMileage } from '../utils/formatters';
@@ -250,13 +251,14 @@ export function ActivityPage() {
                         </h4>
                       </div>
 
-                      <p className="text-xs text-slate-600 mt-1">
-                        {record.workshop_name_manual || (record.is_official_workshop ? 'Bengkel Resmi' : 'DIY')}
-                        {' · '}
-                        {formatDate(record.service_date, 'full')}
-                        {' · '}
-                        {formatMileage(record.mileage_at_service)} km
-                      </p>
+                      <div className="flex items-center gap-2 text-xs text-slate-600 mt-1 flex-wrap">
+                        <span>
+                          {record.workshop_name_manual || (record.is_official_workshop ? 'Bengkel Resmi' : 'DIY')}
+                          {' · '}
+                          {formatDate(record.service_date, 'full')}
+                        </span>
+                        <AnalogOdometer value={record.mileage_at_service} size="sm" />
+                      </div>
 
                       <p className="text-xs font-bold text-slate-900 mt-1">
                         {formatRupiah(record.total_cost)}

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Gauge, Calendar, Wrench, ChevronRight, Sparkles } from 'lucide-react';
 import type { Vehicle } from '../../types';
 import { formatMileage } from '../../utils/formatters';
+import { AnalogOdometer } from '../common/AnalogOdometer';
 
 // ─── SVG Illustrations ────────────────────────────────────────────────────────
 
@@ -148,8 +149,8 @@ export function VehicleCard({ vehicle, serviceCount, lastServiceDate }: VehicleC
               <Gauge size={16} />
             </div>
             <div>
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Odometer</p>
-              <p className="text-xs font-black text-slate-900">{formatMileage(vehicle.current_mileage)} KM</p>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Odometer</p>
+              <AnalogOdometer value={vehicle.current_mileage} size="sm" />
             </div>
           </div>
 
