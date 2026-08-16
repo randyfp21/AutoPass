@@ -4,7 +4,6 @@ import { Wallet, TrendingUp, Receipt, Filter, Eye, Shield, Wrench, ChevronRight,
 import { vehicleService } from '../services/vehicleService';
 import { maintenanceService } from '../services/maintenanceService';
 import { DigitalReceiptModal } from '../components/service/DigitalReceiptModal';
-import { AnalogOdometer } from '../components/common/AnalogOdometer';
 import { GenZSocialShareModal } from '../components/service/GenZSocialShareModal';
 import { Button } from '../components/common/Button';
 import type { Vehicle, ServiceRecord } from '../types';
@@ -342,14 +341,13 @@ export function SpentPage() {
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2 text-xs text-slate-500 mt-1 flex-wrap">
-                        <span>
-                          {record.workshop_name_manual || (record.is_official_workshop ? 'Bengkel Resmi' : 'DIY')}
-                          {' · '}
-                          {formatDate(record.service_date, 'short')}
-                        </span>
-                        <AnalogOdometer value={record.mileage_at_service} size="sm" />
-                      </div>
+                      <p className="text-xs text-slate-500 mt-1 truncate">
+                        {record.workshop_name_manual || (record.is_official_workshop ? 'Bengkel Resmi' : 'DIY')}
+                        {' · '}
+                        {formatDate(record.service_date, 'short')}
+                        {' · '}
+                        {formatMileage(record.mileage_at_service)} km
+                      </p>
                     </div>
                   </div>
 

@@ -23,7 +23,6 @@ import { vehicleService } from '../services/vehicleService';
 import { maintenanceService } from '../services/maintenanceService';
 import type { Vehicle, ServiceRecord } from '../types';
 import { formatMileage, formatDate } from '../utils/formatters';
-import { AnalogOdometer } from '../components/common/AnalogOdometer';
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
@@ -297,12 +296,12 @@ export function VehicleDetailPage() {
 
               {/* 📊 3-Column Spec Cards Grid */}
               <div className="grid grid-cols-3 gap-3">
-                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 text-center space-y-1.5 flex flex-col items-center justify-center">
-                  <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 text-center space-y-1">
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 mx-auto flex items-center justify-center">
                     <Gauge size={18} />
                   </div>
-                  <AnalogOdometer value={vehicle.current_mileage} size="md" />
-                  <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Odometer</p>
+                  <p className="text-sm sm:text-base font-black text-slate-900">{formatMileage(vehicle.current_mileage)}</p>
+                  <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Kilometer</p>
                 </div>
 
                 <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 text-center space-y-1">
