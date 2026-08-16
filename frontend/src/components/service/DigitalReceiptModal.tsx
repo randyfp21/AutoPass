@@ -67,10 +67,7 @@ export function DigitalReceiptModal({
                   <div className="w-8 h-8 bg-blue-600/30 border border-blue-500/40 rounded-xl flex items-center justify-center text-blue-400 shrink-0">
                     <Gauge size={18} />
                   </div>
-                  <span
-                    className="font-bold text-lg sm:text-xl tracking-tight text-white"
-                    style={{ fontFamily: 'Rajdhani, sans-serif' }}
-                  >
+                  <span className="font-extrabold text-base sm:text-lg text-white">
                     Odomtr Digital Receipt #{record.id.slice(0, 8)}
                   </span>
                 </div>

@@ -71,10 +71,7 @@ export function OdometerSummaryWidget({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h4
-                className="font-black text-base text-slate-900 tracking-wide uppercase"
-                style={{ fontFamily: 'Rajdhani, sans-serif' }}
-              >
+              <h4 className="font-extrabold text-sm sm:text-base text-slate-900">
                 Monitor Odometer Real-time
               </h4>
               <span className="bg-blue-100 text-blue-800 text-[10px] font-mono font-black px-2.5 py-0.5 rounded-full border border-blue-200">

@@ -314,10 +314,7 @@ export function DashboardPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3
-                          className="font-black text-base text-rose-950 uppercase tracking-wide"
-                          style={{ fontFamily: 'Rajdhani, sans-serif' }}
-                        >
+                        <h3 className="font-extrabold text-base text-rose-950">
                           Radar Pajak & STNK Kendaraan
                         </h3>
                         <span className="bg-rose-600 text-white text-[10px] font-mono font-black px-2.5 py-0.5 rounded-full shadow-2xs">
