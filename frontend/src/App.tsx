@@ -1,5 +1,6 @@
 import React, { useState, useEffect, ReactNode } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import { useAuth } from './context/AuthContext';
 import Navbar from './components/common/Navbar';
 import BottomNav from './components/common/BottomNav';
@@ -29,6 +30,25 @@ import { vehicleService } from './services/vehicleService';
 import { plannerService } from './services/plannerService';
 import { maintenanceService } from './services/maintenanceService';
 import type { Vehicle, CreatePlannerData, CreateServiceRecordData } from './types';
+
+// ─── Root Route Handler (Directs mobile app straight to Login/Dashboard, skipping Landing Page) ───
+
+function RootRoute() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const isMobileApp = Capacitor.isNativePlatform();
+
+  if (isLoading) return null;
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (isMobileApp) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <LandingPage />;
+}
 
 // ─── Protected Route (requires authenticated user) ────────────────────────────
 
@@ -163,8 +183,8 @@ export function App() {
   return (
     <>
       <Routes>
-        {/* Public Landing Page */}
-        <Route path="/" element={<LandingPage />} />
+        {/* Root Route: Mobile bypasses LandingPage straight to Login/Dashboard */}
+        <Route path="/" element={<RootRoute />} />
 
         {/* Public Only routes */}
         <Route
