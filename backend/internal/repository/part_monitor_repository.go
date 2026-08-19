@@ -37,20 +37,30 @@ func (r *partMonitorRepository) EnsureDefaultPartMonitors(ctx context.Context, v
 			{key: "engine_oil", name: "Oli Mesin", icon: "oil", lifespan: 3000},
 			{key: "spark_plug", name: "Busi Pengapian", icon: "zap", lifespan: 8000},
 			{key: "oil_filter", name: "Filter Oli", icon: "filter", lifespan: 6000},
-			{key: "tires", name: "Ban Depan & Belakang", icon: "circle", lifespan: 15000},
+			{key: "air_filter", name: "Filter Udara Mesin", icon: "wind", lifespan: 10000},
+			{key: "brake_pads", name: "Kampas Rem Depan/Belakang", icon: "shield", lifespan: 12000},
 			{key: "brake_fluid", name: "Minyak Rem", icon: "droplet", lifespan: 12000},
+			{key: "tires", name: "Ban Depan & Belakang", icon: "circle", lifespan: 15000},
 			{key: "vbelt", name: "CVT V-Belt / Rantai", icon: "activity", lifespan: 20000},
+			{key: "transmission_fluid", name: "Oli Transmisi / Oli Gardan", icon: "cog", lifespan: 8000},
 			{key: "radiator_coolant", name: "Air Radiator (Coolant)", icon: "thermometer", lifespan: 12000},
+			{key: "battery", name: "Aki Motor / Battery", icon: "battery", lifespan: 25000},
+			{key: "cabin_ac_filter", name: "Filter Hawa CVT", icon: "fan", lifespan: 10000},
 		}
 	} else {
 		defaults = []defaultPart{
 			{key: "engine_oil", name: "Oli Mesin", icon: "oil", lifespan: 10000},
 			{key: "spark_plug", name: "Busi Standar / Iridium", icon: "zap", lifespan: 20000},
 			{key: "oil_filter", name: "Filter Oli", icon: "filter", lifespan: 10000},
-			{key: "tires", name: "Ban Depan & Belakang", icon: "circle", lifespan: 40000},
+			{key: "air_filter", name: "Filter Udara Mesin", icon: "wind", lifespan: 20000},
+			{key: "brake_pads", name: "Kampas Rem Depan/Belakang", icon: "shield", lifespan: 30000},
 			{key: "brake_fluid", name: "Minyak Rem", icon: "droplet", lifespan: 20000},
+			{key: "tires", name: "Ban Depan & Belakang", icon: "circle", lifespan: 40000},
 			{key: "vbelt", name: "Timing Belt / Fan Belt", icon: "activity", lifespan: 40000},
+			{key: "transmission_fluid", name: "Oli Transmisi / ATF Matic", icon: "cog", lifespan: 20000},
 			{key: "radiator_coolant", name: "Cairan Radiator (Coolant)", icon: "thermometer", lifespan: 20000},
+			{key: "battery", name: "Aki Mobil / Battery", icon: "battery", lifespan: 50000},
+			{key: "cabin_ac_filter", name: "Filter AC Kabin", icon: "fan", lifespan: 15000},
 		}
 	}
 

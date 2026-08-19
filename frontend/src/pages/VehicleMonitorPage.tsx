@@ -19,6 +19,11 @@ import {
   Thermometer,
   RotateCcw,
   ArrowLeft,
+  Wind,
+  Shield,
+  Cog,
+  BatteryCharging,
+  Fan,
 } from 'lucide-react';
 import { vehicleService } from '../services/vehicleService';
 import { partMonitorService } from '../services/partMonitorService';
@@ -43,6 +48,16 @@ function PartIcon({ iconType, className = 'size-5' }: { iconType: string; classN
       return <Activity className={className} />;
     case 'thermometer':
       return <Thermometer className={className} />;
+    case 'wind':
+      return <Wind className={className} />;
+    case 'shield':
+      return <Shield className={className} />;
+    case 'cog':
+      return <Cog className={className} />;
+    case 'battery':
+      return <BatteryCharging className={className} />;
+    case 'fan':
+      return <Fan className={className} />;
     default:
       return <Wrench className={className} />;
   }
