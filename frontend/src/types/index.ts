@@ -78,6 +78,29 @@ export interface UpdateVehicleData {
 }
 
 // ============================================
+// VEHICLE PART MONITOR
+// ============================================
+
+export interface VehiclePartMonitor {
+  id: string;
+  vehicle_id: string;
+  part_key: string;
+  part_name: string;
+  icon_type: string;
+  last_replaced_mileage: number;
+  ideal_lifespan_km: number;
+  is_enabled: boolean;
+  last_replaced_date?: string;
+  created_at: string;
+  updated_at: string;
+  km_traveled: number;
+  km_remaining: number;
+  progress_percent: number;
+  is_urgent: boolean;
+  is_expired: boolean;
+}
+
+// ============================================
 // WORKSHOP
 // ============================================
 

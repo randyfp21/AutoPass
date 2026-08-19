@@ -10,6 +10,7 @@ import {
   Edit3,
   MessageSquare,
   Sparkles,
+  Activity,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from '../../context/LanguageContext';
@@ -28,6 +29,8 @@ export function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isThreadsMode = location.pathname.startsWith('/threads');
+  const isVehicleMonitorMode = location.pathname.startsWith('/vehicle-monitor');
+  const isCoreTrackerMode = !isThreadsMode && !isVehicleMonitorMode;
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -99,28 +102,45 @@ export function Navbar() {
               )}
             </div>
 
-            {/* ── 2. CENTER TOP BAR: Segmented ON/OFF Mode Switcher Pill ── */}
+            {/* ── 2. CENTER TOP BAR: 3-Slider Mode Switcher Pill ── */}
             {isAuthenticated && (
               <div className="absolute left-1/2 -translate-x-1/2 z-20">
-                <div className="bg-slate-100/90 p-1 rounded-full border border-slate-200/80 flex items-center shadow-inner relative transition-all duration-300">
+                <div className="bg-slate-100/90 p-1 rounded-full border border-slate-200/80 flex items-center shadow-inner relative transition-all duration-300 gap-0.5">
                   {/* Segment 1: Core Tracker */}
                   <button
                     type="button"
                     onClick={() => {
-                      if (isThreadsMode) navigate('/dashboard');
+                      if (!isCoreTrackerMode) navigate('/dashboard');
                     }}
                     className={[
                       'flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold transition-all duration-300 cursor-pointer select-none',
-                      !isThreadsMode
+                      isCoreTrackerMode
                         ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25 scale-100'
                         : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 scale-95 opacity-75',
                     ].join(' ')}
                   >
-                    <Gauge size={13} className={!isThreadsMode ? 'text-white' : 'text-slate-400'} />
-                    <span className="hidden sm:inline">Core Tracker</span>
+                    <Gauge size={13} className={isCoreTrackerMode ? 'text-white' : 'text-slate-400'} />
+                    <span className="hidden sm:inline">Odo Tracker</span>
                   </button>
 
-                  {/* Segment 2: Odo Threads */}
+                  {/* Segment 2: Vehicle Monitor (New Feature) */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isVehicleMonitorMode) navigate('/vehicle-monitor');
+                    }}
+                    className={[
+                      'flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold transition-all duration-300 cursor-pointer select-none',
+                      isVehicleMonitorMode
+                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/25 scale-100'
+                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 scale-95 opacity-75',
+                    ].join(' ')}
+                  >
+                    <Activity size={13} className={isVehicleMonitorMode ? 'text-white' : 'text-slate-400'} />
+                    <span>Vehicle Monitor</span>
+                  </button>
+
+                  {/* Segment 3: Odo Threads */}
                   <button
                     type="button"
                     onClick={() => {
@@ -134,7 +154,7 @@ export function Navbar() {
                     ].join(' ')}
                   >
                     <Sparkles size={13} className={isThreadsMode ? 'text-yellow-300' : 'text-slate-400'} />
-                    <span>Odo Threads</span>
+                    <span className="hidden sm:inline">Odo Threads</span>
                   </button>
                 </div>
               </div>

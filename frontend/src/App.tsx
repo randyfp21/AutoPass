@@ -22,6 +22,7 @@ import ThreadDetailPage from './pages/ThreadDetailPage';
 import ThreadPhotoViewerPage from './pages/ThreadPhotoViewerPage';
 import TelemetryStudioPage from './pages/TelemetryStudioPage';
 import ReceiptPhotoViewerPage from './pages/ReceiptPhotoViewerPage';
+import VehicleMonitorPage from './pages/VehicleMonitorPage';
 import { AddPlannerModal } from './components/planner/AddPlannerModal';
 import { AddServiceModal } from './components/service/AddServiceModal';
 import { ThreadComposerModal } from './components/threads/ThreadComposerModal';
@@ -214,6 +215,19 @@ export function App() {
                 onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
               >
                 <DashboardPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vehicle-monitor"
+          element={
+            <ProtectedRoute>
+              <AppLayout
+                onOpenAddPlanner={() => setShowOptionSelectorModal(true)}
+                onOpenNewThreadModal={() => setShowNewThreadComposerModal(true)}
+              >
+                <VehicleMonitorPage />
               </AppLayout>
             </ProtectedRoute>
           }

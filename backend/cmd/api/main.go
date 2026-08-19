@@ -58,6 +58,7 @@ func main() {
 	serviceRepo := repository.NewServiceRepository(db)
 	plannerRepo := repository.NewPlannerRepository(db)
 	threadRepo := repository.NewThreadRepository(db)
+	partMonitorRepo := repository.NewPartMonitorRepository(db)
 
 	// Initialise use cases.
 	authUC := usecase.NewAuthUsecase(userRepo, redisClient, cfg)
@@ -65,6 +66,7 @@ func main() {
 	serviceUC := usecase.NewServiceUsecase(serviceRepo, vehicleRepo, redisClient)
 	plannerUC := usecase.NewPlannerUsecase(plannerRepo, vehicleRepo)
 	threadUC := usecase.NewThreadUsecase(threadRepo)
+	partMonitorUC := usecase.NewPartMonitorUsecase(partMonitorRepo, vehicleRepo)
 
 	// Initialise HTTP handlers.
 	authHandler := deliveryHTTP.NewAuthHandler(authUC)
@@ -73,6 +75,7 @@ func main() {
 	masterHandler := deliveryHTTP.NewMasterHandler(serviceUC)
 	plannerHandler := deliveryHTTP.NewPlannerHandler(plannerUC)
 	threadHandler := deliveryHTTP.NewThreadHandler(threadUC)
+	partMonitorHandler := deliveryHTTP.NewPartMonitorHandler(partMonitorUC)
 
 	// Set up Gin router.
 	router := gin.Default()
@@ -120,6 +123,11 @@ func main() {
 		vehicles.POST("/:id/services", serviceHandler.CreateServiceRecord)
 		vehicles.GET("/:id/services/:serviceId", serviceHandler.GetServiceRecordDetail)
 		vehicles.DELETE("/:id/services/:serviceId", serviceHandler.DeleteServiceRecord)
+
+		// Part Monitor routes nested under vehicle.
+		vehicles.GET("/:id/part-monitors", partMonitorHandler.GetVehiclePartMonitors)
+		vehicles.PUT("/:id/part-monitors/:monitorId", partMonitorHandler.UpdatePartMonitor)
+		vehicles.POST("/:id/part-monitors/:monitorId/replace", partMonitorHandler.ReplacePart)
 	}
 
 	// Service Planner routes (protected).
