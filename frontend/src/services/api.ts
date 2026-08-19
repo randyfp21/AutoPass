@@ -15,15 +15,15 @@ const getBaseURL = (): string => {
     }
     // Android Emulator loopback to host PC
     if (Capacitor.getPlatform() === 'android') {
-      return 'http://10.0.2.2:8080/api/v1';
+      return 'http://10.0.2.2:8090/api/v1';
     }
     // iOS Simulator default loopback to Mac
-    return 'http://localhost:8080/api/v1';
+    return 'http://localhost:8090/api/v1';
   }
 
   // 3. Web Browser on Local Network / Localhost
   const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
-  return `http://${hostname}:8080/api/v1`;
+  return `http://${hostname}:8090/api/v1`;
 };
 
 export const api = axios.create({

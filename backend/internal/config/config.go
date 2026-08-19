@@ -21,7 +21,7 @@ type Config struct {
 // Load reads environment variables and returns a Config instance.
 func Load() *Config {
 	return &Config{
-		Port:           getEnv("PORT", "8080"),
+		Port:           getEnv("PORT", "8090"),
 		Env:            getEnv("ENV", "development"),
 		DBHost:         getEnv("DB_HOST", "localhost"),
 		DBPort:         getEnv("DB_PORT", "5432"),
