@@ -48,6 +48,58 @@ function PartIcon({ iconType, className = 'size-5' }: { iconType: string; classN
   }
 }
 
+// Part Icon Badge with Circular Progress Ring & Status Color
+function PartIconBadge({ monitor }: { monitor: VehiclePartMonitor }) {
+  const { is_enabled, is_expired, is_urgent, progress_percent, icon_type } = monitor;
+
+  let strokeColor = 'text-emerald-500';
+  let iconBgColor = 'bg-emerald-50 text-emerald-600 border-emerald-100';
+
+  if (!is_enabled) {
+    strokeColor = 'text-slate-300';
+    iconBgColor = 'bg-slate-100 text-slate-400 border-slate-200';
+  } else if (is_expired) {
+    strokeColor = 'text-red-600';
+    iconBgColor = 'bg-red-600 text-white shadow-md shadow-red-500/30 border-red-500 animate-pulse';
+  } else if (is_urgent) {
+    strokeColor = 'text-rose-500';
+    iconBgColor = 'bg-rose-500 text-white shadow-md shadow-rose-500/30 border-rose-400';
+  }
+
+  return (
+    <div className="relative w-11 h-11 flex items-center justify-center shrink-0">
+      {/* Circular Progress Ring Indicator on Icon */}
+      <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 36 36">
+        <path
+          className="text-slate-200/80"
+          strokeWidth="3"
+          stroke="currentColor"
+          fill="none"
+          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+        />
+        {is_enabled && (
+          <path
+            className={`${strokeColor} transition-all duration-700 ease-out`}
+            strokeDasharray={`${progress_percent}, 100`}
+            strokeWidth="3.2"
+            strokeLinecap="round"
+            stroke="currentColor"
+            fill="none"
+            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+          />
+        )}
+      </svg>
+
+      {/* Center Icon Box */}
+      <div
+        className={`w-8 h-8 rounded-xl flex items-center justify-center border ${iconBgColor} transition-all duration-300 relative z-10`}
+      >
+        <PartIcon iconType={icon_type} className="size-3.5" />
+      </div>
+    </div>
+  );
+}
+
 // Vehicle Photo Thumbnail component
 function VehicleThumbnail({ vehicle, className = 'w-full h-44' }: { vehicle: Vehicle; className?: string }) {
   if (vehicle.photo_url) {
@@ -495,22 +547,21 @@ export function VehicleMonitorPage() {
                     {/* Header: Icon, Name & Toggle Switch */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div
-                          className={[
-                            'w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 border shadow-2xs',
-                            m.is_expired
-                              ? 'bg-red-600 text-white border-red-500'
-                              : m.is_urgent
-                              ? 'bg-rose-500 text-white border-rose-400'
-                              : 'bg-emerald-50 text-emerald-600 border-emerald-100',
-                          ].join(' ')}
-                        >
-                          <PartIcon iconType={m.icon_type} className="size-5" />
-                        </div>
+                        <PartIconBadge monitor={m} />
                         <div>
                           <h4 className="font-extrabold text-sm text-slate-900">{m.part_name}</h4>
-                          <p className="text-[11px] text-slate-500 font-mono font-medium">
-                            Status: {m.is_enabled ? 'Dipantau' : 'Dinonaktifkan'}
+                          <p className="text-[11px] font-mono font-medium">
+                            {m.is_enabled ? (
+                              m.is_expired ? (
+                                <span className="text-red-600 font-extrabold">⛔ Melebihi Batas Ideal</span>
+                              ) : m.is_urgent ? (
+                                <span className="text-rose-600 font-extrabold">🚨 Sisa {formatMileage(m.km_remaining)} KM</span>
+                              ) : (
+                                <span className="text-emerald-600 font-extrabold">Sisa {formatMileage(m.km_remaining)} KM</span>
+                              )
+                            ) : (
+                              <span className="text-slate-400 font-bold">Dinonaktifkan</span>
+                            )}
                           </p>
                         </div>
                       </div>
@@ -537,23 +588,6 @@ export function VehicleMonitorPage() {
                     {/* Middle: Progress Bar & Metrics */}
                     {m.is_enabled ? (
                       <div className="space-y-3 bg-slate-50/80 border border-slate-100 rounded-2xl p-3.5">
-                        {/* Status Badge Alert */}
-                        <div>
-                          {m.is_expired ? (
-                            <div className="bg-red-600 text-white font-extrabold text-xs px-3 py-1 rounded-xl shadow-xs inline-flex items-center gap-1.5">
-                              ⛔ HABIS/GANTI SEKARANG!
-                            </div>
-                          ) : m.is_urgent ? (
-                            <div className="bg-rose-500 text-white font-extrabold text-xs px-3 py-1 rounded-xl shadow-xs inline-flex items-center gap-1.5">
-                              🚨 SISA {formatMileage(m.km_remaining)} KM LAGI
-                            </div>
-                          ) : (
-                            <div className="bg-emerald-100 text-emerald-900 font-extrabold text-xs px-3 py-1 rounded-xl border border-emerald-200 inline-flex items-center gap-1.5">
-                              ✅ Kondisi Baik (Sisa {formatMileage(m.km_remaining)} KM)
-                            </div>
-                          )}
-                        </div>
-
                         {/* Visual Progress Bar */}
                         <div className="space-y-1">
                           <div className="flex justify-between text-xs font-mono font-bold text-slate-700">
