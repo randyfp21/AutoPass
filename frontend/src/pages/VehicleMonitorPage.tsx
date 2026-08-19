@@ -18,6 +18,7 @@ import {
   Droplet,
   Thermometer,
   RotateCcw,
+  ArrowLeft,
 } from 'lucide-react';
 import { vehicleService } from '../services/vehicleService';
 import { partMonitorService } from '../services/partMonitorService';
@@ -47,8 +48,38 @@ function PartIcon({ iconType, className = 'size-5' }: { iconType: string; classN
   }
 }
 
+// Vehicle Photo Thumbnail component
+function VehicleThumbnail({ vehicle, className = 'w-full h-44' }: { vehicle: Vehicle; className?: string }) {
+  if (vehicle.photo_url) {
+    return (
+      <img
+        src={vehicle.photo_url}
+        alt={`${vehicle.brand} ${vehicle.model}`}
+        className={`${className} object-cover rounded-2xl shadow-inner border border-slate-200`}
+      />
+    );
+  }
+
+  return (
+    <div
+      className={`${className} bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 rounded-2xl flex flex-col items-center justify-center p-4 text-white relative overflow-hidden shadow-inner border border-slate-800`}
+    >
+      <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none" />
+      {vehicle.category === 'mobil' ? (
+        <Car size={44} className="text-emerald-400 opacity-90 drop-shadow-md mb-1" />
+      ) : (
+        <Activity size={44} className="text-emerald-400 opacity-90 drop-shadow-md mb-1" />
+      )}
+      <span className="text-[11px] font-extrabold uppercase font-mono tracking-widest text-emerald-300/90">
+        {vehicle.brand} {vehicle.category}
+      </span>
+    </div>
+  );
+}
+
 export function VehicleMonitorPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [vehicleMonitorsMap, setVehicleMonitorsMap] = useState<Record<string, VehiclePartMonitor[]>>({});
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [monitors, setMonitors] = useState<VehiclePartMonitor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,38 +95,50 @@ export function VehicleMonitorPage() {
   const [editingLifespanId, setEditingLifespanId] = useState<string | null>(null);
   const [customLifespanInput, setCustomLifespanInput] = useState<number>(4000);
 
-  const fetchVehiclesAndMonitors = async () => {
+  const fetchVehiclesAndSummaries = async () => {
     setIsLoading(true);
     setError('');
     try {
       const vehicleList = await vehicleService.getVehicles();
       setVehicles(vehicleList);
 
-      if (vehicleList.length > 0) {
-        const target = selectedVehicle
-          ? vehicleList.find((v) => v.id === selectedVehicle.id) || vehicleList[0]
-          : vehicleList[0];
+      // Fetch part monitors for all vehicles to populate card previews
+      const map: Record<string, VehiclePartMonitor[]> = {};
+      await Promise.all(
+        vehicleList.map(async (v) => {
+          try {
+            const list = await partMonitorService.getPartMonitors(v.id);
+            map[v.id] = list;
+          } catch {
+            map[v.id] = [];
+          }
+        })
+      );
+      setVehicleMonitorsMap(map);
 
-        setSelectedVehicle(target);
-        const partList = await partMonitorService.getPartMonitors(target.id);
-        setMonitors(partList);
-      } else {
-        setSelectedVehicle(null);
-        setMonitors([]);
+      // If a vehicle is currently selected, refresh its monitors
+      if (selectedVehicle) {
+        const currentTarget = vehicleList.find((v) => v.id === selectedVehicle.id);
+        if (currentTarget) {
+          setSelectedVehicle(currentTarget);
+          setMonitors(map[currentTarget.id] || []);
+        } else {
+          setSelectedVehicle(null);
+        }
       }
     } catch (err) {
       console.error(err);
-      setError('Gagal memuat data part monitor kendaraan. Silakan periksa koneksi.');
+      setError('Gagal memuat data kendaraan. Silakan periksa koneksi internet Anda.');
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchVehiclesAndMonitors();
+    fetchVehiclesAndSummaries();
   }, []);
 
-  const handleSelectVehicle = async (vehicle: Vehicle) => {
+  const handleOpenVehicleDetail = async (vehicle: Vehicle) => {
     setSelectedVehicle(vehicle);
     setIsLoading(true);
     try {
@@ -108,10 +151,14 @@ export function VehicleMonitorPage() {
     }
   };
 
+  const handleBackToGallery = () => {
+    setSelectedVehicle(null);
+    fetchVehiclesAndSummaries();
+  };
+
   const handleToggleEnable = async (monitor: VehiclePartMonitor) => {
     if (!selectedVehicle) return;
     const newStatus = !monitor.is_enabled;
-    // Optimistic UI update
     setMonitors((prev) =>
       prev.map((m) => (m.id === monitor.id ? { ...m, is_enabled: newStatus } : m))
     );
@@ -120,7 +167,7 @@ export function VehicleMonitorPage() {
         is_enabled: newStatus,
       });
     } catch {
-      fetchVehiclesAndMonitors();
+      if (selectedVehicle) handleOpenVehicleDetail(selectedVehicle);
     }
   };
 
@@ -155,15 +202,14 @@ export function VehicleMonitorPage() {
     }
   };
 
-  // Compute urgent parts count across selected vehicle
   const urgentCount = monitors.filter((m) => m.is_enabled && (m.is_urgent || m.is_expired)).length;
 
   return (
     <div className="flex-1 bg-slate-50 pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* ── 1. Hero Header ── */}
+        {/* ── 1. Hero Header Banner ── */}
         <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-emerald-950 text-white rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-0 right-0 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative z-10 space-y-2">
             <div className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-mono font-extrabold px-3 py-1 rounded-full">
@@ -171,22 +217,37 @@ export function VehicleMonitorPage() {
               <span>Vehicle Service Monitor & Telemetry Parts</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Monitor Komponen & Telemetri Armada
+              {selectedVehicle
+                ? `Telemetri Part: ${selectedVehicle.brand} ${selectedVehicle.model}`
+                : 'Pilih Kendaraan Untuk Monitoring Telemetri'}
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 font-medium max-w-xl">
-              Pantau batas jarak tempuh ideal oli, busi, ban, dan komponen vital kendaraan Anda secara otomatis berdasar Odometer.
+              {selectedVehicle
+                ? 'Pantau umur ideal komponen dan kilometer penggantian oli, busi, ban, serta cairan kendaraan.'
+                : 'Pilih salah satu kendaraan tersimpan di bawah ini untuk melihat status kesehatan part secara mendalam.'}
             </p>
           </div>
 
           <div className="relative z-10 flex items-center gap-3 shrink-0">
-            <button
-              type="button"
-              onClick={() => setShowAddVehicleModal(true)}
-              className="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-emerald-600/25 transition-all cursor-pointer flex items-center gap-2 active:scale-95 border border-emerald-400/40"
-            >
-              <Plus size={16} />
-              <span>Tambah Kendaraan Baru</span>
-            </button>
+            {selectedVehicle ? (
+              <button
+                type="button"
+                onClick={handleBackToGallery}
+                className="py-2.5 px-4 bg-white/10 hover:bg-white/20 text-white font-extrabold text-xs rounded-xl backdrop-blur-md border border-white/20 transition-all cursor-pointer flex items-center gap-2 active:scale-95"
+              >
+                <ArrowLeft size={16} />
+                <span>Pilih Mobil Lain</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowAddVehicleModal(true)}
+                className="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-emerald-600/25 transition-all cursor-pointer flex items-center gap-2 active:scale-95 border border-emerald-400/40"
+              >
+                <Plus size={16} />
+                <span>Tambah Kendaraan Baru</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -194,9 +255,9 @@ export function VehicleMonitorPage() {
         {isLoading && (
           <div className="space-y-4">
             <div className="skeleton h-16 rounded-2xl" />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="skeleton h-56 rounded-3xl" />
+                <div key={i} className="skeleton h-72 rounded-3xl" />
               ))}
             </div>
           </div>
@@ -226,164 +287,202 @@ export function VehicleMonitorPage() {
           </div>
         )}
 
-        {/* ── 4. Main Vehicle Service Monitor (WHEN VEHICLES EXIST) ── */}
-        {!isLoading && vehicles.length > 0 && selectedVehicle && (
-          <div className="space-y-8">
-            {/* Vehicle Selector Tabs Row */}
-            <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
-              {vehicles.map((v) => {
-                const isSelected = v.id === selectedVehicle.id;
-                return (
-                  <button
-                    key={v.id}
-                    type="button"
-                    onClick={() => handleSelectVehicle(v)}
-                    className={[
-                      'px-4 py-3 rounded-2xl border transition-all cursor-pointer shrink-0 flex items-center gap-3 text-left shadow-2xs',
-                      isSelected
-                        ? 'bg-slate-900 text-white border-slate-900 shadow-md scale-102'
-                        : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50',
-                    ].join(' ')}
-                  >
-                    <span className="bg-amber-300 text-slate-950 font-mono font-black text-xs px-2 py-0.5 rounded border border-amber-400">
-                      {v.license_plate}
-                    </span>
-                    <div>
-                      <p className="font-extrabold text-xs truncate max-w-[120px]">
-                        {v.brand} {v.model}
-                      </p>
-                      <p className="text-[10px] opacity-75 font-mono">
-                        {formatMileage(v.current_mileage)} KM
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
+        {/* ── 4. STEP 1: VEHICLE SELECTION GALLERY GRID (WHEN NO SPECIFIC VEHICLE IS SELECTED YET) ── */}
+        {!isLoading && vehicles.length > 0 && !selectedVehicle && (
+          <div className="space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-extrabold text-slate-900">Daftar Kendaraan Anda ({vehicles.length})</h2>
+                <p className="text-xs text-slate-500 font-medium">
+                  Klik pada kartu kendaraan untuk melihat detail telemetri & kesehatan part
+                </p>
+              </div>
             </div>
 
-            {/* Vehicle Overview Card with Top 3 Monitored Parts */}
-            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-2xs space-y-6">
-              {/* Header Info */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs">
-                    <Car size={24} />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="bg-amber-300 text-slate-950 font-mono font-black text-xs px-2.5 py-0.5 rounded border border-amber-400 shadow-2xs">
-                        {selectedVehicle.license_plate}
-                      </span>
-                      <h2 className="font-extrabold text-lg text-slate-900">
-                        {selectedVehicle.brand} {selectedVehicle.model}
-                      </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {vehicles.map((v) => {
+                const partList = vehicleMonitorsMap[v.id] || [];
+                const enabledParts = partList.filter((m) => m.is_enabled);
+                const hasUrgent = enabledParts.some((m) => m.is_urgent || m.is_expired);
+                const topParts = enabledParts
+                  .sort((a, b) => b.progress_percent - a.progress_percent)
+                  .slice(0, 3);
+
+                return (
+                  <div
+                    key={v.id}
+                    onClick={() => handleOpenVehicleDetail(v)}
+                    className="bg-white border border-slate-200/90 rounded-3xl p-5 space-y-4 hover:shadow-xl hover:border-emerald-400/80 transition-all duration-300 cursor-pointer group flex flex-col justify-between shadow-2xs relative overflow-hidden"
+                  >
+                    {/* Top Thumbnail Image */}
+                    <div className="relative">
+                      <VehicleThumbnail vehicle={v} className="w-full h-44" />
+
+                      {/* Floating License Plate & Category Badge */}
+                      <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
+                        <span className="bg-amber-300 text-slate-950 font-mono font-black text-xs px-2.5 py-1 rounded-lg border border-amber-400 shadow-md">
+                          {v.license_plate}
+                        </span>
+                        <span className="bg-slate-900/80 backdrop-blur-md text-white font-extrabold text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-lg border border-white/20 shadow-md">
+                          {v.category}
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-xs text-slate-500 font-medium mt-0.5">
-                      Kategori: <span className="capitalize font-bold text-slate-700">{selectedVehicle.category}</span>
-                      {' · '}Odometer Saat Ini: <span className="font-mono font-bold text-slate-900">{formatMileage(selectedVehicle.current_mileage)} KM</span>
-                    </p>
-                  </div>
-                </div>
 
-                {urgentCount > 0 ? (
-                  <div className="bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-2 shrink-0">
-                    <ShieldAlert size={16} className="text-rose-600 animate-pulse" />
-                    <span>{urgentCount} Part Membutuhkan Perhatian Mendasar</span>
-                  </div>
-                ) : (
-                  <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-2 shrink-0">
-                    <CheckCircle2 size={16} className="text-emerald-600" />
-                    <span>Seluruh Part Dalam Kondisi Baik</span>
-                  </div>
-                )}
-              </div>
+                    {/* Vehicle Details */}
+                    <div className="space-y-3">
+                      <div>
+                        <h3 className="font-extrabold text-base text-slate-900 group-hover:text-emerald-700 transition-colors">
+                          {v.brand} {v.model}
+                        </h3>
+                        <p className="text-xs text-slate-500 font-mono font-medium">
+                          Odometer: <span className="font-bold text-slate-900">{formatMileage(v.current_mileage)} KM</span>
+                        </p>
+                      </div>
 
-              {/* 🏆 Top 3 Monitored Parts Summary (Per User Directive) */}
-              <div className="space-y-3">
-                <h3 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
-                  <Activity size={16} className="text-emerald-600" />
-                  <span>Ringkasan 3 Part Utama Ter-Monitor:</span>
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                  {monitors
-                    .filter((m) => m.is_enabled)
-                    .sort((a, b) => b.progress_percent - a.progress_percent)
-                    .slice(0, 3)
-                    .map((m) => (
-                      <div
-                        key={m.id}
-                        className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-4 space-y-2.5 shadow-2xs"
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 bg-white text-emerald-600 rounded-lg flex items-center justify-center border border-slate-200/80 shadow-2xs">
-                              <PartIcon iconType={m.icon_type} className="size-4" />
-                            </div>
-                            <span className="font-extrabold text-xs text-slate-900 truncate">
-                              {m.part_name}
-                            </span>
-                          </div>
-
-                          {m.is_expired ? (
-                            <span className="bg-red-600 text-white font-extrabold text-[10px] px-2 py-0.5 rounded-full">
-                              ⛔ Ganti!
-                            </span>
-                          ) : m.is_urgent ? (
-                            <span className="bg-rose-500 text-white font-extrabold text-[10px] px-2 py-0.5 rounded-full">
-                              🚨 Sisa {formatMileage(m.km_remaining)} KM
+                      {/* Monitored Parts Progress Preview */}
+                      <div className="space-y-2 pt-2 border-t border-slate-100">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="font-bold text-slate-700">Ringkasan Part Telemetri:</span>
+                          {hasUrgent ? (
+                            <span className="text-rose-600 font-extrabold flex items-center gap-1">
+                              <ShieldAlert size={12} />
+                              Perlu Perhatian!
                             </span>
                           ) : (
-                            <span className="bg-emerald-100 text-emerald-800 font-extrabold text-[10px] px-2 py-0.5 rounded-full">
-                              ✅ Good
+                            <span className="text-emerald-600 font-extrabold flex items-center gap-1">
+                              <CheckCircle2 size={12} />
+                              Aman
                             </span>
                           )}
                         </div>
 
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-[11px] font-mono text-slate-600">
-                            <span>{formatMileage(m.km_traveled)} KM</span>
-                            <span>{formatMileage(m.ideal_lifespan_km)} KM</span>
+                        {topParts.length > 0 ? (
+                          <div className="space-y-1.5">
+                            {topParts.map((m) => (
+                              <div key={m.id} className="space-y-0.5">
+                                <div className="flex justify-between text-[10px] font-mono text-slate-600 font-medium">
+                                  <span>{m.part_name}</span>
+                                  <span>
+                                    {formatMileage(m.km_traveled)} / {formatMileage(m.ideal_lifespan_km)} KM
+                                  </span>
+                                </div>
+                                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                  <div
+                                    className={[
+                                      'h-full rounded-full transition-all',
+                                      m.is_expired
+                                        ? 'bg-red-600'
+                                        : m.is_urgent
+                                        ? 'bg-rose-500'
+                                        : 'bg-emerald-500',
+                                    ].join(' ')}
+                                    style={{ width: `${m.progress_percent}%` }}
+                                  />
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                          <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                            <div
-                              className={[
-                                'h-full transition-all duration-500 rounded-full',
-                                m.is_expired
-                                  ? 'bg-red-600'
-                                  : m.is_urgent
-                                  ? 'bg-rose-500'
-                                  : 'bg-emerald-500',
-                              ].join(' ')}
-                              style={{ width: `${m.progress_percent}%` }}
-                            />
-                          </div>
-                        </div>
+                        ) : (
+                          <p className="text-[11px] text-slate-400 italic">Belum ada part dipantau</p>
+                        )}
                       </div>
-                    ))}
+                    </div>
+
+                    {/* Bottom CTA Button */}
+                    <div className="pt-2">
+                      <div className="w-full py-2.5 px-4 bg-emerald-50 group-hover:bg-emerald-600 text-emerald-700 group-hover:text-white font-extrabold text-xs rounded-2xl transition-all flex items-center justify-center gap-1.5 shadow-2xs border border-emerald-100 group-hover:border-emerald-600">
+                        <span>Lihat Telemetri & Detail Part</span>
+                        <ChevronRight size={15} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ── 5. STEP 2: VEHICLE DETAIL MONITORING VIEW (WHEN A VEHICLE IS CLICKED) ── */}
+        {!isLoading && selectedVehicle && (
+          <div className="space-y-8 animate-fade-in">
+            {/* Top Navigation Back Bar */}
+            <div className="flex items-center justify-between bg-white border border-slate-200/90 rounded-2xl px-5 py-3 shadow-2xs">
+              <button
+                type="button"
+                onClick={handleBackToGallery}
+                className="text-xs font-extrabold text-slate-700 hover:text-slate-950 flex items-center gap-2 cursor-pointer transition-colors"
+              >
+                <ArrowLeft size={16} className="text-emerald-600" />
+                <span>← Kembali ke Daftar Semua Kendaraan</span>
+              </button>
+
+              <span className="text-xs font-mono font-bold text-slate-400">
+                Penyedia Telemetri: AutoPass Passport
+              </span>
+            </div>
+
+            {/* Selected Vehicle Header Banner */}
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-2xs space-y-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-24 h-24 shrink-0 overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
+                    <VehicleThumbnail vehicle={selectedVehicle} className="w-full h-full" />
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="bg-amber-300 text-slate-950 font-mono font-black text-xs px-2.5 py-0.5 rounded border border-amber-400 shadow-2xs">
+                        {selectedVehicle.license_plate}
+                      </span>
+                      <span className="capitalize text-xs font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-200">
+                        {selectedVehicle.category}
+                      </span>
+                    </div>
+
+                    <h2 className="font-extrabold text-xl text-slate-900">
+                      {selectedVehicle.brand} {selectedVehicle.model}
+                    </h2>
+
+                    <p className="text-xs text-slate-500 font-medium">
+                      Odometer Jarak Tempuh: <span className="font-mono font-bold text-slate-900">{formatMileage(selectedVehicle.current_mileage)} KM</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="shrink-0 flex items-center gap-3">
+                  {urgentCount > 0 ? (
+                    <div className="bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold px-4 py-2.5 rounded-2xl flex items-center gap-2 shadow-2xs">
+                      <ShieldAlert size={18} className="text-rose-600 animate-pulse" />
+                      <span>{urgentCount} Part Membutuhkan Penggantian</span>
+                    </div>
+                  ) : (
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold px-4 py-2.5 rounded-2xl flex items-center gap-2 shadow-2xs">
+                      <CheckCircle2 size={18} className="text-emerald-600" />
+                      <span>Seluruh Part Dalam Kondisi Optimal</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Full 7-Parts Detailed Monitoring Section */}
+            {/* 7 Parts Monitoring Section */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-extrabold text-base text-slate-900">
-                    Daftar Lengkap Telemetri Component & Part ({monitors.length} Part)
-                  </h3>
-                  <p className="text-xs text-slate-500 font-medium">
-                    Aktifkan atau non-aktifkan pemantauan part serta perbarui kilometer penggantian secara langsung
-                  </p>
-                </div>
+              <div>
+                <h3 className="font-extrabold text-base text-slate-900">
+                  Daftar Telemetri Part Kendaraan ({monitors.length} Part)
+                </h3>
+                <p className="text-xs text-slate-500 font-medium">
+                  Atur aktif/nonaktifkan pemantauan part atau perbarui tanggal penggantian komponen
+                </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {monitors.map((m) => (
                   <div
                     key={m.id}
                     className={[
-                      'border rounded-3xl p-5 space-y-4 transition-all shadow-2xs relative overflow-hidden',
+                      'border rounded-3xl p-5 space-y-4 transition-all shadow-2xs relative overflow-hidden flex flex-col justify-between',
                       m.is_enabled
                         ? m.is_expired
                           ? 'bg-red-50/40 border-red-200'
@@ -435,14 +534,14 @@ export function VehicleMonitorPage() {
                       </button>
                     </div>
 
-                    {/* Middle: Progress Bar & Metrics (When Enabled) */}
+                    {/* Middle: Progress Bar & Metrics */}
                     {m.is_enabled ? (
                       <div className="space-y-3 bg-slate-50/80 border border-slate-100 rounded-2xl p-3.5">
                         {/* Status Badge Alert */}
                         <div>
                           {m.is_expired ? (
                             <div className="bg-red-600 text-white font-extrabold text-xs px-3 py-1 rounded-xl shadow-xs inline-flex items-center gap-1.5">
-                              ⛔ PAJAK/UMUR HABIS (GANTI SEKARANG!)
+                              ⛔ HABIS/GANTI SEKARANG!
                             </div>
                           ) : m.is_urgent ? (
                             <div className="bg-rose-500 text-white font-extrabold text-xs px-3 py-1 rounded-xl shadow-xs inline-flex items-center gap-1.5">
@@ -524,7 +623,7 @@ export function VehicleMonitorPage() {
                         setReplaceMileage(selectedVehicle.current_mileage);
                       }}
                       disabled={!m.is_enabled}
-                      className="w-full py-2 px-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95"
+                      className="w-full py-2.5 px-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95"
                     >
                       <RotateCcw size={13} />
                       <span>Perbarui / Ganti Component</span>
@@ -602,7 +701,7 @@ export function VehicleMonitorPage() {
         onSubmit={async (data) => {
           await vehicleService.createVehicle(data);
           setShowAddVehicleModal(false);
-          await fetchVehiclesAndMonitors();
+          await fetchVehiclesAndSummaries();
         }}
       />
     </div>
